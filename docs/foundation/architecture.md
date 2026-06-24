@@ -1,96 +1,139 @@
-# Arquitetura — afro90sInfra
+# Arquitetura — Afro90s
 
 > Documento vivo. Atualize quando ADRs ou specs alterarem a arquitetura.
 
-## Visão geral
+## Visão geral do sistema
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    Repositório afro90sInfra              │
-│  docs/foundation  │  docs/specs  │  .cursor/rules       │
-│  ─────────────────┼──────────────┼──────────────────────  │
-│  (IaC — a definir: Terraform, Pulumi, CDK, etc.)        │
-└──────────────────────────┬──────────────────────────────┘
-                           │ provisiona
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│              Cloud Provider (a definir)                  │
-│  ┌─────────┐  ┌─────────┐  ┌─────────────┐              │
-│  │   dev   │  │ staging │  │ production  │              │
-│  └─────────┘  └─────────┘  └─────────────┘              │
-└─────────────────────────────────────────────────────────┘
-                           │ expõe outputs
-                           ▼
-┌─────────────────────────────────────────────────────────┐
-│           Repositórios de aplicação Afro90s              │
-│         (consomem endpoints, secrets, env vars)          │
-└─────────────────────────────────────────────────────────┘
+┌──────────────┐     HTTPS      ┌─────────────┐     OAC      ┌──────────────┐
+│   Browser    │ ──────────────►│  CloudFront │ ────────────►│  S3 (SPA)    │
+│  React SPA   │                └─────────────┘              └──────────────┘
+└──────┬───────┘
+       │ HTTPS (API)
+       ▼
+┌─────────────┐     invoke     ┌──────────────┐     read/write   ┌────────────┐
+│ API Gateway │ ──────────────►│   Lambda     │ ────────────────►│ DynamoDB   │
+│  HTTP API   │                │  (Node 20)   │                  │ products   │
+└─────────────┘                └──────┬───────┘                  │ orders     │
+       │                              │                          └────────────┘
+       │ Cognito JWT                  ├──► SES (e-mail pedido)
+       │ (rotas /admin/*)             └──► S3 (upload imagens)
+       ▼
+┌─────────────┐
+│   Cognito   │
+│  User Pool  │
+└─────────────┘
+
+Browser ──► wa.me (WhatsApp) — v1 via link no frontend
 ```
+
+## Repositório afro90sInfra
+
+```
+afro90sInfra/
+├── docs/
+│   ├── foundation/          # visão, arquitetura, ADRs
+│   └── specs/               # infra, backend, frontend
+├── infra/                   # CDK (a implementar)
+│   ├── bin/app.ts
+│   └── lib/stacks/
+└── .cursor/rules/
+```
+
+Provisiona recursos AWS nos ambientes **`dev`** e **`production`** (v1). Ambiente `staging` fica fora do escopo inicial e pode ser introduzido depois via ADR.
 
 ## Ambientes
 
 | Ambiente | Propósito | Isolamento |
 |----------|-----------|------------|
-| **dev** | Desenvolvimento e experimentação | Conta/VPC separada ou namespace isolado |
-| **staging** | Validação pré-produção | Espelha production em escala reduzida |
+| **dev** | Desenvolvimento, testes e validação de integração | Conta ou stack isolada de production |
 | **production** | Tráfego real | Máximo isolamento e controle de mudanças |
 
-Detalhes de recursos por ambiente: [spec de infra](../specs/infra/overview.md).
+Naming: `afro90s-{env}-{tipo}-{nome}` (ex.: `afro90s-dev-ddb-products`).
 
-## Camadas (planejadas)
+Detalhes de recursos: [spec de infra](../specs/infra/resources.md).
 
-### 1. Rede
+## Camadas
 
-- VPC, subnets públicas/privadas
-- Security groups / firewall rules
-- DNS e certificados (quando aplicável)
+### 1. Edge / Frontend
 
-### 2. Compute
+- S3 bucket privado para build estático da SPA
+- CloudFront com fallback `index.html` (roteamento client-side)
+- Bucket S3 separado para **imagens de produtos** (URLs públicas via CloudFront ou presigned)
 
-- Serviços de execução (containers, serverless ou VMs — a definir)
-- Auto-scaling e health checks
+### 2. API (serverless)
+
+- API Gateway HTTP API
+- Lambdas por domínio: produtos (público), pedidos (público), admin (protegido)
+- CORS restrito ao domínio CloudFront do frontend
 
 ### 3. Dados
 
-- Bancos gerenciados, caches, object storage
-- Backups e retenção por ambiente
+- DynamoDB `products` — catálogo
+- DynamoDB `orders` — pedidos
+- S3 `assets` — imagens enviadas no CRUD admin
 
-### 4. Identidade e acesso
+### 4. Identidade
 
-- IAM roles/policies com least privilege
-- Secrets em vault gerenciado (não no Git)
-- CI/CD com OIDC ou credenciais rotacionadas
+- Cognito User Pool para admins
+- JWT authorizer nas rotas `/admin/*`
+- Sem autenticação de cliente na v1 ([ADR-005](adr/005-admin-auth-v1.md))
 
-### 5. Observabilidade
+### 5. Notificações
 
-- Logs centralizados
-- Métricas e alertas
-- Rastreamento (se necessário)
+- SES — e-mail ao admin quando novo pedido é criado
+- WhatsApp — link `wa.me` no frontend ([ADR-006](adr/006-whatsapp-integration.md))
+
+### 6. Observabilidade
+
+- CloudWatch Logs (Lambdas)
+- Métricas API Gateway e Lambda
+- Alarmes básicos em production (a detalhar na implementação CDK)
+
+## Fluxo de pedido
+
+```
+Cliente          Frontend           API              DynamoDB    SES        WhatsApp
+   │                │                 │                  │         │            │
+   │── checkout ───►│                 │                  │         │            │
+   │                │── POST /orders ─►│                  │         │            │
+   │                │                 │── put order ────►│         │            │
+   │                │                 │── send email ──────────────►│            │
+   │                │◄── 201 ─────────│                  │         │            │
+   │◄── confirmação │                 │                  │         │            │
+   │── abre link ───────────────────────────────────────────────────────────────►│
+```
+
+## Rotas da API
+
+Separação público vs admin documentada em [api-routes.md](../specs/backend/api-routes.md).
+
+| Grupo | Prefixo | Auth |
+|-------|---------|------|
+| Público | `/products`, `/orders` | Nenhuma |
+| Admin | `/admin/*` | Cognito JWT |
 
 ## Fluxo de deploy (alvo)
 
 ```
-PR → CI (lint, validate, plan) → Review → Merge → CD (apply staging) → Promo manual → production
+PR → CI (lint, synth, diff) → Review → Merge → CD (deploy dev) → Promo manual → production
 ```
 
-Implementação concreta depende da stack escolhida (ver ADRs).
-
-## Dependências externas
-
-| Sistema | Uso |
-|---------|-----|
-| GitHub | Versionamento, CI/CD, PRs |
-| Cloud provider | Hospedagem de recursos |
-| Registry de secrets | Credenciais e chaves |
+Implementação: GitHub Actions + `cdk deploy`. Ver [spec CDK](../specs/infra/cdk.md).
 
 ## Decisões registradas
 
 | ADR | Título | Status |
 |-----|--------|--------|
 | [001](adr/001-repo-structure.md) | Estrutura de documentação do repositório | Aceito |
+| [002](adr/002-aws-cloud-provider.md) | AWS como cloud provider | Aceito |
+| [003](adr/003-cdk-iac.md) | AWS CDK para IaC | Aceito |
+| [004](adr/004-serverless-architecture.md) | API Gateway + Lambda + DynamoDB | Aceito |
+| [005](adr/005-admin-auth-v1.md) | Autenticação admin-only v1 | Aceito |
+| [006](adr/006-whatsapp-integration.md) | Integração WhatsApp | Proposto |
 
-## Próximos passos arquiteturais
+## Referências
 
-1. Escolher cloud provider e ferramenta IaC (novo ADR)
-2. Definir topologia de rede
-3. Especificar outputs consumidos pelas apps Afro90s
+- [Visão do produto](project-overview.md)
+- [Spec infra](../specs/infra/overview.md)
+- [API routes](../specs/backend/api-routes.md)

@@ -13,7 +13,7 @@
 Use mensagens concisas no imperativo, focadas no propósito:
 
 ```
-add módulo de rede para ambiente staging
+add módulo de rede para ambiente dev
 fix policy IAM com permissão excessiva
 docs: atualizar spec de ambientes
 ```

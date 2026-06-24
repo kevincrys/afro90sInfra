@@ -1,55 +1,68 @@
 # Spec: Infraestrutura — Overview
 
-**Status:** Rascunho  
+**Status:** Aprovado  
 **Última atualização:** 2025-06-23
 
 ## Objetivo
 
-Definir requisitos de alto nível para a infraestrutura Afro90s antes da implementação em IaC.
+Definir requisitos de alto nível para a infraestrutura Afro90s antes e durante a implementação em CDK.
 
 ## Requisitos
 
 ### Ambientes
 
-- [ ] Três ambientes: `dev`, `staging`, `production`
-- [ ] Isolamento entre ambientes (conta, VPC ou equivalente)
-- [ ] Naming convention: `afro90s-{env}-{recurso}`
+- [x] Dois ambientes na v1: `dev`, `production`
+- [ ] Isolamento entre ambientes (conta, stack ou equivalente)
+- [x] Naming convention: `afro90s-{env}-{tipo}-{nome}`
+
+> `staging` não faz parte do escopo inicial. Adicionar depois exige ADR e atualização desta spec.
 
 ### Segurança
 
-- [ ] Nenhum secret commitado no repositório
+- [x] Nenhum secret commitado no repositório
 - [ ] IAM/policies com least privilege
-- [ ] Tags obrigatórias em recursos: `project`, `env`, `managed-by`
+- [x] Tags obrigatórias em recursos: `project=afro90s`, `env`, `managed-by=afro90sInfra`
 
 ### CI/CD
 
 - [ ] Pipeline executa validação em todo PR
-- [ ] `plan` automático em PRs que alteram IaC
-- [ ] `apply` em `staging` após merge; `production` com aprovação manual
+- [ ] `cdk diff` automático em PRs que alteram IaC
+- [ ] `cdk deploy` em `dev` após merge; `production` com aprovação manual
 
 ### Outputs para aplicações
 
-- [ ] Documentar outputs exportados (URLs, ARNs, referências a secrets)
-- [ ] Variáveis de ambiente padronizadas por ambiente
+- [x] Documentar outputs exportados ([outputs.md](outputs.md))
+- [ ] Variáveis de ambiente injetadas via CI ou SSM
 
-## Stack (a definir)
+## Stack
 
-| Componente | Opções em avaliação | Decisão |
-|------------|---------------------|---------|
-| Cloud | AWS, GCP, Azure | — |
-| IaC | Terraform, Pulumi, CDK | — |
-| CI | GitHub Actions | — |
-| Secrets | AWS Secrets Manager, Vault, etc. | — |
+| Componente | Decisão | ADR |
+|------------|---------|-----|
+| Cloud | **AWS** | [002](../../foundation/adr/002-aws-cloud-provider.md) |
+| IaC | **AWS CDK (TypeScript)** | [003](../../foundation/adr/003-cdk-iac.md) |
+| API / Compute | **API Gateway HTTP + Lambda Node.js 20** | [004](../../foundation/adr/004-serverless-architecture.md) |
+| Banco | **DynamoDB on-demand** | [004](../../foundation/adr/004-serverless-architecture.md) |
+| Auth admin | **Cognito User Pool** | [005](../../foundation/adr/005-admin-auth-v1.md) |
+| E-mail | **SES** | [004](../../foundation/adr/004-serverless-architecture.md) |
+| Frontend host | **S3 + CloudFront** | [004](../../foundation/adr/004-serverless-architecture.md) |
+| CI | **GitHub Actions** | — |
+| Secrets | **AWS Secrets Manager / SSM Parameter Store** | — |
 
-> Quando a stack for escolhida, registrar em novo ADR e atualizar esta spec.
+## Specs detalhadas
+
+| Documento | Conteúdo |
+|-----------|----------|
+| [cdk.md](cdk.md) | Estrutura do projeto CDK, stacks, deploy |
+| [resources.md](resources.md) | Recursos AWS por serviço |
+| [outputs.md](outputs.md) | Contrato de outputs para apps |
 
 ## Critérios de aceite (fase 1)
 
-1. Ambiente `dev` provisionável via IaC a partir deste repo
+1. Ambiente `dev` provisionável via CDK a partir deste repo
 2. Documentação de outputs disponível para devs de aplicação
-3. Pipeline de CI com validate + plan funcionando
+3. Pipeline de CI com validate + diff funcionando
 
 ## Referências
 
 - [Arquitetura](../../foundation/architecture.md)
-- [ADR-001](../../foundation/adr/001-repo-structure.md)
+- [API routes](../backend/api-routes.md)
