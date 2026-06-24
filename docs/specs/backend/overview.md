@@ -58,6 +58,8 @@ Todas as rotas, headers, payloads e respostas estão em **[api-routes.md](api-ro
 
 Modelos de dados: **[data-models.md](data-models.md)**.
 
+Refinamento incremental das specs: **[tasks/README.md](tasks/README.md)** (backlog por tarefa; `api-routes.md` permanece o contrato único).
+
 ## Variáveis de ambiente
 
 Ver [outputs da infra](../infra/outputs.md). Injetadas pelo CDK no deploy da Lambda.
