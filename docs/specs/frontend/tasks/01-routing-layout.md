@@ -1,0 +1,32 @@
+# Task 01 — Roteamento e layout
+
+**Status:** pendente  
+**Arquivos alvo:** [`overview.md`](../overview.md) — Páginas v1; [`ui-ux.md`](../ui-ux.md)
+
+## Objetivo
+
+Fechar rotas React Router, layout compartilhado (header, footer) e separação público vs admin.
+
+## Decisões a tomar
+
+- [ ] Rotas exatas: `/` vs `/catalogo`; `/produto/:id` vs `/products/:id`
+- [ ] Layout único ou `PublicLayout` + `AdminLayout`
+- [ ] Header: logo, carrinho (badge quantidade), link admin discreto?
+- [ ] Rotas admin em `/admin/*` com `Outlet` protegido
+- [ ] 404 customizada com tema anos 90
+- [ ] Scroll to top em mudança de rota
+
+## Checklist de refinamento
+
+- [ ] Tabela rota → componente → auth em `overview.md`
+- [ ] `Navigate` para login em rotas admin sem token
+- [ ] Breadcrumbs na v1 ou v2?
+
+## Notas / rascunho
+
+<!-- Edite aqui -->
+
+## Quando concluir
+
+- [ ] Atualizar `overview.md`
+- [ ] Marcar **Status** como `concluída`

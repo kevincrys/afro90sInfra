@@ -55,6 +55,7 @@ Definir requisitos de alto nível para a infraestrutura Afro90s antes e durante 
 | [cdk.md](cdk.md) | Estrutura do projeto CDK, stacks, deploy |
 | [resources.md](resources.md) | Recursos AWS por serviço |
 | [outputs.md](outputs.md) | Contrato de outputs para apps |
+| [tasks/README.md](tasks/README.md) | Backlog de refinamento por tarefa |
 
 ## Critérios de aceite (fase 1)
 

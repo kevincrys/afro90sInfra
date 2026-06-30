@@ -64,6 +64,8 @@ Rotas e payloads: **[api-routes.md](../backend/api-routes.md)**.
 
 Variáveis de ambiente: **[outputs da infra](../infra/outputs.md)**.
 
+Refinamento incremental das specs: **[tasks/README.md](tasks/README.md)** (backlog por tarefa).
+
 ## Referências
 
 - [UI/UX](ui-ux.md)
