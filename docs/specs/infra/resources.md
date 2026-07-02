@@ -66,9 +66,24 @@ Tags obrigatórias em todo recurso (via `TaggingAspect` em `bin/app.ts`): `proje
 
 ## S3 — Frontend (`s3-web`)
 
-- Bucket **privado**; acesso apenas via CloudFront OAC/OAI
-- Deploy do build Vite via CI (`aws s3 sync dist/`)
-- Sem listagem pública
+- Bucket **privado** (`BlockPublicAccess.BLOCK_ALL`); acesso apenas via CloudFront OAC
+- Nome: `afro90s-{env}-s3-web`
+- Dev: `versioned: false`, `autoDeleteObjects: true`, `removalPolicy: DESTROY`
+- Prod: `versioned: false`, `removalPolicy: RETAIN` — rollback via redeploy + invalidação CloudFront, não via versões S3
+- Lifecycle: abort multipart incompleto (7d) — **nunca** expira objetos ativos do site
+- Deploy do build Vite via CI (`aws s3 sync dist/`) — ver task frontend CI
+- `index.html`: `Cache-Control: no-cache` no deploy; `assets/*`: `max-age=31536000`
+
+## CloudFront — SPA (`cf-web`)
+
+- Origin: bucket web via `S3BucketOrigin.withOriginAccessControl()`
+- `priceClass: PRICE_CLASS_200` (inclui Brasil)
+- `defaultRootObject: index.html`; viewer `REDIRECT_TO_HTTPS`
+- Custom errors: `403 → /index.html` (200) para SPA routing; **404 não** é reescrito para `index.html`
+- Behaviors: default + `index.html` → `CACHING_DISABLED`; `assets/*` → `CACHING_OPTIMIZED`
+- Security headers: HSTS + `X-Content-Type-Options`
+- Alias customizado: `config.domainName` quando definido (requer certificado ACM — fase futura)
+- Output / SSM: `CloudFrontWebUrl` (`https://{domain}` sem barra final)
 
 ## S3 — Lambda artifacts (`s3-lambda-artifacts`)
 
@@ -87,9 +102,8 @@ Tags obrigatórias em todo recurso (via `TaggingAspect` em `bin/app.ts`): `proje
 
 ## CloudFront
 
-- Origin SPA: bucket web
-- Custom error response: `403/404 → /index.html` (status 200) para SPA routing
-- HTTPS obrigatório
+- Origin SPA: bucket web (`cf-web`) — ver seção acima
+- Behavior `/assets/*` para imagens de produtos: [task 07](tasks/07-assets-storage.md)
 - CORS headers se necessário para assets
 
 ## API Gateway (HTTP API)

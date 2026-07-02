@@ -26,8 +26,8 @@ especialmente em ambientes serverless e de baixo tráfego (v1).
 - **GSIs**: criar apenas os índices usados; cada GSI replica dados e cobra
 
 ### S3
-- **Lifecycle rules**: configurar expiração para objetos temporários
-- **Versioning**: só em `prod`; em `dev` pode ser desativado
+- **Lifecycle rules**: configurar expiração para objetos temporários e multipart incompleto
+- **Versioning**: desligado no bucket **web** (SPA); **lambda-artifacts** em prod mantém versioning para rollback de zip
 - **Intelligent-Tiering**: não usar na v1 (overhead de custo mínimo de monitoramento)
 
 ### CloudFront
