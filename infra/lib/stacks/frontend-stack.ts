@@ -49,13 +49,45 @@ export class FrontendStack extends cdk.Stack {
       },
     );
 
+    const stripAssetsPrefixFn = new cloudfront.Function(this, 'StripAssetsPrefixFn', {
+      functionName: resourceName(config, 'cf', 'strip-assets-prefix'),
+      code: cloudfront.FunctionCode.fromInline(`
+function handler(event) {
+  var request = event.request;
+  if (request.uri.startsWith('/assets')) {
+    request.uri = request.uri.substring(7) || '/';
+  }
+  return request;
+}
+`.trim()),
+    });
+
     const webOrigin = origins.S3BucketOrigin.withOriginAccessControl(this.webBucket);
+    const assetsBucket = s3.Bucket.fromBucketArn(
+      this,
+      'ImportedAssetsBucket',
+      `arn:aws:s3:::${resourceName(config, 's3', 'assets')}`,
+    );
+    const assetsOrigin = origins.S3BucketOrigin.withOriginAccessControl(assetsBucket);
 
     const viewerProtocolPolicy = cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS;
-    const behaviorBase = {
+    const webBehaviorBase = {
       origin: webOrigin,
       viewerProtocolPolicy,
       responseHeadersPolicy: securityHeadersPolicy,
+    };
+
+    const assetsBehaviorBase = {
+      origin: assetsOrigin,
+      viewerProtocolPolicy,
+      responseHeadersPolicy: securityHeadersPolicy,
+      allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD,
+      functionAssociations: [
+        {
+          function: stripAssetsPrefixFn,
+          eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+        },
+      ],
     };
 
     this.webDistribution = new cloudfront.Distribution(this, 'WebDistribution', {
@@ -64,16 +96,20 @@ export class FrontendStack extends cdk.Stack {
       priceClass: cloudfront.PriceClass.PRICE_CLASS_200,
       domainNames: config.domainName ? [config.domainName] : undefined,
       defaultBehavior: {
-        ...behaviorBase,
+        ...webBehaviorBase,
         cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
       },
       additionalBehaviors: {
+        'assets/products/*': {
+          ...assetsBehaviorBase,
+          cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
+        },
         'assets/*': {
-          ...behaviorBase,
+          ...webBehaviorBase,
           cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
         },
         'index.html': {
-          ...behaviorBase,
+          ...webBehaviorBase,
           cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
         },
       },
@@ -88,14 +124,24 @@ export class FrontendStack extends cdk.Stack {
     });
 
     const cloudFrontWebUrl = `https://${this.webDistribution.distributionDomainName}`;
+    const assetsCdnUrl = `${cloudFrontWebUrl}/assets`;
 
     new ssm.StringParameter(this, 'CloudFrontWebUrlParam', {
       parameterName: `/afro90s/${config.env}/cloudfront-web-url`,
       stringValue: cloudFrontWebUrl,
     });
 
+    new ssm.StringParameter(this, 'AssetsCdnUrlParam', {
+      parameterName: `/afro90s/${config.env}/assets-cdn-url`,
+      stringValue: assetsCdnUrl,
+    });
+
     new cdk.CfnOutput(this, 'CloudFrontWebUrl', {
       value: cloudFrontWebUrl,
+    });
+
+    new cdk.CfnOutput(this, 'AssetsCdnUrl', {
+      value: assetsCdnUrl,
     });
   }
 }

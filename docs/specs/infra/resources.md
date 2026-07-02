@@ -95,15 +95,20 @@ Tags obrigatórias em todo recurso (via `TaggingAspect` em `bin/app.ts`): `proje
 
 ## S3 — Assets (`s3-assets`)
 
-- Imagens de produtos enviadas pelo admin (`POST /admin/products`)
-- Estrutura de chave: `products/{productId}/{uuid}.{ext}`
-- Lambda admin com permissão `s3:PutObject`, `s3:DeleteObject`
-- URLs públicas via CloudFront ou base URL configurada em output `ASSETS_CDN_URL`
+- Bucket **privado** (`BlockPublicAccess.BLOCK_ALL`); acesso via CloudFront OAC
+- Nome: `afro90s-{env}-s3-assets`
+- Encryption: SSE-S3 (`S3_MANAGED`); `versioned: false`
+- Dev: `autoDeleteObjects: true`, `removalPolicy: DESTROY`
+- Prod: `removalPolicy: RETAIN`
+- Chaves: `products/{productId}/{uuid}.{ext}` (sem prefixo `assets/` no bucket)
+- Upload via Lambda admin (fase 3); sem CORS no bucket
+- CDN: `{AssetsCdnUrl}/products/...` = `https://{cf-web}/assets/products/...`
 
 ## CloudFront
 
 - Origin SPA: bucket web (`cf-web`) — ver seção acima
-- Behavior `/assets/*` para imagens de produtos: [task 07](tasks/07-assets-storage.md)
+- Imagens de produtos: behavior `assets/products/*` → bucket `s3-assets` (task 07)
+- Bundles Vite: behavior `assets/*` → bucket `s3-web`
 - CORS headers se necessário para assets
 
 ## API Gateway (HTTP API)

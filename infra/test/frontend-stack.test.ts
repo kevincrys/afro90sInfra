@@ -10,7 +10,7 @@ const envFor = (config: typeof devConfig) => ({
 });
 
 describe('FrontendStack', () => {
-  test('dev: private S3, CloudFront OAC, SPA errors, SSM, output', () => {
+  test('dev: private S3, CloudFront OAC, SPA errors, assets behavior, SSM, outputs', () => {
     const app = new cdk.App();
     const stack = new FrontendStack(app, stackName(devConfig, 'frontend'), {
       config: devConfig,
@@ -34,6 +34,18 @@ describe('FrontendStack', () => {
       DistributionConfig: Match.objectLike({
         DefaultRootObject: 'index.html',
         PriceClass: 'PriceClass_200',
+        Origins: Match.arrayWith([Match.objectLike({ Id: Match.anyValue() })]),
+        CacheBehaviors: Match.arrayWith([
+          Match.objectLike({
+            PathPattern: 'assets/products/*',
+            ViewerProtocolPolicy: 'redirect-to-https',
+            AllowedMethods: ['GET', 'HEAD'],
+          }),
+          Match.objectLike({
+            PathPattern: 'assets/*',
+            ViewerProtocolPolicy: 'redirect-to-https',
+          }),
+        ]),
         CustomErrorResponses: Match.arrayWith([
           Match.objectLike({
             ErrorCode: 403,
@@ -44,12 +56,25 @@ describe('FrontendStack', () => {
       }),
     });
 
+    template.resourceCountIs('AWS::CloudFront::Function', 1);
+
     template.hasResourceProperties('AWS::SSM::Parameter', {
       Name: '/afro90s/dev/cloudfront-web-url',
       Type: 'String',
     });
 
+    template.hasResourceProperties('AWS::SSM::Parameter', {
+      Name: '/afro90s/dev/assets-cdn-url',
+      Type: 'String',
+    });
+
     template.hasOutput('CloudFrontWebUrl', {
+      Value: Match.objectLike({
+        'Fn::Join': Match.anyValue(),
+      }),
+    });
+
+    template.hasOutput('AssetsCdnUrl', {
       Value: Match.objectLike({
         'Fn::Join': Match.anyValue(),
       }),

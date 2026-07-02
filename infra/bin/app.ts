@@ -46,10 +46,11 @@ apiStack.addDependency(databaseStack);
 apiStack.addDependency(authStack);
 apiStack.addDependency(storageStack);
 
-new FrontendStack(app, stackName(config, 'frontend'), {
+const frontendStack = new FrontendStack(app, stackName(config, 'frontend'), {
   ...baseProps,
   stackName: stackName(config, 'frontend'),
 });
+frontendStack.addDependency(storageStack);
 
 cdk.Aspects.of(app).add(new TaggingAspect(config.env), {
   priority: cdk.AspectPriority.MUTATING,

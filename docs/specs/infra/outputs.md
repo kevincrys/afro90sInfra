@@ -13,13 +13,13 @@ Documentar valores exportados pelo CDK para consumo pelos repositórios `afro90s
 |--------|-----------|------------|
 | `ApiBaseUrl` | URL base do API Gateway | frontend, backend (testes) |
 | `CloudFrontWebUrl` | URL do frontend | CI deploy SPA |
-| `AssetsCdnUrl` | Base URL das imagens de produtos | backend (montar URLs), frontend |
+| `AssetsCdnUrl` | Base URL das imagens (`https://{cf}/assets`) | backend, frontend — **FrontendStack** |
+| `AssetsBucketName` | Bucket S3 de imagens | backend Lambda — **StorageStack** |
 | `CognitoUserPoolId` | ID do User Pool | frontend admin |
 | `CognitoClientId` | App client ID | frontend admin |
 | `CognitoRegion` | Região AWS | frontend admin |
 | `ProductsTableName` | Nome tabela DynamoDB | backend Lambda |
 | `OrdersTableName` | Nome tabela DynamoDB | backend Lambda |
-| `AssetsBucketName` | Bucket S3 de imagens | backend Lambda |
 | `LambdaFunctionName` | Nome da função API | backend deploy workflow |
 | `LambdaArtifactsBucketName` | Bucket zip da Lambda | backend deploy workflow |
 | `SesFromEmail` | E-mail remetente SES | backend Lambda |

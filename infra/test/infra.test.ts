@@ -39,6 +39,7 @@ describe('CDK stacks scaffold', () => {
       ...baseProps,
       stackName: stackName(devConfig, 'frontend'),
     });
+    frontendStack.addDependency(storageStack);
 
     for (const stack of [databaseStack, authStack, storageStack, apiStack, frontendStack]) {
       Template.fromStack(stack);
