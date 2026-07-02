@@ -14,14 +14,18 @@ infra/
 ├── bin/
 │   └── app.ts                 # entry point; instancia stacks por env
 ├── lib/
+│   ├── config/
+│   │   ├── types.ts           # AppConfig
+│   │   ├── dev.ts / prod.ts
+│   │   └── index.ts           # getConfig()
 │   ├── stacks/
-│   │   ├── frontend-stack.ts  # S3 SPA + CloudFront
-│   │   ├── assets-stack.ts    # S3 imagens de produtos + CloudFront (ou path no CF web)
-│   │   ├── data-stack.ts      # DynamoDB tables
-│   │   ├── auth-stack.ts      # Cognito User Pool
-│   │   └── api-stack.ts       # API Gateway + Lambdas + SES permissions
-│   └── constructs/            # constructs reutilizáveis (ex.: ApiRoute, Table)
-├── test/                      # snapshot ou unit tests de synth
+│   │   ├── database-stack.ts  # DynamoDB
+│   │   ├── auth-stack.ts      # Cognito
+│   │   ├── storage-stack.ts   # S3 assets
+│   │   ├── api-stack.ts       # API Gateway + Lambda
+│   │   └── frontend-stack.ts  # S3 web + CloudFront
+│   └── constructs/            # constructs reutilizáveis
+├── test/
 ├── cdk.json
 ├── package.json
 └── tsconfig.json
@@ -29,14 +33,24 @@ infra/
 
 ## Stacks e dependências
 
+Nomes físicos: `afro90s-{env}-stack-{nome}`
+
+| Stack | Sufixo | Recursos (fase) |
+|-------|--------|-----------------|
+| DatabaseStack | `database` | DynamoDB (task 05) |
+| AuthStack | `auth` | Cognito (task 13) |
+| StorageStack | `storage` | S3 assets (task 07) |
+| ApiStack | `api` | API GW + Lambda (task 10) |
+| FrontendStack | `frontend` | S3 web + CloudFront (task 06) |
+
 ```
-DataStack ──┬──► ApiStack
-AuthStack  ──┘
-FrontendStack (independente)
-AssetsStack ──► ApiStack (Lambda precisa de PutObject no bucket)
+DatabaseStack ──┬──► ApiStack
+AuthStack      ──┤
+StorageStack   ──┘
+FrontendStack (independente — CORS via SSM)
 ```
 
-Ordem de deploy sugerida: `DataStack` → `AuthStack` → `AssetsStack` → `ApiStack` → `FrontendStack`
+Ordem de instanciação em `bin/app.ts`: Database → Auth → Storage → Api → Frontend.
 
 ## Contexto de ambiente
 

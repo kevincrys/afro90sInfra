@@ -31,7 +31,7 @@ Criar os arquivos de configuração por ambiente (`dev` e `prod`) e a interface 
 ### Uso em `bin/app.ts`
 
 - [x] `getConfig` usado para `account` / `region` no `StackProps`
-- [ ] Passar `config` completo para stacks na [task 02](02-cdk-stacks.md)
+- [x] Passar `config` completo para stacks via `Afro90sStackProps`
 
 ### Scripts npm validados
 
