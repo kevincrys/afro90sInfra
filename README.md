@@ -1,6 +1,14 @@
 # afro90sInfra
 
-Repositório de infraestrutura e **documentação central** do projeto **Afro90s** — e-commerce com temática anos 90.
+Repositório de **infraestrutura AWS** e **documentação central** do projeto **Afro90s** — e-commerce com temática anos 90.
+
+## Ecossistema de repositórios
+
+| Repositório | Função |
+|-------------|--------|
+| **afro90sInfra** (este) | CDK, recursos AWS, specs centrais, deploy de infra |
+| [afro90sBackend](https://github.com/kevincrys/afro90sBackend) | API Lambda (Node.js 20 + TypeScript) |
+| [afro90sFrontend](https://github.com/kevincrys/afro90sFrontend) | SPA React + Vite → S3/CloudFront |
 
 ## Documentação
 
@@ -13,15 +21,17 @@ Repositório de infraestrutura e **documentação central** do projeto **Afro90s
 | [Arquitetura](docs/foundation/architecture.md) | Sistema completo, ambientes, deploy |
 | [Glossário](docs/foundation/glossary.md) | Termos do domínio |
 | [ADRs](docs/foundation/adr/) | Decisões arquiteturais |
+| [**Pipelines GitHub**](docs/foundation/github-pipeline-setup.md) | Environments, OIDC, branch rules, workflows |
 
 ### Esferas de desenvolvimento
 
 | Esfera | Entry point | Destaque |
 |--------|-------------|----------|
 | **CDK / Infra** | [specs/infra/overview.md](docs/specs/infra/overview.md) | AWS, stacks, recursos, outputs |
+| **Pipelines infra** | [specs/pipelines/overview.md](docs/specs/pipelines/overview.md) | Workflows CDK validate/deploy |
 | **Backend** | [specs/backend/overview.md](docs/specs/backend/overview.md) | Lambda, DynamoDB, modelos |
 | **Frontend** | [specs/frontend/overview.md](docs/specs/frontend/overview.md) | React SPA, UI, integração |
-| **API (contrato)** | [specs/backend/api-routes.md](docs/specs/backend/api-routes.md) | **Todas as rotas**, headers, payloads |
+| **API (contrato)** | [specs/backend/api-routes.md](docs/specs/backend/api-routes.md) | Rotas, headers, payloads |
 
 ### Contribuição e agentes
 
@@ -35,11 +45,12 @@ Repositório de infraestrutura e **documentação central** do projeto **Afro90s
 ```
 afro90sInfra/
 ├── docs/
-│   ├── foundation/          # visão, arquitetura, ADRs
+│   ├── foundation/          # visão, arquitetura, ADRs, pipelines
 │   └── specs/
-│       ├── infra/           # CDK, AWS
-│       ├── backend/         # API, modelos
-│       └── frontend/        # React SPA
+│       ├── infra/           # CDK, AWS, tasks
+│       ├── pipelines/       # spec de CI/CD deste repo
+│       ├── backend/         # contratos para afro90sBackend
+│       └── frontend/        # contratos para afro90sFrontend
 ├── infra/                   # CDK (a implementar)
 └── .cursor/rules/
 ```
@@ -60,6 +71,8 @@ afro90sInfra/
 
 - [x] Documentação de produto, arquitetura e specs (3 esferas)
 - [x] ADRs de stack (002–006)
+- [x] Repositórios separados (Backend, Frontend, Infra)
+- [x] Guia de configuração de pipelines GitHub
 - [ ] Implementação CDK em `infra/`
-- [ ] Pipeline CI/CD
-- [ ] Repos de aplicação (`afro90s-api`, `afro90s-web`)
+- [ ] Workflows GitHub Actions (validate + deploy)
+- [ ] Provisionar ambiente `dev`

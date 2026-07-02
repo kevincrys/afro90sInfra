@@ -21,7 +21,7 @@ Este arquivo orienta assistentes de IA (Cursor, Copilot, etc.) ao trabalhar nest
 | **API — rotas, headers, payloads** | `docs/specs/backend/api-routes.md` |
 | Decisões arquiteturais | `docs/foundation/adr/` |
 | Regras de código/convenções | `.cursor/rules/` |
-| Glossário do domínio | `docs/foundation/glossary.md` |
+| [Guia pipelines GitHub](docs/foundation/github-pipeline-setup.md) | Environments, OIDC, branch protection |
 
 ## Specs por esfera
 

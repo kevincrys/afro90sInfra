@@ -27,7 +27,17 @@
 Browser ──► wa.me (WhatsApp) — v1 via link no frontend
 ```
 
-## Repositório afro90sInfra
+## Repositórios do ecossistema
+
+| Repositório | Responsabilidade | Pipeline |
+|-------------|------------------|----------|
+| **afro90sInfra** | CDK, recursos AWS, specs centrais | CDK validate + deploy |
+| **afro90sBackend** | Handlers Lambda, serviços, testes | CI (build, test, lint) |
+| **afro90sFrontend** | SPA React, build estático | CI + deploy S3/CloudFront |
+
+Configuração GitHub (environments, OIDC, branch rules): [github-pipeline-setup.md](github-pipeline-setup.md).
+
+## Repositório afro90sInfra (este)
 
 ```
 afro90sInfra/

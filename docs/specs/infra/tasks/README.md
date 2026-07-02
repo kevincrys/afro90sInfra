@@ -119,4 +119,6 @@ Conta AWS: `083171867610` | Região: `us-east-1` | Ambientes: `dev` e `prod`
 - [Specs CDK](../cdk.md)
 - [Recursos AWS](../resources.md)
 - [Outputs](../outputs.md)
+- [Pipelines infra](../../pipelines/overview.md)
+- [Setup GitHub](../../../foundation/github-pipeline-setup.md)
 - [API routes](../../backend/api-routes.md)

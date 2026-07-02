@@ -26,6 +26,7 @@ Prefixos opcionais: `feat`, `fix`, `docs`, `refactor`, `chore`.
 |---------|-----------------|
 | Decisão arquitetural | `docs/foundation/adr/NNN-titulo.md` |
 | Novo requisito de infra | `docs/specs/infra/` ou subpasta correspondente |
+| Configuração GitHub/pipeline | `docs/foundation/github-pipeline-setup.md` |
 | Termo novo do domínio | `docs/foundation/glossary.md` |
 | Mudança de escopo | `docs/foundation/vision.md` |
 

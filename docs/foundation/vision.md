@@ -22,7 +22,7 @@ Este repositório é a fonte da verdade para:
 
 ## Fora de escopo
 
-- Código-fonte das aplicações (implementação Lambda e React vive em `afro90s-api` e `afro90s-web`)
+- Código-fonte das aplicações (implementação Lambda e React vive em [`afro90sBackend`](https://github.com/kevincrys/afro90sBackend) e [`afro90sFrontend`](https://github.com/kevincrys/afro90sFrontend))
 - Lógica de negócio executável
 - Conteúdo editorial ou assets de mídia finais
 - Gerenciamento de dependências de aplicação (npm dos repos de app)
@@ -51,7 +51,7 @@ Repositórios de aplicação consomem **outputs** e seguem **specs** definidas a
 - [ ] Implementar stacks CDK em `infra/`
 - [ ] Pipeline CI/CD (validate + diff + deploy dev; production manual)
 - [ ] Provisionar ambiente `dev`
-- [ ] Integração com repositórios `afro90s-api` e `afro90s-web`
+- [ ] Integração com repositórios [`afro90sBackend`](https://github.com/kevincrys/afro90sBackend) e [`afro90sFrontend`](https://github.com/kevincrys/afro90sFrontend)
 
 ## Referências
 
