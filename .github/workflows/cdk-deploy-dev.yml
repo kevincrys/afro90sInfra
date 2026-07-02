@@ -1,0 +1,57 @@
+name: cdk-deploy-dev
+
+on:
+  push:
+    branches:
+      - dev
+    paths:
+      - 'infra/**'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    name: cdk-deploy-dev
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: infra/package-lock.json
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Install and build
+        working-directory: infra
+        run: npm ci && npm run build
+
+      - name: CDK bootstrap
+        working-directory: infra
+        run: npx cdk bootstrap aws://083171867610/us-east-1
+
+      - name: Deploy (dev)
+        working-directory: infra
+        run: npm run deploy:dev -- --require-approval never
+
+      - name: Export outputs
+        run: bash infra/scripts/export-outputs.sh dev
+
+      - name: Upload outputs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs-dev
+          path: infra/outputs-dev.json
+          retention-days: 30

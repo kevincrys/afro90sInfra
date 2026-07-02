@@ -339,10 +339,10 @@ permissions:
 
 ### Tasks 01–04 — fundação CDK (em sequência)
 
-- [ ] **01** — config por ambiente (`lib/config/`)
-- [ ] **02** — stacks scaffold
-- [ ] **03** — tags e naming
-- [ ] **04** — workflows + bootstrap na pipeline
+- [ ] **01** — config por ambiente (`lib/config/`) ✅
+- [ ] **02** — stacks scaffold ✅
+- [ ] **03** — tags e naming ✅
+- [ ] **04** — workflows + bootstrap na pipeline ✅
 
 ### Validação end-to-end (após stacks CDK existirem)
 

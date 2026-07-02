@@ -100,14 +100,17 @@ Convenção de nomes físicos: ver [resources.md](resources.md).
 | `cdk deploy --all -c env=dev` | Deploy completo |
 | `cdk destroy -c env=dev` | Remove recursos (cuidado em prod) |
 
-## CI/CD (alvo)
+## CI/CD
 
-```yaml
-# .github/workflows/cdk.yml (a implementar)
-# PR: npm ci → npm run build → cdk synth → cdk diff
-# merge main: cdk deploy dev
-# manual workflow: cdk deploy production
-```
+Workflows em `.github/workflows/`:
+
+| Workflow | Arquivo | Trigger |
+|----------|---------|---------|
+| Validate | `cdk-validate.yml` | PR em `infra/**` |
+| Deploy dev | `cdk-deploy-dev.yml` | Push `dev` |
+| Deploy prod | `cdk-deploy-prod.yml` | Push `main` |
+
+Guia de configuração GitHub: [github-pipeline-setup.md](../../foundation/github-pipeline-setup.md)
 
 ## Referências
 
