@@ -264,11 +264,13 @@ Repita por repositório. Rulesets oferecem controle mais granular (ex.: bypass l
 ### afro90sInfra
 
 
-| Arquivo                                 | Trigger                   | Environment  |
-| --------------------------------------- | ------------------------- | ------------ |
-| `.github/workflows/cdk-validate.yml`    | PR em `infra/**`          | —            |
-| `.github/workflows/cdk-deploy-dev.yml`  | Push `dev` em `infra/**`  | `dev`        |
-| `.github/workflows/cdk-deploy-prod.yml` | Push `main` em `infra/**` | `production` |
+| Arquivo                                 | Trigger                                      | Environment  |
+| --------------------------------------- | -------------------------------------------- | ------------ |
+| `.github/workflows/cdk-validate.yml`    | PR em `infra/**` ou workflows CDK            | —            |
+| `.github/workflows/cdk-deploy-dev.yml`  | Push `dev` · ou **Run workflow** (manual)    | `dev`        |
+| `.github/workflows/cdk-deploy-prod.yml` | Push `main` · ou **Run workflow** (manual)  | `production` |
+
+> **Dev e prod são independentes:** push em `main` **não** dispara deploy dev (e vice-versa). Cada workflow usa branch + environment + role OIDC próprios. Para atualizar **dev** na AWS: merge/push na branch `dev`, ou Actions → `cdk-deploy-dev` → **Run workflow**.
 
 
 Spec: [infra/tasks/04-cicd.md](../specs/infra/tasks/04-cicd.md)

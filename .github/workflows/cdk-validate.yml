@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'infra/**'
+      - '.github/workflows/cdk-*.yml'
 
 permissions:
   id-token: write

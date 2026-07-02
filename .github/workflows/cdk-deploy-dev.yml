@@ -6,6 +6,8 @@ on:
       - dev
     paths:
       - 'infra/**'
+      - '.github/workflows/cdk-deploy-dev.yml'
+  workflow_dispatch:
 
 permissions:
   id-token: write
