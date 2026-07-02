@@ -1,0 +1,72 @@
+name: cdk-deploy-prod
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/**'
+      - '.github/workflows/cdk-deploy-prod.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  deploy:
+    name: cdk-deploy-prod
+    runs-on: ubuntu-latest
+    environment: prod
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate GitHub Environment variables
+        run: |
+          if [ -z "${{ vars.AWS_ROLE_ARN }}" ]; then
+            echo "::error::AWS_ROLE_ARN is empty in GitHub Environment 'prod'."
+            echo "GitHub → Settings → Environments → prod → Environment variables"
+            echo "Set AWS_ROLE_ARN to the afro90s-github-cdk-prod role ARN"
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: infra/package-lock.json
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install and build
+        working-directory: infra
+        run: npm ci && npm run build
+
+      - name: CDK bootstrap
+        working-directory: infra
+        run: npm run bootstrap:prod
+
+      - name: Deploy (prod)
+        working-directory: infra
+        run: npm run deploy:prod -- --require-approval never
+
+      - name: Export outputs
+        run: bash infra/scripts/export-outputs.sh prod
+
+      - name: Upload outputs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs-prod
+          path: infra/outputs-prod.json
+          if-no-files-found: error
+          retention-days: 90

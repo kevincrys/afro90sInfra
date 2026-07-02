@@ -20,6 +20,14 @@ Implementar convenções transversais em `src/utils/response.ts` e documentar co
 | Versionamento no path | Não (`/products`, não `/v1/products`) |
 | Rate limit | Somente no throttle do API Gateway (infra) |
 
+## Idioma das mensagens
+
+| Tipo | Idioma | Exemplo |
+|------|--------|---------|
+| Erros de desenvolvedor/operador (`throw`, CI, logs) | **English** | `Invalid env: staging. Expected 'dev' or 'prod'.` |
+| Respostas HTTP para clientes (`ApiError.message`) | **pt-BR** | `'Produto não encontrado.'` |
+| Códigos de erro (`ApiError.code`) | **English** (snake/SCREAMING) | `NOT_FOUND`, `VALIDATION_ERROR` |
+
 ## O que implementar
 
 ### `src/utils/response.ts`

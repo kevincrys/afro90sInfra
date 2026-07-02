@@ -1,0 +1,195 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Afro90s — GitHub OIDC provider and CI/CD IAM roles (task 00-environments)
+
+Parameters:
+  GitHubOrg:
+    Type: String
+    Default: kevincrys
+  AwsAccountId:
+    Type: String
+    Default: '083171867610'
+  AwsRegion:
+    Type: String
+    Default: us-east-1
+
+Resources:
+  GitHubOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      ThumbprintList:
+        - 6938fd4d98bab03faad8751c4e4e4d382625071
+
+  Afro90sGithubCdkPrRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: afro90s-github-cdk-pr
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Sub arn:aws:iam::${AwsAccountId}:oidc-provider/token.actions.githubusercontent.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubOrg}/afro90sInfra:pull_request
+      Policies:
+        - PolicyName: afro90s-cdk-pr-synth-diff
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: STSIdentity
+                Effect: Allow
+                Action: sts:GetCallerIdentity
+                Resource: '*'
+              - Sid: CloudFormationRead
+                Effect: Allow
+                Action:
+                  - cloudformation:Describe*
+                  - cloudformation:Get*
+                  - cloudformation:List*
+                  - cloudformation:ValidateTemplate
+                Resource: '*'
+              - Sid: CloudFormationDiff
+                Effect: Allow
+                Action:
+                  - cloudformation:CreateChangeSet
+                  - cloudformation:DeleteChangeSet
+                  - cloudformation:DescribeChangeSet
+                  - cloudformation:ExecuteChangeSet
+                Resource: !Sub arn:aws:cloudformation:${AwsRegion}:${AwsAccountId}:stack/afro90s-*/*
+              - Sid: SSMBootstrapRead
+                Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                Resource: !Sub arn:aws:ssm:${AwsRegion}:${AwsAccountId}:parameter/cdk-bootstrap/*
+
+  Afro90sGithubCdkDevRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: afro90s-github-cdk-dev
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Sub arn:aws:iam::${AwsAccountId}:oidc-provider/token.actions.githubusercontent.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub:
+                  - !Sub repo:${GitHubOrg}/afro90sInfra:environment:dev
+                  - !Sub repo:${GitHubOrg}/afro90sInfra:ref:refs/heads/dev
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  Afro90sGithubCdkProdRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: afro90s-github-cdk-prod
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Sub arn:aws:iam::${AwsAccountId}:oidc-provider/token.actions.githubusercontent.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub:
+                  - !Sub repo:${GitHubOrg}/afro90sInfra:environment:prod
+                  - !Sub repo:${GitHubOrg}/afro90sInfra:ref:refs/heads/main
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+  Afro90sGithubBackendDevRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: afro90s-github-backend-dev
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Sub arn:aws:iam::${AwsAccountId}:oidc-provider/token.actions.githubusercontent.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub:
+                  - !Sub repo:${GitHubOrg}/afro90sBackend:environment:dev
+                  - !Sub repo:${GitHubOrg}/afro90sBackend:ref:refs/heads/dev
+      Policies:
+        - PolicyName: afro90s-backend-deploy-dev
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                Resource: arn:aws:s3:::afro90s-dev-s3-lambda-artifacts/api/*
+              - Effect: Allow
+                Action:
+                  - lambda:UpdateFunctionCode
+                  - lambda:GetFunction
+                Resource: !Sub arn:aws:lambda:${AwsRegion}:${AwsAccountId}:function:afro90s-dev-lambda-api
+
+  Afro90sGithubBackendProdRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: afro90s-github-backend-prod
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Sub arn:aws:iam::${AwsAccountId}:oidc-provider/token.actions.githubusercontent.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub:
+                  - !Sub repo:${GitHubOrg}/afro90sBackend:environment:prod
+                  - !Sub repo:${GitHubOrg}/afro90sBackend:ref:refs/heads/main
+      Policies:
+        - PolicyName: afro90s-backend-deploy-prod
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                Resource: arn:aws:s3:::afro90s-prod-s3-lambda-artifacts/api/*
+              - Effect: Allow
+                Action:
+                  - lambda:UpdateFunctionCode
+                  - lambda:GetFunction
+                Resource: !Sub arn:aws:lambda:${AwsRegion}:${AwsAccountId}:function:afro90s-prod-lambda-api
+
+Outputs:
+  CdkPrRoleArn:
+    Value: !GetAtt Afro90sGithubCdkPrRole.Arn
+  CdkDevRoleArn:
+    Value: !GetAtt Afro90sGithubCdkDevRole.Arn
+  CdkProdRoleArn:
+    Value: !GetAtt Afro90sGithubCdkProdRole.Arn
+  BackendDevRoleArn:
+    Value: !GetAtt Afro90sGithubBackendDevRole.Arn
+  BackendProdRoleArn:
+    Value: !GetAtt Afro90sGithubBackendProdRole.Arn
+  OidcProviderArn:
+    Value: !GetAtt GitHubOidcProvider.Arn

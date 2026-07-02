@@ -91,7 +91,7 @@ Implementar o HTTP API Gateway com a Lambda de router e as **3 rotas públicas**
 
 ## Pré-requisitos
 
-- Task 05 (DynamoDB), 06 (Assets), 07 (Frontend), 08 (IAM pública), 09 (SSM) concluídas
+- [Task 09](09-ssm-params.md) concluída
 
 ## Critérios de conclusão
 
