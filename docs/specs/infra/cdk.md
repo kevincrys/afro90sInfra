@@ -72,15 +72,23 @@ Configuração centralizada em `lib/config/` (`getConfig(env)`).
 
 ## Tags obrigatórias
 
-Aplicar em todo recurso via `Tags.of(this).add(...)`:
+Aplicadas globalmente via `TaggingAspect` (`lib/constructs/tagging-aspect.ts`) em `bin/app.ts` **após** instanciar as stacks:
+
+```typescript
+cdk.Aspects.of(app).add(new TaggingAspect(config.env));
+```
+
+Tags em todo recurso CDK:
 
 ```typescript
 {
   project: 'afro90s',
-  env: 'dev',           // ou production
+  env: 'dev',           // ou prod
   'managed-by': 'afro90sInfra',
 }
 ```
+
+Convenção de nomes físicos: ver [resources.md](resources.md).
 
 ## Comandos
 

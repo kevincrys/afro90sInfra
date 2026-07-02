@@ -7,6 +7,46 @@
 
 Catalogar recursos AWS provisionados pelo CDK para o Afro90s.
 
+## Convenção de naming
+
+Padrão: `afro90s-{env}-{tipo}-{nome}` — use `dev` / `prod` (não `production`).
+
+| Tipo | Abreviação |
+|------|------------|
+| S3 bucket | `s3` |
+| CloudFront | `cf` |
+| DynamoDB | `ddb` |
+| Lambda | `lambda` |
+| API Gateway | `apigw` |
+| Cognito | `cognito` |
+| IAM Role | `role` |
+| Stack CDK | `stack` |
+| SSM Parameter | path `/afro90s/{env}/...` |
+
+Helper CDK: `resourceName(config, tipo, nome)` em `infra/lib/constructs/naming.ts`.
+
+### Nomes físicos (dev / prod)
+
+| Recurso | Nome dev | Nome prod |
+|---------|----------|-----------|
+| Stack database | `afro90s-dev-stack-database` | `afro90s-prod-stack-database` |
+| Stack auth | `afro90s-dev-stack-auth` | `afro90s-prod-stack-auth` |
+| Stack storage | `afro90s-dev-stack-storage` | `afro90s-prod-stack-storage` |
+| Stack api | `afro90s-dev-stack-api` | `afro90s-prod-stack-api` |
+| Stack frontend | `afro90s-dev-stack-frontend` | `afro90s-prod-stack-frontend` |
+| S3 web | `afro90s-dev-s3-web` | `afro90s-prod-s3-web` |
+| S3 assets | `afro90s-dev-s3-assets` | `afro90s-prod-s3-assets` |
+| S3 lambda artifacts | `afro90s-dev-s3-lambda-artifacts` | `afro90s-prod-s3-lambda-artifacts` |
+| DynamoDB products | `afro90s-dev-ddb-products` | `afro90s-prod-ddb-products` |
+| DynamoDB orders | `afro90s-dev-ddb-orders` | `afro90s-prod-ddb-orders` |
+| Cognito | `afro90s-dev-cognito-admins` | `afro90s-prod-cognito-admins` |
+| Lambda API | `afro90s-dev-lambda-api` | `afro90s-prod-lambda-api` |
+| API Gateway | `afro90s-dev-apigw-api` | `afro90s-prod-apigw-api` |
+| IAM Lambda pública | `afro90s-dev-role-lambda-public` | `afro90s-prod-role-lambda-public` |
+| IAM Lambda admin | `afro90s-dev-role-lambda-admin` | `afro90s-prod-role-lambda-admin` |
+
+Tags obrigatórias em todo recurso (via `TaggingAspect` em `bin/app.ts`): `project=afro90s`, `env`, `managed-by=afro90sInfra`.
+
 ## Resumo por serviço
 
 | Serviço | Nome (padrão) | Propósito |

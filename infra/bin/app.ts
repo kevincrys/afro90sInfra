@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
+import { TaggingAspect } from '../lib/constructs/tagging-aspect';
 import { getConfig } from '../lib/config';
 import { ApiStack } from '../lib/stacks/api-stack';
 import { AuthStack } from '../lib/stacks/auth-stack';
@@ -49,3 +50,5 @@ new FrontendStack(app, stackName(config, 'frontend'), {
   ...baseProps,
   stackName: stackName(config, 'frontend'),
 });
+
+cdk.Aspects.of(app).add(new TaggingAspect(config.env));
