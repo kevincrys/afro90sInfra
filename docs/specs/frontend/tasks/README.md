@@ -1,94 +1,108 @@
-# Tasks — Refinamento das specs de frontend
+# Tasks — Frontend Afro90s (entregas faseadas)
 
-Backlog de tarefas pequenas para refinar [`overview.md`](../overview.md), [`ui-ux.md`](../ui-ux.md) e [`integration.md`](../integration.md).
-
-Os specs principais permanecem em **três arquivos únicos**. Cada task concluída deve resultar em edições pontuais nos specs alvo.
-
-Repo de implementação futuro: **`afro90s-web`**.
+Backlog de implementação da SPA no repositório **`afro90s-web`** (repo separado).
+Organizado em **4 fases** alinhadas com [`infra/tasks/`](../../infra/tasks/README.md) e [`backend/tasks/`](../../backend/tasks/README.md).
 
 ## Legenda de status
 
 | Status | Significado |
 |--------|-------------|
-| `pendente` | Ainda não revisada |
-| `em revisão` | Decisões em andamento |
-| `concluída` | Specs alvo atualizadas |
+| `pendente` | Não iniciada |
+| `em andamento` | Em implementação |
+| `concluída` | Critérios de conclusão verificados |
 
-Atualize o campo **Status** no topo de cada arquivo de task.
+---
 
-## Índice
+## Fase 0 — Fundação
 
-### Fundação
+> Setup do repo, tema visual, roteamento, cliente API e pipeline de deploy.
 
-| Task | Arquivo | Foco |
-|------|---------|------|
-| 00 | [00-project-stack.md](00-project-stack.md) | React, Vite, TypeScript, estrutura do repo |
-| 01 | [01-routing-layout.md](01-routing-layout.md) | Rotas, layout, navegação |
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 00 | [00-setup-repo.md](00-setup-repo.md) | Vite + React + TS + Tailwind + Zustand |
+| 01 | [01-tema-visual.md](01-tema-visual.md) | Paleta `#7A004B`/`#FFD21F`, componentes base |
+| 02 | [02-roteamento-layout.md](02-roteamento-layout.md) | React Router, layouts, 404 |
+| 03 | [03-api-client.md](03-api-client.md) | Axios + React Query + tipos |
+| 04 | [04-cicd-deploy.md](04-cicd-deploy.md) | GitHub Actions → S3 + CloudFront |
 
-### Loja pública
+---
 
-| Task | Arquivo | Foco |
-|------|---------|------|
-| 02 | [02-catalog-page.md](02-catalog-page.md) | Catálogo, busca, paginação |
-| 03 | [03-product-detail.md](03-product-detail.md) | Detalhe do produto, carrinho |
-| 04 | [04-cart-checkout.md](04-cart-checkout.md) | Carrinho e formulário de pedido |
-| 05 | [05-whatsapp-flow.md](05-whatsapp-flow.md) | Pós-pedido e link wa.me |
+## Fase 1 — Site público
 
-### Integração API
+> **Entregável:** loja no ar — catálogo, detalhe, carrinho drawer, checkout e WhatsApp.
+> Sem login, sem admin.
 
-| Task | Arquivo | Foco |
-|------|---------|------|
-| 06 | [06-api-client-query.md](06-api-client-query.md) | Cliente HTTP, React Query, tipos |
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 05 | [05-catalogo.md](05-catalogo.md) | Página `/` com scroll infinito |
+| 06 | [06-produto-detalhe.md](06-produto-detalhe.md) | `/produto/:id` + galeria modal |
+| 07 | [07-carrinho-checkout.md](07-carrinho-checkout.md) | Drawer carrinho + checkout Zod |
+| 08 | [08-whatsapp.md](08-whatsapp.md) | Abertura automática wa.me pós-pedido |
+| 09 | [09-states-a11y.md](09-states-a11y.md) | Skeletons, toasts, acessibilidade |
+| 10 | [10-aceite-fase1.md](10-aceite-fase1.md) | Checklist aceite fase 1 |
 
-### Admin
+**✓ Resultado:** `https://*.cloudfront.net` com loja funcional.
 
-| Task | Arquivo | Foco |
-|------|---------|------|
-| 07 | [07-admin-auth.md](07-admin-auth.md) | Login Cognito, rotas protegidas |
-| 08 | [08-admin-products.md](08-admin-products.md) | CRUD produtos, upload de imagens |
-| 09 | [09-admin-orders.md](09-admin-orders.md) | Listagem e status de pedidos |
+---
 
-### UI/UX e entrega
+## Fase 2 — Login admin
 
-| Task | Arquivo | Foco |
-|------|---------|------|
-| 10 | [10-theme-visual.md](10-theme-visual.md) | Temática anos 90, responsividade |
-| 11 | [11-states-a11y.md](11-states-a11y.md) | Loading, empty, error, acessibilidade |
-| 12 | [12-env-deploy.md](12-env-deploy.md) | Variáveis VITE, build, deploy S3 |
-| 13 | [13-acceptance-v1.md](13-acceptance-v1.md) | Critérios de aceite e testes v1 |
+> **Entregável:** autenticação Cognito via Amplify. Painel admin ainda vazio.
 
-## Ordem sugerida
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 11 | [11-login-admin.md](11-login-admin.md) | Amplify SRP + `ProtectedRoute` |
+| 12 | [12-aceite-fase2.md](12-aceite-fase2.md) | Checklist aceite fase 2 |
 
-**Trilha mínima (loja pública):** `00 → 01 → 06 → 02 → 03 → 04 → 05`
+**✓ Resultado:** admin faz login e acessa `/admin/pedidos`.
 
-**Trilha UI:** `10 → 11` (em paralelo com páginas)
+---
 
-**Trilha admin:** `07 → 08 → 09`
+## Fase 3 — Painel admin
 
-**Antes do primeiro deploy:** `12 → 13`
+> **Entregável:** CRUD produtos com upload + gestão de pedidos.
 
-**Cross-links:**
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 13 | [13-admin-produtos.md](13-admin-produtos.md) | Cards + modal CRUD + upload multipart |
+| 14 | [14-admin-pedidos.md](14-admin-pedidos.md) | Tabs status + drawer detalhe |
+| 15 | [15-aceite-fase3.md](15-aceite-fase3.md) | Checklist aceite fase 3 |
 
-- API: [backend/api-routes.md](../../backend/api-routes.md) e [backend/tasks/](../../backend/tasks/)
-- Infra: [infra/outputs.md](../../infra/outputs.md) e [infra/tasks/04-frontend-hosting.md](../../infra/tasks/04-frontend-hosting.md)
+**✓ Resultado:** admin gerencia produtos e pedidos.
 
-## Como usar
+---
 
-1. Abra uma task e preencha **Decisões a tomar** e **Notas / rascunho**.
-2. Marque **Status** como `em revisão` enquanto discute.
-3. Ao fechar decisões, edite as seções referenciadas em `overview.md`, `ui-ux.md` ou `integration.md`.
-4. Marque checklists em **Quando concluir** e mude **Status** para `concluída`.
+## Fase 4 — Qualidade final
 
-## Template
+> **Entregável:** testes E2E Cypress + regressão completa.
 
-```markdown
-# Task NN — Título
-**Status:** pendente
-**Arquivos alvo:** ...
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 16 | [16-testes-e2e.md](16-testes-e2e.md) | Cypress specs por fase + Vitest unit |
+| 17 | [17-aceite-fase4.md](17-aceite-fase4.md) | Checklist aceite frontend v1 |
 
-## Objetivo
-## Decisões a tomar
-## Checklist de refinamento
-## Notas / rascunho
-## Quando concluir
-```
+**✓ Resultado:** frontend v1 completo e testado.
+
+---
+
+## Alinhamento cross-repo
+
+| Fase | O que o usuário vê | Infra | Backend | Frontend |
+|------|-------------------|-------|---------|----------|
+| 1 | Loja pública + pedido | fase 1 | fase 1 | fase 1 |
+| 2 | Login admin | fase 2 | fase 2 | fase 2 |
+| 3 | Painel admin | fase 3 | fase 3 | fase 3 |
+| 4 | E-mail + testes | fase 4 | fase 4 | fase 4 |
+
+## Ordem de deploy por fase
+
+1. **Infra** deploya recursos (`afro90sInfra` → merge `dev`)
+2. **Backend** deploya Lambda (`afro90s-api` → CI build + CDK atualiza bundle)
+3. **Frontend** deploya SPA (`afro90s-web` → CI build + `s3 sync`)
+
+## Referências
+
+- [UI/UX](../ui-ux.md)
+- [Integration](../integration.md)
+- [API routes](../../backend/api-routes.md)
+- [Infra outputs](../../infra/outputs.md)

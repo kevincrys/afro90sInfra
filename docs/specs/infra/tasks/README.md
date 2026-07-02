@@ -1,87 +1,118 @@
-# Tasks — Implementação da infraestrutura Afro90s
+# Tasks — Infraestrutura Afro90s (entregas faseadas)
 
-Backlog de tarefas para implementar os recursos AWS via CDK no repositório `afro90sInfra`.
+Backlog de implementação CDK organizado em **4 fases** de entrega incremental.
+Cada fase é deployável e testável de forma independente.
 
-Todas as decisões de arquitetura já estão fechadas. Cada task descreve **o que implementar**, com checklists executáveis e critérios de conclusão claros.
-
-Ambientes v1: **`dev`** e **`prod`** — mesma conta AWS (`083171867610`), região `us-east-1`.
+Conta AWS: `083171867610` | Região: `us-east-1` | Ambientes: `dev` e `prod`
 
 ## Legenda de status
 
 | Status | Significado |
 |--------|-------------|
-| `pendente` | Ainda não iniciada |
-| `em andamento` | Implementação em curso |
+| `pendente` | Não iniciada |
+| `em andamento` | Em implementação |
 | `concluída` | Critérios de conclusão verificados |
 
-## Índice
+---
 
-### Fundação
+## Fase 0 — Fundação
+
+> Pré-requisito para todas as fases. Sem entrega visível, mas sem ela nada roda.
 
 | # | Arquivo | O que entrega |
 |---|---------|---------------|
-| 00 | [00-environments.md](00-environments.md) | Setup do repo CDK, AWS IAM, OIDC, bootstrap, GitHub |
-| 01 | [01-cdk-stacks.md](01-cdk-stacks.md) | 5 stacks em `lib/stacks/` + `bin/app.ts` |
+| 00 | [00-environments.md](00-environments.md) | Setup repo CDK, IAM user, OIDC, bootstrap, GitHub |
+| 01 | [01-cdk-stacks.md](01-cdk-stacks.md) | 5 stacks scaffold em `lib/stacks/` + `bin/app.ts` |
 | 02 | [02-cdk-config-deploy.md](02-cdk-config-deploy.md) | `lib/config/{dev,prod}.ts` e scripts npm |
-| 03 | [03-tags-naming.md](03-tags-naming.md) | Aspect de tags globais e tabela de naming |
+| 03 | [03-tags-naming.md](03-tags-naming.md) | Aspect de tags globais e convenção de naming |
+| 04 | [04-cicd.md](04-cicd.md) | 3 workflows GitHub Actions (validate, deploy-dev, deploy-prod) |
 
-### Recursos AWS
+---
 
-| # | Arquivo | O que entrega |
-|---|---------|---------------|
-| 04 | [04-frontend-hosting.md](04-frontend-hosting.md) | S3 web + CloudFront OAC (SPA) |
-| 05 | [05-assets-storage.md](05-assets-storage.md) | S3 assets + behavior `/assets/*` no CloudFront |
-| 06 | [06-api-gateway-lambda.md](06-api-gateway-lambda.md) | HTTP API + Lambda router + authorizer Cognito |
-| 07 | [07-dynamodb.md](07-dynamodb.md) | Tabelas `products` e `orders` + GSIs (free tier) |
-| 08 | [08-cognito.md](08-cognito.md) | User Pool admins + App Client |
-| 09 | [09-ses.md](09-ses.md) | Template SES + parâmetros SSM de e-mail |
-| 10 | [10-iam-security.md](10-iam-security.md) | Roles Lambda (público e admin) com least privilege |
+## Fase 1 — Site público
 
-### Contratos e operação
+> **Entregável:** site no ar com catálogo de produtos, imagens e formulário de pedido.
+> Sem login, sem admin, sem e-mail. `POST /orders` cria pedido no banco, não envia e-mail.
 
 | # | Arquivo | O que entrega |
 |---|---------|---------------|
-| 11 | [11-outputs-env.md](11-outputs-env.md) | CfnOutputs + script `export-outputs.sh` |
-| 12 | [12-secrets-ssm.md](12-secrets-ssm.md) | SSM Parameters + `.env.example` |
-| 13 | [13-cicd.md](13-cicd.md) | 3 workflows GitHub Actions (validate, deploy-dev, deploy-prod) |
-| 14 | [14-observability.md](14-observability.md) | Log groups 14d + dashboard CloudWatch free tier |
-| 15 | [15-acceptance-phase1.md](15-acceptance-phase1.md) | Script smoke test + checklist aceite fase 1 |
+| 05 | [05-dynamodb.md](05-dynamodb.md) | Tabelas `products` e `orders` + GSIs (free tier) |
+| 06 | [06-assets-storage.md](06-assets-storage.md) | S3 assets + behavior `/assets/*` no CloudFront |
+| 07 | [07-frontend-hosting.md](07-frontend-hosting.md) | S3 web + CloudFront OAC (SPA React) |
+| 08 | [08-iam-publica.md](08-iam-publica.md) | Role Lambda pública (sem SES) |
+| 09 | [09-ssm-params.md](09-ssm-params.md) | SSM Parameters fase 1 + `.env.example` |
+| 10 | [10-api-publica.md](10-api-publica.md) | HTTP API + Lambda + 3 rotas públicas |
+| 11 | [11-outputs.md](11-outputs.md) | CfnOutputs + script `export-outputs.sh` |
+| 12 | [12-aceite-fase1.md](12-aceite-fase1.md) | Script smoke test fase 1 + checklist aceite |
 
-## Ordem recomendada de execução
+**✓ Resultado:** `https://*.cloudfront.net` abre o site. `GET /products` e `POST /orders` funcionam.
 
-```
-00 → 02 → 01 → 03
-          ↓
-     07 → 08 → 05 → 04
-          ↓
-     10 → 12 → 09 → 06
-          ↓
-     11 → 13 → 14 → 15
-```
+---
 
-**Trilha mínima para 1º deploy:**
-`00 → 02 → 01 → 03 → 07 → 08 → 10 → 05 → 04 → 06 → 12 → 11 → 13`
+## Fase 2 — Login admin
 
-**Antes do aceite de fase 1:**
-`14 → 15`
+> **Entregável:** autenticação Cognito funcional. O painel admin ainda não tem rotas, mas o token já é válido.
+
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 13 | [13-cognito.md](13-cognito.md) | User Pool Cognito + App Client + authorizer JWT |
+| 14 | [14-aceite-fase2.md](14-aceite-fase2.md) | Checklist aceite: login funcional, token válido |
+
+**✓ Resultado:** admin consegue fazer login e obter token JWT. Rotas admin retornam `404` (sem `401`).
+
+---
+
+## Fase 3 — Rotas admin
+
+> **Entregável:** painel admin completo — CRUD de produtos com upload de imagens e gestão de pedidos.
+
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 15 | [15-iam-admin.md](15-iam-admin.md) | Role Lambda admin (DynamoDB CRUD + S3 write) |
+| 16 | [16-api-admin.md](16-api-admin.md) | 8 rotas `/admin/*` + authorizer Cognito aplicado |
+| 17 | [17-aceite-fase3.md](17-aceite-fase3.md) | Checklist aceite: CRUD products + orders admin |
+
+**✓ Resultado:** admin faz login, cria produtos, faz upload de imagens, gerencia pedidos.
+
+---
+
+## Fase 4 — Email
+
+> **Entregável:** `POST /orders` passa a enviar e-mail de notificação ao admin via SES.
+> SES habilitado — `POST /orders` existia desde a fase 1, apenas sem envio.
+
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 18 | [18-ses.md](18-ses.md) | SES template + SSM e-mail params + IAM SES |
+| 19 | [19-observabilidade.md](19-observabilidade.md) | Log groups 14d + dashboard CloudWatch free tier |
+| 20 | [20-aceite-fase4.md](20-aceite-fase4.md) | Smoke test completo + checklist aceite v1 final |
+
+**✓ Resultado:** infraestrutura v1 completa. E-mail enviado no pedido. Dashboard CloudWatch ativo.
+
+---
 
 ## Dependências entre tasks
 
 | Task | Depende de |
 |------|------------|
-| 01 | 00 |
-| 02 | 00 |
+| 01, 02 | 00 |
 | 03 | 01 |
-| 04, 07, 08 | 01, 02, 03 |
-| 05 | 04 |
-| 06 | 07, 08, 05, 10, 12 |
-| 09 | 00 (SES verificado), 10, 12 |
-| 10 | 07, 05 |
-| 11 | 04–10 |
-| 12 | 10 |
-| 13 | 00 (GitHub configurado), 02 |
-| 14 | 06 |
-| 15 | 00–14 |
+| 04 | 00, 02 |
+| 05, 06, 07 | 01, 02, 03 |
+| 06 | 07 (behavior no CF) |
+| 08 | 05 |
+| 09 | 05, 06, 07, 10 |
+| 10 | 05, 06, 07, 08, 09 |
+| 11 | 05–10 |
+| 12 | 00–11 |
+| 13 | 12 (fase 1 entregue) |
+| 14 | 13 |
+| 15 | 05, 06 |
+| 16 | 13, 15 |
+| 17 | 15, 16 |
+| 18 | 00–17 |
+| 19 | 10 |
+| 20 | 00–19 |
 
 ## Referências
 

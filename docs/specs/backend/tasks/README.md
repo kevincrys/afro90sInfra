@@ -1,95 +1,103 @@
-# Tasks — Refinamento das specs de backend
+# Tasks — Backend Afro90s (entregas faseadas)
 
-Backlog de tarefas pequenas para refinar [`api-routes.md`](../api-routes.md), [`data-models.md`](../data-models.md) e [`overview.md`](../overview.md).
-
-O contrato HTTP permanece em **um único arquivo** (`api-routes.md`). Cada task concluída deve resultar em edições pontuais nos specs alvo — não reestruturar `api-routes.md`.
+Backlog de implementação da API no repositório **`afro90s-api`** (repo separado).
+Organizado em **4 fases** alinhadas com [`infra/tasks/`](../../infra/tasks/README.md).
 
 ## Legenda de status
 
 | Status | Significado |
 |--------|-------------|
-| `pendente` | Ainda não revisada |
-| `em revisão` | Decisões em andamento |
-| `concluída` | Specs alvo atualizadas |
+| `pendente` | Não iniciada |
+| `em andamento` | Em implementação |
+| `concluída` | Critérios de conclusão verificados |
 
-Atualize o campo **Status** no topo de cada arquivo de task.
+---
 
-## Índice
+## Fase 0 — Fundação
 
-### Fundação (começar aqui)
+> Setup do repo, convenções, modelos, erros, paginação e repositórios DynamoDB.
 
-| Task | Arquivo | Foco |
-|------|---------|------|
-| 00 | [00-conventions.md](00-conventions.md) | Base URL, stages, CORS, headers |
-| 04 | [04-pagination-cursor.md](04-pagination-cursor.md) | Cursor opaco, Base64URL, schema interno |
-| 05 | [05-errors-and-http.md](05-errors-and-http.md) | Códigos HTTP, `ApiError`, `details` |
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 00 | [00-setup-repo.md](00-setup-repo.md) | Estrutura `afro90s-api`, Vitest, ESLint, CI |
+| 01 | [01-convencoes-globais.md](01-convencoes-globais.md) | Response helpers, CORS, `X-Request-Id` |
+| 02 | [02-modelos-de-dados.md](02-modelos-de-dados.md) | Schemas Zod: Product, Order, Customer |
+| 03 | [03-erros-http.md](03-erros-http.md) | `ApiError`, mapeamento code → status |
+| 04 | [04-paginacao-cursor.md](04-paginacao-cursor.md) | Cursor Base64URL, `parseLimit` |
+| 05 | [05-dynamodb-access.md](05-dynamodb-access.md) | Repositórios products e orders + GSIs |
 
-### Modelos de dados
+---
 
-| Task | Arquivo | Foco |
-|------|---------|------|
-| 01 | [01-product-model.md](01-product-model.md) | Product, price, validação |
-| 02 | [02-order-model.md](02-order-model.md) | Order, Customer, fullPrice |
-| 03 | [03-photo-upload.md](03-photo-upload.md) | PhotoInput, S3, limites |
+## Fase 1 — API pública
 
-### Rotas públicas
+> **Entregável:** 3 rotas públicas. `POST /orders` grava no banco, **sem e-mail** (`SES_ENABLED=false`).
 
-| Task | Arquivo | Rota |
-|------|---------|------|
-| 06 | [06-route-get-products.md](06-route-get-products.md) | `GET /products` |
-| 07 | [07-route-get-product-by-id.md](07-route-get-product-by-id.md) | `GET /products/{id}` |
-| 08 | [08-route-post-orders.md](08-route-post-orders.md) | `POST /orders` |
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 06 | [06-rota-get-products.md](06-rota-get-products.md) | `GET /products` |
+| 07 | [07-rota-get-product-by-id.md](07-rota-get-product-by-id.md) | `GET /products/{id}` |
+| 08 | [08-rota-post-orders.md](08-rota-post-orders.md) | `POST /orders` (sem SES) |
+| 09 | [09-aceite-fase1.md](09-aceite-fase1.md) | Checklist aceite fase 1 |
 
-### Rotas admin — produtos
+**✓ Resultado:** catálogo e checkout funcionam via API.
 
-| Task | Arquivo | Rotas |
-|------|---------|-------|
-| 09 | [09-route-admin-products-list.md](09-route-admin-products-list.md) | `GET /admin/products` |
-| 10 | [10-route-admin-products-crud.md](10-route-admin-products-crud.md) | `POST/GET/PUT/DELETE /admin/products*` |
-| 11 | [11-route-admin-products-stock.md](11-route-admin-products-stock.md) | `PATCH /admin/products/{id}/stock` |
+---
 
-### Rotas admin — pedidos
+## Fase 2 — Login admin
 
-| Task | Arquivo | Rotas |
-|------|---------|-------|
-| 12 | [12-route-admin-orders.md](12-route-admin-orders.md) | `GET/PATCH /admin/orders*` |
+> **Entregável:** middleware auth Cognito. Rotas admin ainda não existem, mas token é aceito.
 
-### Cross-cutting
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 10 | [10-auth-cognito.md](10-auth-cognito.md) | Middleware JWT + verificação grupo `admins` |
+| 11 | [11-aceite-fase2.md](11-aceite-fase2.md) | Checklist aceite fase 2 |
 
-| Task | Arquivo | Foco |
-|------|---------|------|
-| 13 | [13-auth-cognito.md](13-auth-cognito.md) | JWT, Cognito, rotas admin |
-| 14 | [14-email-ses.md](14-email-ses.md) | E-mail de novo pedido |
-| 15 | [15-dynamodb-access.md](15-dynamodb-access.md) | Query/GSI por rota |
-| 16 | [16-overview-and-tests.md](16-overview-and-tests.md) | Handlers, testes, aceite v1 |
+**✓ Resultado:** token Cognito válido não recebe `401`.
 
-## Ordem sugerida
+---
 
-**Trilha mínima (API pública):** `00 → 01 → 04 → 05 → 06 → 07 → 08`
+## Fase 3 — Rotas admin
 
-**Trilha admin:** `13 → 03 → 09 → 10 → 11 → 12`
+> **Entregável:** CRUD produtos com upload S3 + gestão de pedidos.
 
-**Antes de implementar DynamoDB:** `15` (idealmente antes de `06` e `12`)
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 12 | [12-upload-imagens.md](12-upload-imagens.md) | Serviço upload S3 multipart |
+| 13 | [13-rotas-admin-products.md](13-rotas-admin-products.md) | 6 rotas `/admin/products*` |
+| 14 | [14-rotas-admin-orders.md](14-rotas-admin-orders.md) | 3 rotas `/admin/orders*` |
+| 15 | [15-aceite-fase3.md](15-aceite-fase3.md) | Checklist aceite fase 3 |
 
-**Antes de merge final v1:** `16`
+**✓ Resultado:** admin gerencia produtos e pedidos via API.
 
-## Template de cada task
+---
 
-```markdown
-# Task NN — Título
-**Status:** pendente
-**Arquivos alvo:** ...
+## Fase 4 — Email
 
-## Objetivo
-## Decisões a tomar
-## Checklist de refinamento
-## Notas / rascunho
-## Quando concluir
-```
+> **Entregável:** `POST /orders` passa a enviar e-mail SES. Cobertura de testes ≥ 80%.
 
-## Como usar
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 16 | [16-email-ses.md](16-email-ses.md) | `email.service` com SES template |
+| 17 | [17-testes-cobertura.md](17-testes-cobertura.md) | Vitest ≥ 80%, DynamoDB Local |
+| 18 | [18-aceite-fase4.md](18-aceite-fase4.md) | Checklist aceite API v1 completa |
 
-1. Abra uma task e preencha **Decisões a tomar** e **Notas / rascunho**.
-2. Marque **Status** como `em revisão` enquanto discute.
-3. Ao fechar decisões, edite as seções referenciadas em `api-routes.md` / `data-models.md` / `overview.md`.
-4. Marque checklists em **Quando concluir** e mude **Status** para `concluída`.
+**✓ Resultado:** API v1 completa com e-mail e testes.
+
+---
+
+## Alinhamento com infra e frontend
+
+| Fase | Infra | Backend | Frontend |
+|------|-------|---------|----------|
+| 0 | tasks 00–04 | tasks 00–05 | tasks 00–04 |
+| 1 | tasks 05–12 | tasks 06–09 | tasks 05–10 |
+| 2 | tasks 13–14 | tasks 10–11 | tasks 11–12 |
+| 3 | tasks 15–17 | tasks 12–15 | tasks 13–15 |
+| 4 | tasks 18–20 | tasks 16–18 | tasks 16–17 |
+
+## Referências
+
+- [API routes](../api-routes.md)
+- [Data models](../data-models.md)
+- [Infra tasks](../../infra/tasks/README.md)
+- [Frontend tasks](../../frontend/tasks/README.md)
