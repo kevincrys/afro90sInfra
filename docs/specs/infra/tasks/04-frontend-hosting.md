@@ -1,39 +1,65 @@
 # Task 04 — Frontend hosting (S3 + CloudFront)
 
 **Status:** pendente  
-**Arquivos alvo:** [`resources.md`](../resources.md) — S3 web, CloudFront; [`cdk.md`](../cdk.md) — `FrontendStack`
+**Arquivos alvo:** [`resources.md`](../resources.md), [`cdk.md`](../cdk.md)
 
 ## Objetivo
 
-Fechar hospedagem da SPA React: bucket privado, CDN, SPA routing e deploy via CI.
+Implementar `FrontendStack`: bucket S3 privado + distribuição CloudFront com OAC para hospedar a SPA React.
 
-## Decisões a tomar
+## Configurações já definidas
 
-- [ ] OAC (Origin Access Control) vs OAI legado — recomendado: OAC
-OAC
-- [ ] Custom error responses: `403` e `404` → `/index.html` (200)
-A principio sim, se isso não gerar que erros no backend direcionem para esse path
-- [ ] Domínio customizado + certificado ACM na v1 ou só `*.cloudfront.net`?
-deixe preparado a base para custom domain, mas o dominio precisa ser comprado 
-- [ ] HTTPS: redirect HTTP → HTTPS obrigatório
-sim
-- [ ] Cache policy para `index.html` (no-cache ou curto) vs assets com hash
-index.html com no cache e assets com hash com cach
-- [ ] Deploy SPA: `aws s3 sync` no CI — invalidação CloudFront obrigatória?
-sims
+| Decisão | Valor |
+|---------|-------|
+| Acesso S3 | OAC (Origin Access Control) |
+| SPA routing | Custom error `403/404 → /index.html` (status 200) |
+| Domínio customizado | Base preparada, domínio ainda a comprar |
+| HTTPS | Redirect obrigatório HTTP → HTTPS |
+| Cache `index.html` | `no-cache` (TTL 0) |
+| Cache assets com hash | Cache longo (1 ano) |
+| Deploy SPA | `aws s3 sync` no CI + invalidação CloudFront |
+| CloudFront Price Class | `PriceClass_200` (inclui Brasil) |
 
-## Checklist de refinamento
+## O que implementar
 
-- [ ] Bucket `afro90s-{env}-s3-web` — block public access, versionamento?
-- [ ] Output `CloudFrontWebUrl` para CORS da API e `VITE_*`
-- [ ] Documentar pipeline de deploy do repo `afro90s-web`
-- [ ] Headers de segurança (HSTS, X-Content-Type-Options) — v1 ou v2?
+### S3 — bucket web
 
-## Notas / rascunho
+- [ ] Criar bucket `afro90s-{env}-s3-web`
+- [ ] `blockPublicAccess: BlockPublicAccess.BLOCK_ALL`
+- [ ] `versioned: false` em dev; `true` em prod
+- [ ] `removalPolicy`: `DESTROY` em dev, `RETAIN` em prod
+- [ ] `autoDeleteObjects: true` em dev (para `cdk destroy`)
 
-<!-- Edite aqui -->
+### CloudFront — distribuição web
 
-## Quando concluir
+- [ ] Origin: bucket web via `S3BucketOrigin.withOriginAccessControl()`
+- [ ] `priceClass: PriceClass.PRICE_CLASS_200`
+- [ ] Viewer protocol: `REDIRECT_TO_HTTPS`
+- [ ] Custom error responses:
+  - `403 → /index.html` status `200`
+  - `404 → /index.html` status `200`
+- [ ] Cache policy `index.html`: `CachePolicy.CACHING_DISABLED`
+- [ ] Cache policy `assets/*`: TTL máximo com `CachePolicy.CACHING_OPTIMIZED`
+- [ ] Alias de domínio: configurar `domainNames` com `config.domainName` se definido (placeholder)
+- [ ] `defaultRootObject: 'index.html'`
+- [ ] Security headers mínimos via `ResponseHeadersPolicy` (HSTS, X-Content-Type-Options)
 
-- [ ] Atualizar `resources.md` e `cdk.md` se necessário
-- [ ] Marcar **Status** como `concluída`
+### Outputs
+
+- [ ] `CfnOutput` `CloudFrontWebUrl` = URL da distribuição (sem barra final)
+- [ ] Exportar via SSM: `/afro90s/{env}/cloudfront-web-url`
+
+## Pré-requisitos
+
+- Tasks 01, 02, 03 concluídas
+
+## Critérios de conclusão
+
+- [ ] `cdk synth` gera bucket + distribuição CloudFront com OAC
+- [ ] URL CloudFront acessível após deploy (`https://*.cloudfront.net`)
+- [ ] `index.html` servido em qualquer rota (SPA routing funcionando)
+- [ ] Assets estáticos com cabeçalho `Cache-Control: max-age=31536000`
+- [ ] `index.html` com `Cache-Control: no-cache`
+- [ ] Output `CloudFrontWebUrl` disponível no CloudFormation
+- [ ] `resources.md` atualizado
+- [ ] Atualizar **Status** para `concluída`

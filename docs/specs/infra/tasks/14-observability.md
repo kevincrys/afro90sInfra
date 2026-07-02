@@ -1,34 +1,74 @@
 # Task 14 — Observabilidade
 
 **Status:** pendente  
-**Arquivos alvo:** [`resources.md`](../resources.md) ou [`overview.md`](../overview.md); [`architecture.md`](../../../foundation/architecture.md)
+**Arquivos alvo:** [`resources.md`](../resources.md), [`overview.md`](../overview.md)
 
 ## Objetivo
 
-Definir logging, métricas e alarmes mínimos para Lambdas e API Gateway em production.
+Configurar logging estruturado, retenção de logs e dashboard CloudWatch dentro do free tier.
 
-## Decisões a tomar
+## Configurações já definidas
 
-- [ ] Retenção CloudWatch Logs (ex.: 14 dias dev, 30 dias production)
-- [ ] Log level na Lambda: `INFO` vs `DEBUG` por ambiente
-- [ ] Métricas customizadas na v1 ou só AWS/Lambda defaults?
-- [ ] Alarmes production: 5xx API Gateway, Lambda errors, duration p99
-- [ ] SNS ou e-mail para alarmes — destinatário admin
-- [ ] X-Ray tracing na v1? (recomendado: fora de escopo v1)
-- [ ] Dashboard CloudWatch único por ambiente
+| Decisão | Valor |
+|---------|-------|
+| Retenção de logs | 14 dias (dev e prod) |
+| Log level | `INFO` em todos os ambientes |
+| Métricas | Defaults AWS/Lambda (sem customizadas) |
+| Alarmes | Sem alarmes na v1 |
+| X-Ray | Fora de escopo v1 |
+| Dashboard | Um por ambiente, dentro do free tier |
 
-## Checklist de refinamento
+## O que implementar
 
-- [ ] Log groups nomeados por Lambda
-- [ ] Structured logging JSON na aplicação (contrato com backend)
-- [ ] Lista mínima de alarmes para production
-- [ ] Custo estimado de logs/alarmes aceitável para v1
+### CloudWatch Log Groups
 
-## Notas / rascunho
+- [ ] Criar `LogGroup` explícito para a Lambda `afro90s-{env}-lambda-api`:
+  - Nome: `/aws/lambda/afro90s-{env}-lambda-api`
+  - `retention: RetentionDays.TWO_WEEKS` (14 dias)
+  - `removalPolicy: DESTROY` em dev
 
-<!-- Edite aqui -->
+> Free tier CloudWatch Logs: 5 GB ingestão/mês + 5 GB armazenamento. Para a v1 está bem dentro do limite.
 
-## Quando concluir
+### Logging estruturado (contrato com backend)
 
-- [ ] Atualizar `resources.md` ou nova seção em `overview.md`
-- [ ] Marcar **Status** como `concluída`
+- [ ] Documentar no `resources.md` o formato JSON esperado:
+
+```json
+{
+  "level": "INFO",
+  "requestId": "...",
+  "route": "GET /products",
+  "durationMs": 45,
+  "message": "..."
+}
+```
+
+- [ ] Lambda deve emitir logs nesse formato (backend implementa — documentar aqui como contrato)
+
+### Dashboard CloudWatch
+
+- [ ] Criar `Dashboard` CDK com nome `afro90s-{env}-dashboard`:
+  - Widget: Lambda Invocations (count)
+  - Widget: Lambda Errors (count)
+  - Widget: Lambda Duration P50/P99
+  - Widget: API Gateway 4xx / 5xx count
+- [ ] Usar apenas métricas nativas AWS (gratuitas)
+
+> Free tier CloudWatch Dashboards: 3 dashboards com até 50 métricas são gratuitos.
+
+### Sem alarmes na v1
+
+- [ ] Confirmar que não há `Alarm` ou `CfnAlarm` nos stacks (custo adicional)
+
+## Pré-requisitos
+
+- Task 06 (Lambda criada — para criar log group)
+
+## Critérios de conclusão
+
+- [ ] Log group `/aws/lambda/afro90s-dev-lambda-api` visível no CloudWatch
+- [ ] Retenção configurada para 14 dias
+- [ ] Dashboard `afro90s-dev-dashboard` visível no CloudWatch com os 4 widgets
+- [ ] Nenhum alarme CloudWatch criado
+- [ ] `resources.md` atualizado com seção observabilidade
+- [ ] Atualizar **Status** para `concluída`

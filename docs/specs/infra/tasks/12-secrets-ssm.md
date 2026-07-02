@@ -1,40 +1,77 @@
-# Task 12 — Secrets e SSM Parameter Store
+# Task 12 — SSM Parameter Store
 
 **Status:** pendente  
-**Arquivos alvo:** [`outputs.md`](../outputs.md); [`overview.md`](../overview.md) — segurança
+**Arquivos alvo:** [`outputs.md`](../outputs.md), [`overview.md`](../overview.md)
 
 ## Objetivo
 
-Definir o que fica em SSM/Secrets Manager vs CDK context vs variáveis não sensíveis na Lambda.
+Implementar todos os parâmetros SSM necessários via CDK e documentar o contrato de paths para Lambdas e CI.
 
-## Decisões a tomar
+## Configurações já definidas
 
-- [ ] SSM vs Secrets Manager para e-mails e WhatsApp number
-emails e WhatsApp number de usuários ficarão no DynamoDB, e-mails e WhatsApp number do sistema, SSM
+| Decisão | Valor |
+|---------|-------|
+| Serviço | SSM Parameter Store Standard (gratuito) |
+| Quem cria | CDK `StringParameter` |
+| E-mails do sistema | SSM |
+| WhatsApp admin | SSM |
+| Rotação de secrets | Fora de escopo v1 |
+| `.env` local | `.gitignore` + `.env.example` sem valores |
 
-- [ ] `VITE_WHATSAPP_NUMBER`: injetado no build CI do frontend (não é secret) — confirmar
-se for o do admin, SSM, 
-- [ ] `ADMIN_EMAIL`, `SES_FROM_EMAIL`: SSM path sugerido `/afro90s/{env}/...`
-Sim
-- [ ] Parâmetros criados manualmente antes do deploy vs CDK `StringParameter`
- CDK `StringParameter`
+## O que implementar
 
-- [ ] Rotação de secrets na v1 — fora de escopo?
-fora do escopo
-- [ ] `.env` local para dev: `.gitignore` + exemplo `.env.example` sem valores
-Sim
-## Checklist de refinamento
+### Parâmetros por ambiente
 
-- [ ] Tabela parâmetro → tipo → quem cria → quem consome
-- [ ] IAM Lambda: `ssm:GetParameter` escopo por ARN/path
-- [ ] Documentar setup manual pré-primeiro-deploy
-- [ ] Alinhar com task [10-iam-security.md](10-iam-security.md)
+Criar em cada stack relevante com `new StringParameter(...)`:
 
-## Notas / rascunho
+| Path | Tipo | Stack que cria | Quem consome |
+|------|------|----------------|--------------|
+| `/afro90s/{env}/admin-email` | String | ApiStack ou SesStack | Lambda (SES destino) |
+| `/afro90s/{env}/ses-from-email` | String | ApiStack ou SesStack | Lambda (SES remetente) |
+| `/afro90s/{env}/whatsapp-number` | String | ApiStack | Frontend via CI |
+| `/afro90s/{env}/cloudfront-web-url` | String | FrontendStack | ApiStack (CORS) |
+| `/afro90s/{env}/assets-bucket-name` | String | StorageStack | ApiStack |
+| `/afro90s/{env}/assets-bucket-arn` | String | StorageStack | ApiStack (IAM) |
+| `/afro90s/{env}/products-table-name` | String | DatabaseStack | ApiStack |
+| `/afro90s/{env}/orders-table-name` | String | DatabaseStack | ApiStack |
+| `/afro90s/{env}/cognito-user-pool-id` | String | AuthStack | ApiStack (authorizer) |
+| `/afro90s/{env}/cognito-client-id` | String | AuthStack | Frontend via CI |
+| `/afro90s/{env}/api-base-url` | String | ApiStack | Frontend via CI |
 
-<!-- Edite aqui -->
+- [ ] Todos como `parameterType: ParameterType.STRING` (Standard — gratuito)
+- [ ] Valores sensíveis nulos no CDK: preencher via `cdk deploy` com `--parameters` ou setar no console antes do deploy
+  - `admin-email`, `ses-from-email`, `whatsapp-number` têm placeholder inicial
 
-## Quando concluir
+### Leitura nas Lambdas
 
-- [ ] Atualizar `outputs.md` e `overview.md`
-- [ ] Marcar **Status** como `concluída`
+- [ ] Lambdas leem parâmetros via SDK (`GetParameter`) em tempo de execução — **não** via CDK `valueFromLookup` (que hardcodaria no template)
+- [ ] Ou, preferível: CDK lê SSM na synth para injetar como env var na Lambda (elimina chamada runtime)
+  - Usar `StringParameter.valueForStringParameter(this, '/afro90s/dev/...')` no CDK
+
+### `.env.example`
+
+- [ ] Criar `infra/.env.example` com todas as chaves sem valores:
+
+```
+AWS_PROFILE=kevincrys-admin
+CDK_DEFAULT_ACCOUNT=083171867610
+CDK_DEFAULT_REGION=us-east-1
+```
+
+- [ ] Confirmar que `infra/.env` está no `.gitignore`
+
+### IAM para Lambdas
+
+- [ ] Permissão `ssm:GetParameter` restrita ao path `/afro90s/{env}/*` nas roles da task 10
+
+## Pré-requisitos
+
+- Task 10 (IAM roles criadas)
+
+## Critérios de conclusão
+
+- [ ] Todos os parâmetros visíveis em SSM Parameter Store (`us-east-1`) para dev
+- [ ] Lambda consegue ler `/afro90s/dev/products-table-name` sem erro de permissão
+- [ ] `.env.example` criado e `.env` no `.gitignore`
+- [ ] `outputs.md` e `overview.md` atualizados
+- [ ] Atualizar **Status** para `concluída`

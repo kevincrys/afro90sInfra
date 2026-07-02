@@ -1,40 +1,77 @@
 # Task 09 — SES (e-mail de pedidos)
 
 **Status:** pendente  
-**Arquivos alvo:** `[resources.md](../resources.md)` — SES; `[outputs.md](../outputs.md)`; task [14-email-ses.md](../../backend/tasks/14-email-ses.md)
+**Arquivos alvo:** [`resources.md`](../resources.md), [`outputs.md`](../outputs.md)
 
 ## Objetivo
 
-Fechar identidade SES, template de notificação e parâmetros para Lambda `POST /orders`.
+Configurar identidade SES e template de notificação de pedidos consumido pela Lambda `POST /orders`.
 
-## Decisões a tomar
+## Configurações já definidas
 
-- Dev: sandbox SES com e-mails verificados vs production com domínio
-- Dominio a ser adquiro em prod
-- Identidade: domínio `afro90s.com.br` vs e-mail individual
-- Dominio a ser adquirido ainda
-- Template: SES template gerenciado vs string na Lambda
-- Template Gerenciado do SES
-- Variáveis: `orderId`, `customerName`, `fullPrice`, `itemsSummary` — completar lista
-- Somente orderID e CusTomerNAme
-- `SesFromEmail` e `AdminNotificationEmail` via SSM Parameter Store
-- Sim
-- Permissão IAM: `ses:SendEmail` / `ses:SendTemplatedEmail` escopo mínimo
-- Sim
+| Decisão | Valor |
+|---------|-------|
+| Dev | Sandbox SES com e-mails verificados manualmente |
+| Prod | Domínio `afro90s.com.br` (a verificar quando comprado) |
+| Identidade | E-mail individual em dev; domínio em prod |
+| Template | SES template gerenciado (não string na Lambda) |
+| Variáveis do template | `orderId`, `customerName` |
+| Parâmetros | `SesFromEmail` e `AdminNotificationEmail` via SSM |
+| IAM | `ses:SendTemplatedEmail` escopo mínimo |
 
-## Checklist de refinamento
+## O que implementar
 
-- Documentar setup manual pré-deploy (verificar domínio/e-mail)
-- Outputs `SesFromEmail`, `AdminNotificationEmail`
-- Cross-link backend task 14 (falha SES após gravar pedido)
-- DKIM/SPF se usar domínio customizado
+### SES — identidade (setup manual pré-deploy)
 
-## Notas / rascunho
+> Feito no console ou via CDK `CfnEmailIdentity`. Em dev usar e-mail; em prod usar domínio.
 
+- [ ] **dev**: verificar e-mail remetente (já feito na task 00) e e-mail destino admin no console SES sandbox
+- [ ] **prod**: quando domínio for comprado, criar `CfnEmailIdentity` para o domínio + configurar registros DKIM/SPF no DNS
 
+### SES — template CDK
 
-## Quando concluir
+- [ ] Criar `CfnTemplate` com nome `afro90s-{env}-ses-new-order`:
 
-- Atualizar `resources.md` e `outputs.md`
-- Marcar **Status** como `concluída`
+```typescript
+new CfnTemplate(this, 'OrderTemplate', {
+  template: {
+    templateName: `afro90s-${env}-ses-new-order`,
+    subjectPart: 'Novo pedido #{orderId}',
+    htmlPart: `
+      <h2>Novo pedido recebido</h2>
+      <p><strong>ID:</strong> {{orderId}}</p>
+      <p><strong>Cliente:</strong> {{customerName}}</p>
+    `,
+    textPart: 'Novo pedido {{orderId}} de {{customerName}}',
+  },
+});
+```
 
+- [ ] Variáveis do template: `{{orderId}}`, `{{customerName}}`
+
+### SSM — parâmetros
+
+- [ ] `/afro90s/{env}/ses-from-email` — e-mail remetente verificado
+- [ ] `/afro90s/{env}/admin-notification-email` — e-mail destino do admin
+
+> Criar como `StringParameter` no CDK. Preencher valor antes do deploy via `cdk deploy` ou via console.
+
+### Outputs CloudFormation
+
+- [ ] `CfnOutput` `SesFromEmail` (valor lido do SSM, não hardcoded)
+- [ ] `CfnOutput` `AdminNotificationEmail` (idem)
+
+## Pré-requisitos
+
+- Task 00 (verificação de e-mail SES feita no setup)
+- Task 12 (SSM parameters)
+- Task 10 (IAM: `ses:SendTemplatedEmail`)
+
+## Critérios de conclusão
+
+- [ ] Template SES visível no console (`us-east-1` → SES → Email templates)
+- [ ] Lambda `POST /orders` envia e-mail sem erro após pedido criado
+- [ ] Sandbox: e-mail recebido no endereço de destino verificado
+- [ ] Outputs `SesFromEmail` e `AdminNotificationEmail` no CloudFormation
+- [ ] `resources.md` e `outputs.md` atualizados
+- [ ] Atualizar **Status** para `concluída`

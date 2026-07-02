@@ -1,43 +1,83 @@
 # Task 07 — DynamoDB
 
 **Status:** pendente  
-**Arquivos alvo:** [`resources.md`](../resources.md) — tabelas `products` e `orders`; [`cdk.md`](../cdk.md) — `DataStack`
+**Arquivos alvo:** [`resources.md`](../resources.md)
 
 ## Objetivo
 
-Fechar modelagem física DynamoDB, GSIs, billing e backup — alinhado ao backend.
+Implementar `DatabaseStack`: tabelas `products` e `orders` com GSIs, billing no free tier e backup apenas em prod.
 
-## Decisões a tomar
+## Configurações já definidas
 
-- [ ] Billing: on-demand confirmado para v1 
+| Decisão | Valor |
+|---------|-------|
+| Billing | PROVISIONED (free tier: 25 WCU + 25 RCU total) |
+| PITR | Somente prod, somente tabela `orders` |
+| GSI products | `gsi-name` (PK: `nameLower`, SK: `id`) |
+| GSI products | `gsi-createdAt` (PK: `createdAt`) para listagem pública |
+| GSI orders | `gsi-status-createdAt` (PK: `status`, SK: `createdAt`) |
+| `nameLower` | lowercase + remoção de acentos |
+| TTL | Fora de escopo v1 |
+| Deletion protection | Prod apenas |
 
- Provisionado no modelo gratuito
-- [ ] PITR: apenas `production` ou também `dev`?
-prod somente na tabela de pedidos 
-- [ ] GSI `gsi-name` (PK `nameLower`, SK `id`) — confirmar para busca por nome
+## O que implementar
 
-sim  certifique-se de que a soma das RCUs/WCUs da tabela principal + as RCUs/WCUs do GSI não ultrapasse o limite global
-- [ ] GSI `gsi-status-createdAt` (PK `status`, SK `createdAt`) — confirmar
-sim,  certifique-se de que a soma das RCUs/WCUs da tabela principal + as RCUs/WCUs do GSI não ultrapasse o limite global
-- [ ] Listagem pública sem `name`: Scan vs novo GSI (ex.: `gsi-createdAt`) — alinhar [backend task 15](../../backend/tasks/15-dynamodb-access.md) 
-novo gsi,  certifique-se de que a soma das RCUs/WCUs da tabela principal + as RCUs/WCUs do GSI não ultrapasse o limite global
-- [ ] Atributo `nameLower`: normalização (lowercase, remover acentos?)
-sim, remova
-- [ ] TTL em registros — v2?
-v2
-## Checklist de refinamento
+### Capacidade (free tier)
 
-- [ ] Schema de atributos por tabela documentado
-- [ ] Nomes físicos: `afro90s-{env}-ddb-products`, `afro90s-{env}-ddb-orders`
-- [ ] Export table names como outputs (task 11)
-- [ ] Point-in-time recovery e deletion protection em production
+Distribuir as 25 WCU e 25 RCU gratuitas entre tabelas e GSIs:
 
-## Notas / rascunho
+| Recurso | WCU | RCU |
+|---------|-----|-----|
+| `products` table | 3 | 5 |
+| `gsi-name` | 1 | 2 |
+| `gsi-createdAt` | 1 | 2 |
+| `orders` table | 3 | 5 |
+| `gsi-status-createdAt` | 1 | 2 |
+| **Total** | **9** | **16** |
 
-<!-- Edite aqui -->
+> Abaixo dos 25 gratuitos. Ajustar conforme carga real.
 
-## Quando concluir
+### Tabela `products`
 
-- [ ] Atualizar `resources.md`
-- [ ] Sinalizar mudanças necessárias em backend task 15 se GSIs mudarem
-- [ ] Marcar **Status** como `concluída`
+- [ ] Nome: `afro90s-{env}-ddb-products`
+- [ ] PK: `id` (String)
+- [ ] `billingMode: BillingMode.PROVISIONED`, WCU 3, RCU 5
+- [ ] `removalPolicy: DESTROY` em dev; `RETAIN` em prod
+- [ ] `deletionProtection: true` em prod
+- [ ] GSI `gsi-name`: PK `nameLower` (String), SK `id` (String), WCU 1, RCU 2
+- [ ] GSI `gsi-createdAt`: PK `createdAt` (String), WCU 1, RCU 2
+- [ ] Auto-scaling: **desativado** (para evitar cobranças além do free tier)
+
+### Tabela `orders`
+
+- [ ] Nome: `afro90s-{env}-ddb-orders`
+- [ ] PK: `id` (String)
+- [ ] `billingMode: BillingMode.PROVISIONED`, WCU 3, RCU 5
+- [ ] `removalPolicy: DESTROY` em dev; `RETAIN` em prod
+- [ ] `deletionProtection: true` em prod
+- [ ] `pointInTimeRecovery: true` **somente em prod**
+- [ ] GSI `gsi-status-createdAt`: PK `status` (String), SK `createdAt` (String), WCU 1, RCU 2
+
+### Exports via SSM
+
+- [ ] `/afro90s/{env}/products-table-name`
+- [ ] `/afro90s/{env}/orders-table-name`
+
+### Outputs CloudFormation
+
+- [ ] `CfnOutput` `ProductsTableName`
+- [ ] `CfnOutput` `OrdersTableName`
+
+## Pré-requisitos
+
+- Tasks 01, 02, 03 concluídas
+
+## Critérios de conclusão
+
+- [ ] Tabelas criadas no CloudFormation sem erro
+- [ ] GSIs visíveis no console DynamoDB
+- [ ] Total de WCU + RCU (tabelas + GSIs) ≤ 25 de cada (free tier)
+- [ ] PITR ativo em prod somente para `orders`
+- [ ] Outputs `ProductsTableName` e `OrdersTableName` no CloudFormation
+- [ ] `resources.md` atualizado com schema de atributos
+- [ ] Atualizar **Status** para `concluída`

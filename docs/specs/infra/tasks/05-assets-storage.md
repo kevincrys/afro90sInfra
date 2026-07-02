@@ -1,39 +1,64 @@
 # Task 05 — Assets storage (imagens de produtos)
 
 **Status:** pendente  
-**Arquivos alvo:** [`resources.md`](../resources.md) — S3 assets, CloudFront assets; [`outputs.md`](../outputs.md) — `AssetsCdnUrl`
+**Arquivos alvo:** [`resources.md`](../resources.md), [`outputs.md`](../outputs.md)
 
 ## Objetivo
 
-Fechar armazenamento e entrega de imagens enviadas pelo admin (`POST /admin/products`).
+Implementar `StorageStack`: bucket S3 de imagens de produtos com entrega via behavior `/assets/*` na distribuição CloudFront web.
 
-## Decisões a tomar
+## Configurações já definidas
 
-- [ ] CloudFront dedicado (`cf-assets`) vs behavior `/assets/*` no `cf-web`
-behavior `/assets/*`
-- [ ] Acesso público via OAC no CloudFront vs presigned URLs apenas
- Acesso público via OAC no CloudFront vs presigned URLs apenas
-- [ ] Estrutura de chave: `products/{productId}/{uuid}.{ext}` — confirmar
-Sim
-- [ ] CORS no bucket assets para upload direto do browser (v1: upload via Lambda apenas)
-Sim
-- [ ] Lifecycle policy para imagens órfãs — v2?
-V2 somente
-- [ ] Encryption: SSE-S3 vs SSE-KMS
-SSE-S3
+| Decisão | Valor |
+|---------|-------|
+| CDN | Behavior `/assets/*` na distribuição cf-web (não distribuição separada) |
+| Acesso público | OAC via CloudFront |
+| Estrutura de chave | `products/{productId}/{uuid}.{ext}` |
+| Upload | Via Lambda admin (não direto do browser) |
+| Encryption | SSE-S3 (padrão AWS) |
+| Lifecycle orphans | Fora de escopo v1 (v2) |
 
-## Checklist de refinamento
+## O que implementar
 
-- [ ] Bucket `afro90s-{env}-s3-assets` e permissões Lambda admin
-- [ ] Montagem de URL pública: `ASSETS_CDN_URL` + key
-- [ ] Alinhar com [backend task 03-photo-upload.md](../../backend/tasks/03-photo-upload.md)
-- [ ] Limite 10 MB API GW — impacto em base64 múltiplo
+### S3 — bucket assets
 
-## Notas / rascunho
+- [ ] Criar bucket `afro90s-{env}-s3-assets`
+- [ ] `blockPublicAccess: BlockPublicAccess.BLOCK_ALL`
+- [ ] `encryption: BucketEncryption.S3_MANAGED` (SSE-S3)
+- [ ] `versioned: false` em dev; `false` em prod (imagens são substituídas por UUID)
+- [ ] `removalPolicy: DESTROY` em dev, `RETAIN` em prod
+- [ ] `cors: []` — sem CORS (upload somente via Lambda)
 
-<!-- Edite aqui -->
+### CloudFront — behavior `/assets/*`
 
-## Quando concluir
+- [ ] Adicionar origin do bucket assets na distribuição criada na task 04
+  - Usar `S3BucketOrigin.withOriginAccessControl()` para o bucket assets
+- [ ] Adicionar `additionalBehaviors` para path `assets/*`:
+  - `allowedMethods: AllowedMethods.ALLOW_GET_HEAD`
+  - `cachePolicy: CachePolicy.CACHING_OPTIMIZED`
+  - `viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS`
 
-- [ ] Atualizar `resources.md` e `outputs.md`
-- [ ] Marcar **Status** como `concluída`
+> A distribuição pertence ao `FrontendStack`. O `StorageStack` exporta o bucket ARN/nome para que o `FrontendStack` adicione o behavior. Usar SSM para cross-stack.
+
+### Exports via SSM
+
+- [ ] `/afro90s/{env}/assets-bucket-name` = nome do bucket
+- [ ] `/afro90s/{env}/assets-bucket-arn` = ARN do bucket
+
+### Outputs CloudFormation
+
+- [ ] `CfnOutput` `AssetsBucketName`
+- [ ] `CfnOutput` `AssetsCdnUrl` = `https://{cloudfront-domain}/assets` (sem barra final)
+
+## Pré-requisitos
+
+- Task 04 concluída (distribuição CloudFront web existente)
+- Task 10 concluída (permissões IAM Lambda para PutObject)
+
+## Critérios de conclusão
+
+- [ ] Imagem salva em `products/test/uuid.jpg` acessível via `{AssetsCdnUrl}/products/test/uuid.jpg`
+- [ ] Bucket não acessível publicamente por URL S3 direta (403)
+- [ ] Outputs `AssetsBucketName` e `AssetsCdnUrl` no CloudFormation
+- [ ] `resources.md` e `outputs.md` atualizados
+- [ ] Atualizar **Status** para `concluída`

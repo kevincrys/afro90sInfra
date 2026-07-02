@@ -1,81 +1,91 @@
-# Tasks — Refinamento das specs de infra
+# Tasks — Implementação da infraestrutura Afro90s
 
-Backlog de tarefas pequenas para refinar [`overview.md`](../overview.md), [`cdk.md`](../cdk.md), [`resources.md`](../resources.md) e [`outputs.md`](../outputs.md).
+Backlog de tarefas para implementar os recursos AWS via CDK no repositório `afro90sInfra`.
 
-Os specs principais permanecem em **quatro arquivos únicos**. Cada task concluída deve resultar em edições pontuais nos specs alvo.
+Todas as decisões de arquitetura já estão fechadas. Cada task descreve **o que implementar**, com checklists executáveis e critérios de conclusão claros.
 
-Ambientes v1: **`dev`** e **`production`** (sem `staging`).
+Ambientes v1: **`dev`** e **`prod`** — mesma conta AWS (`083171867610`), região `us-east-1`.
 
 ## Legenda de status
 
 | Status | Significado |
 |--------|-------------|
-| `pendente` | Ainda não revisada |
-| `em revisão` | Decisões em andamento |
-| `concluída` | Specs alvo atualizadas |
-
-Atualize o campo **Status** no topo de cada arquivo de task.
+| `pendente` | Ainda não iniciada |
+| `em andamento` | Implementação em curso |
+| `concluída` | Critérios de conclusão verificados |
 
 ## Índice
 
-### Fundação CDK
+### Fundação
 
-| Task | Arquivo | Foco |
-|------|---------|------|
-| 00 | [00-environments.md](00-environments.md) | Ambientes dev/production, região, isolamento |
-| 01 | [01-cdk-stacks.md](01-cdk-stacks.md) | Stacks, dependências, constructs |
-| 02 | [02-cdk-config-deploy.md](02-cdk-config-deploy.md) | Config por env, bootstrap, comandos |
-| 03 | [03-tags-naming.md](03-tags-naming.md) | Naming e tags obrigatórias |
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 00 | [00-environments.md](00-environments.md) | Setup do repo CDK, AWS IAM, OIDC, bootstrap, GitHub |
+| 01 | [01-cdk-stacks.md](01-cdk-stacks.md) | 5 stacks em `lib/stacks/` + `bin/app.ts` |
+| 02 | [02-cdk-config-deploy.md](02-cdk-config-deploy.md) | `lib/config/{dev,prod}.ts` e scripts npm |
+| 03 | [03-tags-naming.md](03-tags-naming.md) | Aspect de tags globais e tabela de naming |
 
 ### Recursos AWS
 
-| Task | Arquivo | Foco |
-|------|---------|------|
-| 04 | [04-frontend-hosting.md](04-frontend-hosting.md) | S3 SPA + CloudFront |
-| 05 | [05-assets-storage.md](05-assets-storage.md) | S3 imagens + CDN |
-| 06 | [06-api-gateway-lambda.md](06-api-gateway-lambda.md) | HTTP API + Lambdas |
-| 07 | [07-dynamodb.md](07-dynamodb.md) | Tabelas e GSIs |
-| 08 | [08-cognito.md](08-cognito.md) | User Pool admin |
-| 09 | [09-ses.md](09-ses.md) | E-mail de pedidos |
-| 10 | [10-iam-security.md](10-iam-security.md) | Roles e least privilege |
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 04 | [04-frontend-hosting.md](04-frontend-hosting.md) | S3 web + CloudFront OAC (SPA) |
+| 05 | [05-assets-storage.md](05-assets-storage.md) | S3 assets + behavior `/assets/*` no CloudFront |
+| 06 | [06-api-gateway-lambda.md](06-api-gateway-lambda.md) | HTTP API + Lambda router + authorizer Cognito |
+| 07 | [07-dynamodb.md](07-dynamodb.md) | Tabelas `products` e `orders` + GSIs (free tier) |
+| 08 | [08-cognito.md](08-cognito.md) | User Pool admins + App Client |
+| 09 | [09-ses.md](09-ses.md) | Template SES + parâmetros SSM de e-mail |
+| 10 | [10-iam-security.md](10-iam-security.md) | Roles Lambda (público e admin) com least privilege |
 
 ### Contratos e operação
 
-| Task | Arquivo | Foco |
-|------|---------|------|
-| 11 | [11-outputs-env.md](11-outputs-env.md) | Outputs CFN e env vars |
-| 12 | [12-secrets-ssm.md](12-secrets-ssm.md) | SSM, secrets, parâmetros |
-| 13 | [13-cicd.md](13-cicd.md) | GitHub Actions |
-| 14 | [14-observability.md](14-observability.md) | Logs, métricas, alarmes |
-| 15 | [15-acceptance-phase1.md](15-acceptance-phase1.md) | Critérios aceite fase 1 |
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 11 | [11-outputs-env.md](11-outputs-env.md) | CfnOutputs + script `export-outputs.sh` |
+| 12 | [12-secrets-ssm.md](12-secrets-ssm.md) | SSM Parameters + `.env.example` |
+| 13 | [13-cicd.md](13-cicd.md) | 3 workflows GitHub Actions (validate, deploy-dev, deploy-prod) |
+| 14 | [14-observability.md](14-observability.md) | Log groups 14d + dashboard CloudWatch free tier |
+| 15 | [15-acceptance-phase1.md](15-acceptance-phase1.md) | Script smoke test + checklist aceite fase 1 |
 
-## Ordem sugerida
+## Ordem recomendada de execução
 
-**Trilha mínima (modelar antes de codar CDK):** `00 → 03 → 01 → 07 → 05 → 04`
-
-**Trilha API/integração:** `08 → 06 → 09 → 10 → 11 → 12`
-
-**Antes do primeiro deploy:** `02 → 13 → 15`
-
-**Cross-link backend:** [07-dynamodb.md](07-dynamodb.md) ↔ [backend/tasks/15-dynamodb-access.md](../../backend/tasks/15-dynamodb-access.md)
-
-## Como usar
-
-1. Abra uma task e preencha **Decisões a tomar** e **Notas / rascunho**.
-2. Marque **Status** como `em revisão` enquanto discute.
-3. Ao fechar decisões, edite as seções referenciadas nos specs alvo.
-4. Marque checklists em **Quando concluir** e mude **Status** para `concluída`.
-
-## Template
-
-```markdown
-# Task NN — Título
-**Status:** pendente
-**Arquivos alvo:** ...
-
-## Objetivo
-## Decisões a tomar
-## Checklist de refinamento
-## Notas / rascunho
-## Quando concluir
 ```
+00 → 02 → 01 → 03
+          ↓
+     07 → 08 → 05 → 04
+          ↓
+     10 → 12 → 09 → 06
+          ↓
+     11 → 13 → 14 → 15
+```
+
+**Trilha mínima para 1º deploy:**
+`00 → 02 → 01 → 03 → 07 → 08 → 10 → 05 → 04 → 06 → 12 → 11 → 13`
+
+**Antes do aceite de fase 1:**
+`14 → 15`
+
+## Dependências entre tasks
+
+| Task | Depende de |
+|------|------------|
+| 01 | 00 |
+| 02 | 00 |
+| 03 | 01 |
+| 04, 07, 08 | 01, 02, 03 |
+| 05 | 04 |
+| 06 | 07, 08, 05, 10, 12 |
+| 09 | 00 (SES verificado), 10, 12 |
+| 10 | 07, 05 |
+| 11 | 04–10 |
+| 12 | 10 |
+| 13 | 00 (GitHub configurado), 02 |
+| 14 | 06 |
+| 15 | 00–14 |
+
+## Referências
+
+- [Specs CDK](../cdk.md)
+- [Recursos AWS](../resources.md)
+- [Outputs](../outputs.md)
+- [API routes](../../backend/api-routes.md)
