@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import * as cdk from 'aws-cdk-lib';
+import { getConfig } from '../lib/config';
 import { FoundationStack } from '../lib/stacks/foundation-stack';
 
 const app = new cdk.App();
@@ -9,11 +10,10 @@ if (!envName || (envName !== 'dev' && envName !== 'prod')) {
   throw new Error('Contexto obrigatório: -c env=dev ou -c env=prod');
 }
 
-const account = process.env.CDK_DEFAULT_ACCOUNT ?? '083171867610';
-const region = process.env.CDK_DEFAULT_REGION ?? 'us-east-1';
+const config = getConfig(envName);
 
-new FoundationStack(app, `afro90s-${envName}-stack-foundation`, {
-  stackName: `afro90s-${envName}-stack-foundation`,
-  env: { account, region },
-  envName: envName as 'dev' | 'prod',
+new FoundationStack(app, `afro90s-${config.env}-stack-foundation`, {
+  stackName: `afro90s-${config.env}-stack-foundation`,
+  env: { account: config.account, region: config.region },
+  envName: config.env,
 });

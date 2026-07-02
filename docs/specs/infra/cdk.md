@@ -42,16 +42,19 @@ Ordem de deploy sugerida: `DataStack` → `AuthStack` → `AssetsStack` → `Api
 
 ```bash
 cdk deploy --all -c env=dev
-cdk deploy --all -c env=production
+cdk deploy --all -c env=prod
 ```
 
-Valores em `cdk.json` context ou `lib/config/{env}.ts`:
+Configuração centralizada em `lib/config/` (`getConfig(env)`).
 
-| Parâmetro | Exemplo dev |
-|-----------|-------------|
-| `env` | `dev` |
-| `domainName` | `dev.afro90s.com.br` (opcional v1) |
-| `corsAllowedOrigins` | URL do CloudFront frontend |
+| Parâmetro | dev | prod | Origem |
+|-----------|-----|------|--------|
+| `env` | `dev` | `prod` | contexto CDK `-c env=` |
+| `account` | `083171867610` | `083171867610` | `lib/config/{env}.ts` |
+| `region` | `us-east-1` | `us-east-1` | `lib/config/{env}.ts` |
+| `domainName` | *(opcional)* | *(opcional)* | `lib/config/{env}.ts` — domínio a comprar |
+| `adminEmail` | *(preencher)* | *(preencher)* | `lib/config/{env}.ts` — SES (fase 4) |
+| `corsAllowedOrigins` | URL CloudFront dev | URL CloudFront prod | SSM / outputs (fase 1) |
 
 ## Tags obrigatórias
 
