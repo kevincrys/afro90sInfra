@@ -10,10 +10,15 @@ Fechar divisão em stacks, ordem de deploy e constructs reutilizáveis.
 ## Decisões a tomar
 
 - [ ] Confirmar 5 stacks: `DataStack`, `AuthStack`, `AssetsStack`, `ApiStack`, `FrontendStack`
+NÃO, separar as stacks por recursor sempre, LAmbda Stack, STorageSTack, DBStack, e etc
 - [ ] `AssetsStack` separado ou fundir com `FrontendStack`?
+será por recyris
 - [ ] Constructs compartilhados: `ApiRoute`, `DynamoTable`, `TaggedBucket` — quais na v1?
+stacks separadas, o que puder ser compartilhado pode ser feito
 - [ ] Um `app.ts` instancia todas vs apps por stack
+um app.ts instancia todas 
 - [ ] Exportações cross-stack: `Fn.importValue` vs props diretas entre stacks
+ Exportações cross-stack: `Fn.importValue`
 
 ## Checklist de refinamento
 

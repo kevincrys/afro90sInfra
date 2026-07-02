@@ -10,11 +10,17 @@ Fechar camada de integração HTTP: cliente tipado, tratamento de erros, React Q
 ## Decisões a tomar
 
 - [ ] Wrapper único `apiClient` com métodos get/post/put/patch/delete
+Sim
 - [ ] Erros da API: classe `ApiError` com `code` e `message`
+Sim
 - [ ] `QueryClient` defaults: `staleTime`, `retry` para listagens
+Sim
 - [ ] Invalidação de cache após mutações admin
+Sim
 - [ ] `encodeURIComponent` em `cursor` nas query strings
+Sim
 - [ ] Tipos importados de pacote compartilhado vs duplicados em `types/` (v1: local)
+Tipos importados de pacote compartilhado Sempre
 
 ## Checklist de refinamento
 

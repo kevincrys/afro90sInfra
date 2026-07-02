@@ -10,12 +10,17 @@ Fechar rotas React Router, layout compartilhado (header, footer) e separação p
 ## Decisões a tomar
 
 - [ ] Rotas exatas: `/` vs `/catalogo`; `/produto/:id` vs `/products/:id`
+Sim
 - [ ] Layout único ou `PublicLayout` + `AdminLayout`
+Layout único para facilitar
 - [ ] Header: logo, carrinho (badge quantidade), link admin discreto?
+logo, carrinho, barra de busca e categorys, no menu admin só logo e logoy
 - [ ] Rotas admin em `/admin/*` com `Outlet` protegido
+sim
 - [ ] 404 customizada com tema anos 90
+sim
 - [ ] Scroll to top em mudança de rota
-
+Sim
 ## Checklist de refinamento
 
 - [ ] Tabela rota → componente → auth em `overview.md`

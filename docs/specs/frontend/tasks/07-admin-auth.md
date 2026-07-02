@@ -10,12 +10,18 @@ Fechar login admin, armazenamento de token e proteção de rotas `/admin/*`.
 ## Decisões a tomar
 
 - [ ] Biblioteca: Amplify `configure` + `signIn` vs cognito-identity-js
+ Amplify `configure` + `signIn`
 - [ ] Armazenar token: memória vs `sessionStorage` (evitar `localStorage`?)
+Cookie se possivel, se não SessionStorage
 - [ ] Refresh token automático na v1?
+Sim
 - [ ] Página `/admin/login`: redirect para `/admin/produtos` após sucesso
-- [ ] Logout: limpar token e cache React Query admin
-- [ ] Grupo `admins` — tratar `403` com mensagem específica
+para /admin/pedidos
 
+- [ ] Logout: limpar token e cache React Query admin
+Sim
+- [ ] Grupo `admins` — tratar `403` com mensagem específica
+Sim
 ## Checklist de refinamento
 
 - [ ] Variáveis `VITE_COGNITO_*` documentadas

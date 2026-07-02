@@ -10,12 +10,18 @@ Especificar pipeline GitHub Actions para validação em PR e deploy em `dev` / `
 ## Decisões a tomar
 
 - [ ] Workflow único `cdk.yml` vs separados validate/deploy
+ separados validate/deploy
 - [ ] PR: `npm ci` → `build` → `cdk synth` → `cdk diff` (comentário no PR?)
-- [ ] Merge em `main`: deploy automático `dev` ou manual?
+IKSso mesmo
+- [ ] Merge em `main`: deploy automático `dev` ou manual?merge em main deploy em prod, merge na branch devc, deploy em dev
 - [ ] `production`: workflow_dispatch com approval environment GitHub
+com trigger em push na main
 - [ ] Autenticação AWS: OIDC `id-token: write` + IAM role
+isso
 - [ ] Paths filter: só rodar quando `infra/**` muda
+Sim
 - [ ] Artefato: guardar `cdk.out` em PR para review?
+SIm
 
 ## Checklist de refinamento
 

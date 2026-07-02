@@ -10,10 +10,15 @@ Consolidar checklist pós-deploy da fase 1 e validar integração entre stacks e
 ## Decisões a tomar
 
 - [ ] Definição de "dev provisionável": todas as 5 stacks green?
+Sim
 - [ ] Smoke tests manuais vs script automatizado pós-deploy
+Script Automatizado Pós-Deploy
 - [ ] Ordem de verificação: API → DynamoDB → S3 → CloudFront → Cognito
+SIm 
 - [ ] Quem valida outputs: maintainer infra vs dev app
+maintainer infra 
 - [ ] Rollback strategy em production na v1
+rollout se o Script Automatizado Pós-Deploy falhar
 
 ## Checklist de refinamento
 

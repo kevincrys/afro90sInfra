@@ -10,12 +10,17 @@ Fechar configuração `VITE_*`, build de produção e deploy para S3/CloudFront.
 ## Decisões a tomar
 
 - [ ] Arquivo `.env.example` com chaves sem valores
+Sim
 - [ ] Ambientes: `.env.development` local apontando para API `dev`
+Sim
 - [ ] CI: GitHub Actions no repo `afro90s-web` — build + `aws s3 sync` + invalidação CF
+isso
 - [ ] Injeção de env no CI a partir de outputs da infra (task [infra 11](../../infra/tasks/11-outputs-env.md))
+Sim
 - [ ] `base` no Vite: `/` para SPA na raiz do CloudFront
+exato
 - [ ] Preview deployments na v1? (fora de escopo)
-
+não
 ## Checklist de refinamento
 
 - [ ] Tabela completa `VITE_*` com origem e exemplo

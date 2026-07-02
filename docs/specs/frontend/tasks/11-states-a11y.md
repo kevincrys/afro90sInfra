@@ -10,12 +10,16 @@ Padronizar loading, empty, error, success e requisitos de acessibilidade.
 ## Decisões a tomar
 
 - [ ] Biblioteca de toast: sonner, react-hot-toast ou custom
+qSonner
 - [ ] Componente `Skeleton` reutilizável vs por página
+Por página
 - [ ] Mensagens de erro: exibir `ApiError.message` direto ou mapear para pt-BR
-- [ ] Foco ao abrir modal/drawer admin
-- [ ] `aria-live` para feedback de pedido criado
+Mapear, back sempre só em portugues
+- [ ] Foco ao abrir modal/drawer admin sim
+- [ ] `aria-live` para feedback de pedido criado |
+Sim
 - [ ] Skip link "ir para conteúdo" na v1?
-
+Sim
 ## Checklist de refinamento
 
 - [ ] Tabela tela → skeleton (completar em `ui-ux.md`)

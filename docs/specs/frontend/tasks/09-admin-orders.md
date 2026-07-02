@@ -10,12 +10,17 @@ Fechar listagem de pedidos e atualização de status no painel admin.
 ## Decisões a tomar
 
 - [ ] Listagem: filtro por `status` (tabs ou select)
+tabs
 - [ ] Ordenação: mais recentes primeiro (default API)
+Sim
 - [ ] Detalhe do pedido: drawer, modal ou página `/admin/pedidos/:id`
+drawer
 - [ ] Mudança de status: dropdown com apenas transições válidas (ver data-models)
+Sim
 - [ ] Exibir dados do `customer` e itens com nomes de produto (join client-side ou enriquecer API v2?)
+sim
 - [ ] Paginação com cursor na listagem admin
-
+Sim
 ## Checklist de refinamento
 
 - [ ] `GET /admin/orders`, `GET /admin/orders/{id}`, `PATCH .../status`

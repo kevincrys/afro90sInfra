@@ -9,14 +9,22 @@ Fechar modelagem física DynamoDB, GSIs, billing e backup — alinhado ao backen
 
 ## Decisões a tomar
 
-- [ ] Billing: on-demand confirmado para v1
-- [ ] PITR: apenas `production` ou também `dev`?
-- [ ] GSI `gsi-name` (PK `nameLower`, SK `id`) — confirmar para busca por nome
-- [ ] GSI `gsi-status-createdAt` (PK `status`, SK `createdAt`) — confirmar
-- [ ] Listagem pública sem `name`: Scan vs novo GSI (ex.: `gsi-createdAt`) — alinhar [backend task 15](../../backend/tasks/15-dynamodb-access.md)
-- [ ] Atributo `nameLower`: normalização (lowercase, remover acentos?)
-- [ ] TTL em registros — v2?
+- [ ] Billing: on-demand confirmado para v1 
 
+ Provisionado no modelo gratuito
+- [ ] PITR: apenas `production` ou também `dev`?
+prod somente na tabela de pedidos 
+- [ ] GSI `gsi-name` (PK `nameLower`, SK `id`) — confirmar para busca por nome
+
+sim  certifique-se de que a soma das RCUs/WCUs da tabela principal + as RCUs/WCUs do GSI não ultrapasse o limite global
+- [ ] GSI `gsi-status-createdAt` (PK `status`, SK `createdAt`) — confirmar
+sim,  certifique-se de que a soma das RCUs/WCUs da tabela principal + as RCUs/WCUs do GSI não ultrapasse o limite global
+- [ ] Listagem pública sem `name`: Scan vs novo GSI (ex.: `gsi-createdAt`) — alinhar [backend task 15](../../backend/tasks/15-dynamodb-access.md) 
+novo gsi,  certifique-se de que a soma das RCUs/WCUs da tabela principal + as RCUs/WCUs do GSI não ultrapasse o limite global
+- [ ] Atributo `nameLower`: normalização (lowercase, remover acentos?)
+sim, remova
+- [ ] TTL em registros — v2?
+v2
 ## Checklist de refinamento
 
 - [ ] Schema de atributos por tabela documentado

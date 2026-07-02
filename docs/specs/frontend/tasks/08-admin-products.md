@@ -10,12 +10,17 @@ Fechar painel de produtos: listagem, criar, editar, excluir e upload de imagens.
 ## Decisões a tomar
 
 - [ ] UI: tabela vs cards no admin
+CArds
 - [ ] Formulário create/edit: mesma página ou modal/drawer
+Modal
 - [ ] Upload padrão: multipart (stream) vs base64 no JSON
+multipart
 - [ ] Preview de imagens antes de salvar; reordenar fotos na v1?
+Sim, Sim
 - [ ] Confirmação antes de `DELETE`
+Sim
 - [ ] Ajuste de estoque: na mesma tela ou ação separada (`PATCH .../stock`)?
-
+Mesma tela
 ## Checklist de refinamento
 
 - [ ] Consumir todas as rotas `/admin/products*`

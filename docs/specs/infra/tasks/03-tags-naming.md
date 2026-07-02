@@ -10,10 +10,15 @@ Padronizar naming `afro90s-{env}-{tipo}-{nome}` e tags obrigatórias em todos os
 ## Decisões a tomar
 
 - [ ] Tags fixas: `project=afro90s`, `env`, `managed-by=afro90sInfra` — mais alguma?
+a princio não
 - [ ] `tipo` na convenção: `s3`, `cf`, `ddb`, `lambda`, `apigw`, `cognito` — lista fechada?
+acredito que sim
 - [ ] `env` em production: string `production` ou `prod` nos nomes físicos?
+prod
 - [ ] Exceções: recursos com limite de tamanho de nome (Lambda, etc.)
+não ultrapasse o limite padrão da aws somentes
 - [ ] Aplicar tags via aspect CDK global vs por construct
+aspect CDK global
 
 ## Checklist de refinamento
 

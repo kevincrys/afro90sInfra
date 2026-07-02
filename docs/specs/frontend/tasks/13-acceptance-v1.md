@@ -10,10 +10,13 @@ Consolidar critérios de aceite do frontend v1 e testes mínimos antes de releas
 ## Decisões a tomar
 
 - [ ] E2E: Playwright/Cypress na v1 ou só testes manuais?
+inclua cypress
 - [ ] Unit: componentes críticos (carrinho, formatadores) com Vitest?
+Sim
 - [ ] Mock da API em dev: MSW (Mock Service Worker)?
+não precisa, dev sera um ambiente funciona;
 - [ ] Definition of Done por página
-
+Sim
 ## Checklist de refinamento
 
 - [ ] Checklist executável v1:

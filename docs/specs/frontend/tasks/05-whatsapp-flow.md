@@ -10,10 +10,15 @@ Fechar UX após `POST /orders` com sucesso: confirmação na tela e abertura do 
 ## Decisões a tomar
 
 - [ ] Abrir `wa.me` automaticamente em nova aba ou só botão "Continuar no WhatsApp"?
+Continuar no WhatsApp automaticamente em nova aba ao clicar em finalizar
 - [ ] Template da mensagem: incluir lista de itens ou só resumo?
+Só resumo, 
 - [ ] `VITE_WHATSAPP_NUMBER`: validar formato (DDI + DDD + número)
-- [ ] Tela de confirmação: exibir `orderId` para o cliente anotar
+sim
+- [ ] Tela de confirmação: exibir `orderId` para o cliente anotar 
+ira ser enviado para a mensagem do WhasApp
 - [ ] Mobile: deep link `whatsapp://` vs `https://wa.me`
+ deep link `whatsapp://`
 
 ## Checklist de refinamento
 

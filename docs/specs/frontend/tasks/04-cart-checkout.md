@@ -10,12 +10,16 @@ Fechar carrinho local e fluxo de checkout com formulário do cliente.
 ## Decisões a tomar
 
 - [ ] Carrinho: Context vs Zustand; persistir em `localStorage`?
+Zustand
 - [ ] Página `/checkout` acessível só com itens no carrinho (redirect se vazio)
+Sim, mas não vai ser página, drawer Somente
 - [ ] Campos `customer`: name, address, postalCode, tel — máscaras CEP/tel?
+Sim
 - [ ] Validação client-side antes de `POST /orders` (Zod?)
-- [ ] Exibir resumo: itens, subtotal, total (somente leitura — total vem da API na resposta)
+Sim
+- [ ] Exibir resumo: itens, subtotal, total (somente leitura — total vem da API na resposta) Sim
 - [ ] Botão submit: loading state durante POST
-
+Sim
 ## Checklist de refinamento
 
 - [ ] Body `POST /orders` alinhado a [api-routes.md](../../backend/api-routes.md)

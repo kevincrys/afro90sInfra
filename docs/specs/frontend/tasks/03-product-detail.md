@@ -10,11 +10,15 @@ Refinar página de detalhe: galeria de fotos, informações e adicionar ao carri
 ## Decisões a tomar
 
 - [ ] Galeria: carrossel vs imagem única + thumbnails
+Imagem Unica, ao clicar abre modal com carrosel
 - [ ] URLs de `photos[]`: prefixar com `VITE_ASSETS_CDN_URL` se relativo?
+não pode ser relativo
 - [ ] Quantidade no carrinho: seletor 1..N limitado ao `product.quantity`?
+sim 
 - [ ] Botão "Comprar" desabilitado se esgotado
+Sim
 - [ ] SEO v1: `document.title` = nome do produto?
-
+sim
 ## Checklist de refinamento
 
 - [ ] `GET /products/{id}` com React Query `['product', id]`

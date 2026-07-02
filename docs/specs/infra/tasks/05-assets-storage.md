@@ -10,11 +10,17 @@ Fechar armazenamento e entrega de imagens enviadas pelo admin (`POST /admin/prod
 ## Decisões a tomar
 
 - [ ] CloudFront dedicado (`cf-assets`) vs behavior `/assets/*` no `cf-web`
+behavior `/assets/*`
 - [ ] Acesso público via OAC no CloudFront vs presigned URLs apenas
+ Acesso público via OAC no CloudFront vs presigned URLs apenas
 - [ ] Estrutura de chave: `products/{productId}/{uuid}.{ext}` — confirmar
+Sim
 - [ ] CORS no bucket assets para upload direto do browser (v1: upload via Lambda apenas)
+Sim
 - [ ] Lifecycle policy para imagens órfãs — v2?
+V2 somente
 - [ ] Encryption: SSE-S3 vs SSE-KMS
+SSE-S3
 
 ## Checklist de refinamento
 

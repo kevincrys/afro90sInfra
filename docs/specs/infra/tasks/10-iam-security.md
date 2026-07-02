@@ -10,13 +10,19 @@ Fechar roles de execução Lambda com least privilege e políticas de segurança
 ## Decisões a tomar
 
 - [ ] Uma role por Lambda vs role compartilhada por domínio
+ role compartilhada por domínio
 - [ ] DynamoDB: permissões em tabela específica + índices (`table/index/*`)
+isso
 - [ ] S3 assets: `PutObject`/`DeleteObject` apenas no prefixo `products/*`
+Sim
 - [ ] SES: restrito ao `From` verificado
+Sim
 - [ ] Logs: `logs:CreateLogGroup` automático vs explícito
+`logs:CreateLogGroup` automático (adicionar permissão para acompanhar logs via cloudWatchs)
 - [ ] CI/CD: OIDC GitHub → AWS vs access keys (recomendado: OIDC)
+OIDC GitHub
 - [ ] Nenhum secret no Git — confirmar uso SSM/Secrets Manager
-
+SSM/Secrets Manager
 ## Checklist de refinamento
 
 - [ ] Matriz Lambda → actions → resources
