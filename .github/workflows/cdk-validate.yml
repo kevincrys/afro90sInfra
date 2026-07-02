@@ -27,10 +27,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate repository variables
+        run: |
+          if [ -z "${{ vars.AWS_ROLE_ARN_PR }}" ]; then
+            echo "::error::AWS_ROLE_ARN_PR vazio nas Repository variables."
+            echo "GitHub → Settings → Secrets and variables → Actions → Variables"
+            echo "Adicione AWS_ROLE_ARN_PR = ARN da role afro90s-github-cdk-pr"
+            exit 1
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: npm
           cache-dependency-path: infra/package-lock.json
 

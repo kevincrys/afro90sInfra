@@ -57,7 +57,7 @@ git push -u origin dev
 | `AWS_ROLE_ARN` | ARN role `afro90s-github-cdk-dev` |
 | `CDK_ENV` | `dev` |
 
-### Environment `production`
+### Environment `prod`
 
 | Variable | Valor |
 |----------|-------|
@@ -68,7 +68,7 @@ Proteger `main`: PR + required checks (checks de workflow aparecem após [task 0
 
 ## 3. GitHub — afro90sBackend
 
-Environments `dev` e `production` com:
+Environments `dev` e `prod` com:
 
 | Variable | dev |
 |----------|-----|

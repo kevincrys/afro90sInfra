@@ -19,7 +19,7 @@ Configurar pipelines de **deploy do código Lambda** neste repositório: bundle 
 | Chaves S3 | `api/{git-sha}.zip` + `api/latest.zip` |
 | Auth AWS | OIDC — role `afro90s-github-backend-{dev\|prod}` |
 | Trigger dev | Push em branch `dev` |
-| Trigger prod | Push em branch `main` + environment `production` |
+| Trigger prod | Push em branch `main` + environment `prod` |
 
 ## O que implementar
 
@@ -65,7 +65,7 @@ Configurar pipelines de **deploy do código Lambda** neste repositório: bundle 
 ### `.github/workflows/deploy-prod.yml`
 
 - [ ] Trigger: `push` em `main`
-- [ ] `environment: production`
+- [ ] `environment: prod`
 - [ ] Steps idênticos ao deploy-dev com variables de prod
 
 ### Variables GitHub (por environment)
@@ -87,7 +87,7 @@ Configurar pipelines de **deploy do código Lambda** neste repositório: bundle 
 
 - [ ] Merge em `dev` publica zip no S3 e Lambda responde com código novo
 - [ ] `api/{sha}.zip` retido no bucket para rollback manual
-- [ ] Merge em `main` deploya em production com approval do environment
+- [ ] Merge em `main` deploya em prod (GitHub Environment `prod`) com approval do environment
 - [ ] Nenhum `AWS_ACCESS_KEY_ID` no repositório
 - [ ] Atualizar **Status** para `concluída`
 

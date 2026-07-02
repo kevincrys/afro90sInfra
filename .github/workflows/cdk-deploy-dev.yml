@@ -26,10 +26,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Validate GitHub Environment variables
+        run: |
+          if [ -z "${{ vars.AWS_ROLE_ARN }}" ]; then
+            echo "::error::AWS_ROLE_ARN vazio no Environment 'dev'."
+            echo "GitHub → Settings → Environments → dev → Environment variables"
+            echo "Adicione AWS_ROLE_ARN = ARN da role afro90s-github-cdk-dev"
+            exit 1
+          fi
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: npm
           cache-dependency-path: infra/package-lock.json
 

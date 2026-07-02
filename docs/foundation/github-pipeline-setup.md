@@ -141,9 +141,11 @@ Configurar em **Settings → Environments** de cada repositório.
 | Environment  | Variables                                               | Protection rules                                           |
 | ------------ | ------------------------------------------------------- | ---------------------------------------------------------- |
 | `dev`        | `AWS_ROLE_ARN` = ARN role cdk-dev · `CDK_ENV` = `dev`   | Nenhuma (deploy automático)                                |
-| `production` | `AWS_ROLE_ARN` = ARN role cdk-prod · `CDK_ENV` = `prod` | Required reviewers (1+) · Deployment branches: `main` only |
+| `prod` | `AWS_ROLE_ARN` = ARN role **cdk-prod** · `CDK_ENV` = `prod` | Required reviewers (1+) · Deployment branches: `main` only |
 
-> **Região:** os workflows de infra usam `AWS_REGION=us-east-1` no YAML (fixo). A repository variable `AWS_REGION` abaixo é opcional para este repo; nos jobs com `environment:`, variables de **repositório** nem sempre ficam visíveis em `vars.*` — por isso não depender dela no deploy prod.
+> **`AWS_ROLE_ARN` é obrigatório em cada Environment** (`dev` e `prod`), não basta na repository variable. Se estiver vazio, `configure-aws-credentials` falha com *Could not load credentials from any providers*.
+
+> **Região:** os workflows de infra usam `AWS_REGION=us-east-1` no YAML (fixo).
 
 
 **Repository variables** (Settings → Secrets and variables → Actions → Variables):
@@ -163,7 +165,7 @@ Configurar em **Settings → Environments** de cada repositório.
 | Environment  | Variables                                                                  | Protection rules                 |
 | ------------ | -------------------------------------------------------------------------- | -------------------------------- |
 | `dev`        | `AWS_ROLE_ARN` · `AWS_REGION` · `ARTIFACT_BUCKET` · `LAMBDA_FUNCTION_NAME` | Nenhuma                          |
-| `production` | Idem (valores prod)                                                        | Required reviewers · `main` only |
+| `prod` | Idem (valores prod)                                                        | Required reviewers · `main` only |
 
 
 **Repository variables:**
@@ -183,7 +185,7 @@ Valores de `ARTIFACT_BUCKET` e `LAMBDA_FUNCTION_NAME` vêm dos [outputs CDK](../
 | Environment  | Variables                                                              | Protection rules                 |
 | ------------ | ---------------------------------------------------------------------- | -------------------------------- |
 | `dev`        | `AWS_ROLE_ARN` · `S3_BUCKET` · `CLOUDFRONT_DISTRIBUTION_ID` · `VITE_*` | Nenhuma                          |
-| `production` | Idem com valores prod                                                  | Required reviewers · `main` only |
+| `prod` | Idem com valores prod                                                  | Required reviewers · `main` only |
 
 
 **Repository variables:**
@@ -268,7 +270,7 @@ Repita por repositório. Rulesets oferecem controle mais granular (ex.: bypass l
 | --------------------------------------- | -------------------------------------------- | ------------ |
 | `.github/workflows/cdk-validate.yml`    | PR em `infra/**` ou workflows CDK            | —            |
 | `.github/workflows/cdk-deploy-dev.yml`  | Push `dev` · ou **Run workflow** (manual)    | `dev`        |
-| `.github/workflows/cdk-deploy-prod.yml` | Push `main` · ou **Run workflow** (manual)  | `production` |
+| `.github/workflows/cdk-deploy-prod.yml` | Push `main` · ou **Run workflow** (manual)  | `prod` |
 
 > **Dev e prod são independentes:** push em `main` **não** dispara deploy dev (e vice-versa). Cada workflow usa branch + environment + role OIDC próprios. Para atualizar **dev** na AWS: merge/push na branch `dev`, ou Actions → `cdk-deploy-dev` → **Run workflow**.
 
@@ -282,7 +284,7 @@ Spec: [infra/tasks/04-cicd.md](../specs/infra/tasks/04-cicd.md)
 | ----------------------------------- | -------------------------- | ------------ |
 | `.github/workflows/ci.yml`          | PR + push (todas branches) | —            |
 | `.github/workflows/deploy-dev.yml`  | Push `dev`                 | `dev`        |
-| `.github/workflows/deploy-prod.yml` | Push `main`                | `production` |
+| `.github/workflows/deploy-prod.yml` | Push `main`                | `prod` |
 
 
 Steps CI: `npm ci` → `npm run build` → `npm run test:coverage` → `npm run lint`
@@ -298,7 +300,7 @@ Spec: [backend/tasks/00-deploy-api.md](../specs/backend/tasks/00-deploy-api.md)
 | ----------------------------------- | ----------- | ------------ |
 | `.github/workflows/ci.yml`          | PR + push   | —            |
 | `.github/workflows/deploy-dev.yml`  | Push `dev`  | `dev`        |
-| `.github/workflows/deploy-prod.yml` | Push `main` | `production` |
+| `.github/workflows/deploy-prod.yml` | Push `main` | `prod` |
 
 
 Spec: [frontend/tasks/04-cicd-deploy.md](../specs/frontend/tasks/04-cicd-deploy.md)
@@ -340,7 +342,7 @@ env:
 **afro90sInfra (GitHub):**
 
 - [x] Branch `dev` criada
-- [x] Environments `dev` e `production` configurados
+- [x] Environments `dev` e `prod` configurados
 - [x] Variables preenchidas (`AWS_REGION`, `AWS_ROLE_ARN_PR`, env vars)
 - [x] Branch protection / ruleset em `main`
 

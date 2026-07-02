@@ -38,7 +38,7 @@ Criar os 3 workflows GitHub Actions que validam PRs e fazem deploy automático p
 ### `.github/workflows/cdk-deploy-prod.yml`
 
 - [x] Trigger: push `main` em `infra/**`
-- [x] `environment: production`
+- [x] `environment: prod`
 - [x] bootstrap → deploy:prod → `export-outputs.sh prod` → artifact
 
 ### Script auxiliar

@@ -13,7 +13,7 @@ Pipelines de **validação e deploy de infraestrutura AWS** via CDK. **Não** in
 |----------|---------|---------|------|
 | Validate | `cdk-validate.yml` | PR alterando `infra/**` | build → synth → diff → artifact `cdk.out` |
 | Deploy dev | `cdk-deploy-dev.yml` | Push em `dev` | `cdk deploy` ambiente dev |
-| Deploy prod | `cdk-deploy-prod.yml` | Push em `main` | `cdk deploy` ambiente production |
+| Deploy prod | `cdk-deploy-prod.yml` | Push em `main` | `cdk deploy` ambiente prod (GitHub Environment `prod`) |
 
 ## O que o CDK deploya vs o que o backend deploya
 
