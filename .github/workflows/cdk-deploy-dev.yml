@@ -11,6 +11,9 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  AWS_REGION: us-east-1
+
 jobs:
   deploy:
     name: cdk-deploy-dev
@@ -32,7 +35,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Install and build
         working-directory: infra

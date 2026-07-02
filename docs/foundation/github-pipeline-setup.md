@@ -143,6 +143,8 @@ Configurar em **Settings → Environments** de cada repositório.
 | `dev`        | `AWS_ROLE_ARN` = ARN role cdk-dev · `CDK_ENV` = `dev`   | Nenhuma (deploy automático)                                |
 | `production` | `AWS_ROLE_ARN` = ARN role cdk-prod · `CDK_ENV` = `prod` | Required reviewers (1+) · Deployment branches: `main` only |
 
+> **Região:** os workflows de infra usam `AWS_REGION=us-east-1` no YAML (fixo). A repository variable `AWS_REGION` abaixo é opcional para este repo; nos jobs com `environment:`, variables de **repositório** nem sempre ficam visíveis em `vars.*` — por isso não depender dela no deploy prod.
+
 
 **Repository variables** (Settings → Secrets and variables → Actions → Variables):
 
