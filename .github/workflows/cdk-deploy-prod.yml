@@ -9,7 +9,8 @@ on:
       - '.github/workflows/cdk-deploy-prod.yml'
   workflow_dispatch:
 
-permissions:  id-token: write
+permissions:
+  id-token: write
   contents: read
 
 env:
@@ -58,4 +59,5 @@ jobs:
         with:
           name: outputs-prod
           path: infra/outputs-prod.json
+          if-no-files-found: error
           retention-days: 90

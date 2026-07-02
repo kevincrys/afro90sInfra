@@ -1,37 +1,32 @@
 ---
-description: Nunca commitar sem revisão explícita do usuário
+description: Nunca commitar ou fazer push sem o usuário pedir explicitamente
 alwaysApply: true
 ---
 
-# Git — Commit apenas com aprovação explícita
+# Git — commit e push só quando solicitado
 
 ## Regra principal
 
-**Nunca crie um commit, faça push ou altere o histórico git sem instrução explícita do usuário.**
+**Não execute `git commit`, `git push` nem altere histórico git até o usuário pedir explicitamente** (ex.: "commite", "pode commitar", "faz o push").
 
-Isso inclui:
-- `git commit`
-- `git push`
-- `git merge` / `git rebase`
-- `git commit --amend`
-- `git stash pop` com efeitos colaterais
+Válido para **todos os repositórios** do monorepo (`afro90sInfra`, `afro90sBackend`, `afro90sFrontend`).
 
-## Antes de qualquer commit
+## Fluxo obrigatório
 
-1. Mostre ao usuário um resumo claro do que será commitado (arquivos + mensagem proposta)
-2. Aguarde confirmação explícita ("pode commitar", "sim", "faz o commit")
-3. Somente então execute o commit
+1. Implementar / corrigir o código
+2. Informar o que mudou e **propor** mensagem de commit
+3. **Parar** — aguardar o usuário solicitar o commit
+4. Só então: `git add` → `git commit` (e push **somente** se pedido)
 
-## Mensagem de commit
+## Proibido sem pedido explícito
 
-- Formato: `tipo: descrição curta no imperativo` (ex.: `feat: adicionar stack DynamoDB`)
-- Tipos: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`
+- ❌ Commit "de cortesia" após corrigir bug ou terminar task
+- ❌ Vários commits seguidos sem confirmação entre eles
+- ❌ Push automático após commit
+- ❌ `git commit --amend` / rebase / reset que altere histórico compartilhado
+
+## Mensagem de commit (quando autorizado)
+
+- Formato: `tipo: descrição curta no imperativo` (`feat`, `fix`, `docs`, `chore`, `refactor`, `test`)
 - Máximo 72 caracteres na linha principal
 - Nunca usar `--no-verify`
-
-## O que não fazer
-
-- ❌ Commitar no meio de uma implementação sem perguntar
-- ❌ Fazer push automático após commit
-- ❌ Criar commits de "WIP" sem avisar
-- ❌ Alterar commits já existentes sem confirmação

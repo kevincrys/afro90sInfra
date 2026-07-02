@@ -5,6 +5,7 @@ on:
     paths:
       - 'infra/**'
       - '.github/workflows/cdk-*.yml'
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -57,4 +58,5 @@ jobs:
         with:
           name: cdk-out-dev
           path: infra/cdk.out/
+          if-no-files-found: error
           retention-days: 7

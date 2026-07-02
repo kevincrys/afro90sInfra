@@ -59,4 +59,5 @@ jobs:
         with:
           name: outputs-dev
           path: infra/outputs-dev.json
+          if-no-files-found: error
           retention-days: 30
