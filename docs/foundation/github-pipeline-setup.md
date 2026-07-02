@@ -308,10 +308,13 @@ permissions:
   id-token: write
   contents: read
 
+env:
+  AWS_REGION: us-east-1
+
 - uses: aws-actions/configure-aws-credentials@v4
   with:
     role-to-assume: ${{ vars.AWS_ROLE_ARN }}
-    aws-region: ${{ vars.AWS_REGION }}
+    aws-region: ${{ env.AWS_REGION }}
 ```
 
 **Nunca** usar `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` nos repositórios.
