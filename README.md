@@ -73,6 +73,6 @@ afro90sInfra/
 - [x] ADRs de stack (002–006)
 - [x] Repositórios separados (Backend, Frontend, Infra)
 - [x] ADR-007 — deploy Lambda via S3 (backend)
-- [ ] Implementação CDK em `infra/`
+- [ ] Implementação CDK em `infra/` (task 00 — scaffold concluído)
 - [ ] Workflows GitHub Actions (validate + deploy)
 - [ ] Provisionar ambiente `dev`

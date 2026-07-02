@@ -1,29 +1,33 @@
 # Task 00 — Setup inicial do repositório e AWS
 
-**Status:** pendente  
-**Arquivos alvo:** [`cdk.md`](../cdk.md), [`overview.md`](../overview.md)
+**Status:** concluída (MFA admin/root recomendado, não bloqueia CI/CD)  
+**Arquivos alvo:** `[cdk.md](../cdk.md)`, `[overview.md](../overview.md)`
 
 ## Objetivo
 
-Preparar o repositório `afro90sInfra` para desenvolvimento CDK e configurar todos os pré-requisitos AWS e GitHub antes do primeiro `cdk deploy`.
+Preparar o repositório `afro90sInfra` para desenvolvimento CDK e configurar os pré-requisitos **AWS (console/OIDC)** e **GitHub** antes do primeiro deploy via pipeline.
+
+> **Sem AWS local:** OIDC, roles e Environments são configurados manualmente (console ou template CFN). CDK bootstrap roda na **primeira execução da pipeline** ([task 04](04-cicd.md)), não exige CLI local.
 
 ## Configurações já definidas
 
-| Decisão | Valor |
-|---------|-------|
-| Conta AWS | `083171867610` (única para dev e prod) |
-| Região | `us-east-1` |
-| Contextos CDK | `-c env=dev` e `-c env=prod` |
-| Stages API GW | `dev` e `prod` |
+
+| Decisão             | Valor                                         |
+| ------------------- | --------------------------------------------- |
+| Conta AWS           | `083171867610` (única para dev e prod)        |
+| Região              | `us-east-1`                                   |
+| Contextos CDK       | `-c env=dev` e `-c env=prod`                  |
+| Stages API GW       | `dev` e `prod`                                |
 | Domínio customizado | base preparada, domínio a comprar futuramente |
+
 
 ## O que implementar
 
 ### Estrutura do repositório
 
-- [ ] Criar pasta `infra/` na raiz do repo
-- [ ] Dentro de `infra/`, rodar `cdk init app --language typescript`
-- [ ] Organizar pastas conforme [`cdk.md`](../cdk.md):
+- [x] Criar pasta `infra/` na raiz do repo
+- [x] Dentro de `infra/`, rodar `cdk init app --language typescript`
+- [x] Organizar pastas conforme `[cdk.md](../cdk.md)`:
   ```
   infra/
   ├── bin/app.ts
@@ -35,148 +39,57 @@ Preparar o repositório `afro90sInfra` para desenvolvimento CDK e configurar tod
   ├── package.json
   └── tsconfig.json
   ```
-- [ ] Criar `.gitignore` com: `node_modules/`, `cdk.out/`, `.env`, `*.js.map` (dentro de `infra/`)
-- [ ] Criar `.env.example` na raiz de `infra/` com todas as chaves sem valores:
-  ```
-  AWS_PROFILE=
-  CDK_DEFAULT_ACCOUNT=083171867610
-  CDK_DEFAULT_REGION=us-east-1
-  ```
-- [ ] Ajustar `tsconfig.json` para `strict: true` e `target: ES2020`
-- [ ] Adicionar scripts em `package.json`:
-  ```json
-  "build": "tsc",
-  "synth:dev": "cdk synth -c env=dev",
-  "synth:prod": "cdk synth -c env=prod",
-  "diff:dev": "cdk diff -c env=dev",
-  "diff:prod": "cdk diff -c env=prod",
-  "deploy:dev": "cdk deploy --all -c env=dev",
-  "deploy:prod": "cdk deploy --all -c env=prod"
-  ```
+- [x] Criar `.gitignore` com: `node_modules/`, `cdk.out/`, `.env`, `*.js.map` (dentro de `infra/`)
+- [x] Criar `.env.example` na raiz de `infra/` com todas as chaves sem valores
+- [x] Ajustar `tsconfig.json` para `strict: true` e `target: ES2020`
+- [x] Adicionar scripts em `package.json` (`build`, `synth:dev/prod`, `diff`, `deploy`)
 
-### AWS — IAM e acesso
+### IAM GitHub (CloudFormation)
 
-- [ ] Criar usuário IAM `kevincrys-admin` (não usar root no dia a dia)
+- [x] Template `infra/iam/github-oidc-roles.template.yaml` (OIDC + 5 roles + policies JSON explícitas)
+- [x] Runbook `infra/scripts/task-00-runbook.md`
+
+### AWS — IAM e acesso (console)
+
+- [x] Criar usuário IAM `kevincrys-admin` (não usar root no dia a dia)
   - Policy: `AdministratorAccess`
-  - Ativar MFA
-- [ ] Ativar MFA na conta root
-- [ ] Salvar URL de login: `https://083171867610.signin.aws.amazon.com/console`
-- [ ] Criar access key para uso local via `aws configure --profile kevincrys-admin`
+  - [ ] Ativar MFA no usuário *(recomendado; não bloqueia pipeline)*
+- [ ] Ativar MFA na conta root *(recomendado)*
+- [x] URL de login: `https://083171867610.signin.aws.amazon.com/console`
 
-### AWS — CDK Bootstrap
+> **CLI local opcional:** `aws configure --profile kevincrys-admin` só é necessário se quiser rodar `cdk deploy` ou `cdk bootstrap` na máquina. O fluxo padrão do projeto é **pipeline + console**.
 
-- [ ] Com o perfil configurado, rodar uma vez:
-  ```bash
-  cd infra
-  npm ci
-  npx cdk bootstrap aws://083171867610/us-east-1
-  ```
-- [ ] Confirmar stack `CDKToolkit` no CloudFormation (`us-east-1`)
+### AWS — OIDC provider e roles CI/CD
 
-### AWS — OIDC provider para GitHub Actions
+Setup **manual** (uma vez) — fundação para GitHub Actions assumirem role sem access key.
 
-No console: **IAM → Identity providers → Add provider**
+Referência alternativa: template `infra/iam/github-oidc-roles.template.yaml`
 
-- [ ] Type: `OpenID Connect`
-- [ ] URL: `https://token.actions.githubusercontent.com`
-- [ ] Audience: `sts.amazonaws.com`
-
-### AWS — Roles IAM para CI/CD
-
-Criar 3 roles com os trust policies abaixo:
-
-**`afro90s-github-cdk-pr`** (PRs — só synth/diff):
-```json
-{
-  "Condition": {
-    "StringLike": {
-      "token.actions.githubusercontent.com:sub": "repo:kevincrys/afro90sInfra:pull_request"
-    }
-  }
-}
-```
-
-**`afro90s-github-cdk-dev`** (deploy dev):
-```json
-{
-  "Condition": {
-    "StringLike": {
-      "token.actions.githubusercontent.com:sub": "repo:kevincrys/afro90sInfra:ref:refs/heads/dev"
-    }
-  }
-}
-```
-
-**`afro90s-github-cdk-prod`** (deploy prod):
-```json
-{
-  "Condition": {
-    "StringLike": {
-      "token.actions.githubusercontent.com:sub": "repo:kevincrys/afro90sInfra:ref:refs/heads/main"
-    }
-  }
-}
-```
-
-- [ ] `afro90s-github-cdk-pr` → policy: CloudFormation read + `sts:GetCallerIdentity`
-- [ ] `afro90s-github-cdk-dev` → policy: `AdministratorAccess` (restringir depois da v1)
-- [ ] `afro90s-github-cdk-prod` → policy: `AdministratorAccess` (restringir depois da v1)
-
-### AWS — Roles IAM para CI/CD backend (`afro90sBackend`)
-
-Criar 2 roles (deploy dev/prod). CI em PR **não precisa** de AWS na v1.
-
-**`afro90s-github-backend-dev`** — trust: `repo:kevincrys/afro90sBackend:ref:refs/heads/dev`
-
-**`afro90s-github-backend-prod`** — trust: `repo:kevincrys/afro90sBackend:ref:refs/heads/main`
-
-Policy (ajustar ARNs por ambiente):
-
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": ["s3:PutObject", "s3:PutObjectAcl"],
-      "Resource": "arn:aws:s3:::afro90s-dev-s3-lambda-artifacts/api/*"
-    },
-    {
-      "Effect": "Allow",
-      "Action": ["lambda:UpdateFunctionCode", "lambda:GetFunction"],
-      "Resource": "arn:aws:lambda:us-east-1:083171867610:function:afro90s-dev-lambda-api"
-    }
-  ]
-}
-```
-
-- [ ] Repetir policy para `prod` com bucket/função prod
-- [ ] Ver [ADR-007](../../../foundation/adr/007-backend-lambda-s3-deploy.md)
+- [x] OIDC provider GitHub (`token.actions.githubusercontent.com`)
+- [x] `afro90s-github-cdk-pr` — CFN read + diff + `sts:GetCallerIdentity`
+- [x] `afro90s-github-cdk-dev` / `-prod` — `AdministratorAccess` (v1)
+- [x] `afro90s-github-backend-dev` / `-prod` — S3 + Lambda (v1)
 
 ### GitHub — afro90sBackend Environments
 
-- [ ] **`dev`**: `AWS_ROLE_ARN`, `AWS_REGION`, `ARTIFACT_BUCKET`, `LAMBDA_FUNCTION_NAME`
-- [ ] **`production`**: idem com valores prod + required reviewers
+- [x] **`dev`**: `AWS_ROLE_ARN`, `AWS_REGION`, `ARTIFACT_BUCKET`, `LAMBDA_FUNCTION_NAME`
+- [x] **`production`**: idem com valores prod + required reviewers
 
 ### GitHub — Branches e Environments (afro90sInfra)
 
-- [ ] Branch `dev` criada no repositório `kevincrys/afro90sInfra`
-- [ ] Branch `main` criada e protegida (exigir PR + checks)
-- [ ] **Settings → Environments → `dev`**:
-  - Variable `AWS_ROLE_ARN` = `arn:aws:iam::083171867610:role/afro90s-github-cdk-dev`
-  - Variable `CDK_ENV` = `dev`
-- [ ] **Settings → Environments → `production`**:
-  - Variable `AWS_ROLE_ARN` = `arn:aws:iam::083171867610:role/afro90s-github-cdk-prod`
-  - Variable `CDK_ENV` = `prod`
-- [ ] **Repository variables**:
-  - `AWS_REGION` = `us-east-1`
-  - `AWS_ROLE_ARN_PR` = `arn:aws:iam::083171867610:role/afro90s-github-cdk-pr`
+Conforme [github-pipeline-setup.md](../../../foundation/github-pipeline-setup.md) (seções 1, 4–6).
 
-### SES — verificação antecipada (dev)
+- [x] Branch `dev` criada no repositório `kevincrys/afro90sInfra`
+- [x] Branch `main` protegida (PR + checks / ruleset)
+- [x] **Settings → Environments → `dev`** (variables do runbook)
+- [x] **Settings → Environments → `production`**
+- [x] **Repository variables**: `AWS_REGION`, `AWS_ROLE_ARN_PR`
 
-- [ ] No console SES (`us-east-1`): verificar e-mail remetente (sandbox)
-- [ ] Verificar também o e-mail destino (admin) — sandbox exige ambos
-- [ ] Anotar e-mail verificado para usar em task 09
+> **Próxima task:** [01 — Configuração por ambiente](01-cdk-config-deploy.md)
+
+> **CDK bootstrap** (`CDKToolkit`) → [task 04 — CI/CD](04-cicd.md), na primeira execução dos workflows de deploy.
+
+> **SES:** verificação de identidades → fase 4 ([task 18 — SES](18-ses.md)), não nesta task.
 
 ## Pré-requisitos
 
@@ -184,10 +97,15 @@ Nenhum — esta é a primeira task.
 
 ## Critérios de conclusão
 
-- [ ] `npm run build` sem erros dentro de `infra/`
-- [ ] `npm run synth:dev` gera CloudFormation (mesmo com stacks vazias)
-- [ ] `aws sts get-caller-identity --profile kevincrys-admin` retorna conta `083171867610`
-- [ ] Stack `CDKToolkit` visível no CloudFormation
-- [ ] Roles IAM CDK (3) + backend (2) criadas
-- [ ] Environments configurados no GitHub
-- [ ] Atualizar **Status** para `concluída`
+- [x] `npm run build` sem erros dentro de `infra/`
+- [x] `npm run synth:dev` gera CloudFormation *(local, sem credenciais AWS)*
+- [x] Roles IAM CDK (3) + backend (2) criadas (OIDC GitHub)
+- [x] Environments configurados no GitHub (afro90sInfra + afro90sBackend)
+- [x] Atualizar **Status** para `concluída`
+
+## Referências
+
+- [Runbook](../../../../infra/scripts/task-00-runbook.md)
+- [IAM template](../../../../infra/iam/github-oidc-roles.template.yaml)
+- [github-pipeline-setup.md](../../../foundation/github-pipeline-setup.md)
+- [Task 04 — bootstrap via pipeline](04-cicd.md)

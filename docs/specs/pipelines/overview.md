@@ -31,12 +31,15 @@ Guia completo: [github-pipeline-setup.md](../../foundation/github-pipeline-setup
 
 ## Tasks de implementação
 
+Ordem sequencial: ver [tasks/README.md](../infra/tasks/README.md).
+
 | Task | Descrição | Status |
 |------|-----------|--------|
-| [00-environments](../infra/tasks/00-environments.md) | OIDC, roles IAM (CDK + backend) | pendente |
-| [04-cicd](../infra/tasks/04-cicd.md) | Workflows GitHub Actions | pendente |
-| [10-api-publica](../infra/tasks/10-api-publica.md) | Lambda placeholder + bucket artefatos | pendente |
-| [11-outputs](../infra/tasks/11-outputs.md) | Export outputs pós-deploy | pendente |
+| [00-environments](../infra/tasks/00-environments.md) | OIDC, roles IAM, GitHub | concluída |
+| [01-cdk-config-deploy](../infra/tasks/01-cdk-config-deploy.md) | Config dev/prod + scripts npm | pendente |
+| [02-cdk-stacks](../infra/tasks/02-cdk-stacks.md) | Stacks scaffold | pendente |
+| [03-tags-naming](../infra/tasks/03-tags-naming.md) | Tags globais | pendente |
+| [04-cicd](../infra/tasks/04-cicd.md) | Workflows + bootstrap na pipeline | pendente |
 
 ## Relação com outros repos
 
