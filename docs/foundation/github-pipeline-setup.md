@@ -6,11 +6,11 @@ Guia para configurar **GitHub Actions**, **Environments**, **branch protection**
 
 | Repositório | GitHub | Pipeline | Deploy |
 |-------------|--------|----------|--------|
-| **afro90sInfra** | `kevincrys/afro90sInfra` | CDK validate + deploy | AWS via CDK |
-| **afro90sBackend** | `kevincrys/afro90sBackend` | CI (build, test, lint) | Código Lambda via CDK no repo infra |
+| **afro90sInfra** | `kevincrys/afro90sInfra` | CDK validate + deploy | Recursos AWS (CDK) — **não** código Lambda |
+| **afro90sBackend** | `kevincrys/afro90sBackend` | CI + deploy API | S3 artifact + `update-function-code` |
 | **afro90sFrontend** | `kevincrys/afro90sFrontend` | CI + deploy SPA | S3 sync + invalidação CloudFront |
 
-**Ordem de deploy:** infra → backend (via CDK) → frontend.
+**Ordem de deploy:** infra (recursos) → backend (código Lambda) → frontend (SPA).
 
 Specs detalhadas de workflows: [pipelines/overview.md](../specs/pipelines/overview.md).
 
@@ -63,13 +63,12 @@ Cada role usa trust policy com `token.actions.githubusercontent.com:sub` restrit
 
 ### afro90sBackend
 
-| Role | Trigger GitHub | Policy (v1) |
-|------|----------------|-------------|
-| `afro90s-github-backend-pr` | `repo:kevincrys/afro90sBackend:pull_request` | `sts:GetCallerIdentity` (CI sem AWS, se aplicável) |
-| `afro90s-github-backend-dev` | `repo:kevincrys/afro90sBackend:ref:refs/heads/dev` | Permissões mínimas se CI precisar de AWS (ex.: testes integração) |
-| `afro90s-github-backend-prod` | `repo:kevincrys/afro90sBackend:ref:refs/heads/main` | Idem |
+| Role | Trigger GitHub | Policy |
+|------|----------------|--------|
+| `afro90s-github-backend-dev` | `repo:kevincrys/afro90sBackend:ref:refs/heads/dev` | `s3:PutObject` em `afro90s-dev-s3-lambda-artifacts/api/*` + `lambda:UpdateFunctionCode` na função dev |
+| `afro90s-github-backend-prod` | `repo:kevincrys/afro90sBackend:ref:refs/heads/main` | Idem para recursos prod |
 
-> O deploy da Lambda em si ocorre pelo pipeline do **afro90sInfra** (CDK referencia ou empacota o código deste repo). O backend roda CI local (build, test, lint) em todo PR.
+> Deploy de **código** Lambda neste repo ([ADR-007](adr/007-backend-lambda-s3-deploy.md)). CI em PR não exige AWS na v1.
 
 ### afro90sFrontend
 
@@ -128,15 +127,17 @@ Configurar em **Settings → Environments** de cada repositório.
 
 | Environment | Variables | Protection rules |
 |-------------|-----------|------------------|
-| `dev` | `AWS_ROLE_ARN` (se CI precisar AWS) | Opcional |
-| `production` | `AWS_ROLE_ARN` | Required reviewers · `main` only |
+| `dev` | `AWS_ROLE_ARN` · `AWS_REGION` · `ARTIFACT_BUCKET` · `LAMBDA_FUNCTION_NAME` | Nenhuma |
+| `production` | Idem (valores prod) | Required reviewers · `main` only |
 
-**Repository variables** (se necessário):
+**Repository variables:**
 
 | Nome | Valor |
 |------|-------|
 | `AWS_REGION` | `us-east-1` |
 | `NODE_VERSION` | `20` |
+
+Valores de `ARTIFACT_BUCKET` e `LAMBDA_FUNCTION_NAME` vêm dos [outputs CDK](../specs/infra/outputs.md) por ambiente.
 
 ### afro90sFrontend
 
@@ -217,10 +218,14 @@ Spec: [infra/tasks/04-cicd.md](../specs/infra/tasks/04-cicd.md)
 | Arquivo | Trigger | Environment |
 |---------|---------|-------------|
 | `.github/workflows/ci.yml` | PR + push (todas branches) | — |
+| `.github/workflows/deploy-dev.yml` | Push `dev` | `dev` |
+| `.github/workflows/deploy-prod.yml` | Push `main` | `production` |
 
-Steps: `npm ci` → `npm run build` → `npm run test:coverage` → `npm run lint`
+Steps CI: `npm ci` → `npm run build` → `npm run test:coverage` → `npm run lint`
 
-Spec: [backend/tasks/00-setup-repo.md](../specs/backend/tasks/00-setup-repo.md)
+Steps deploy: `npm run bundle` → zip → S3 `api/{sha}.zip` + `api/latest.zip` → `lambda update-function-code`
+
+Spec: [backend/tasks/00-deploy-api.md](../specs/backend/tasks/00-deploy-api.md)
 
 ### afro90sFrontend
 
@@ -269,7 +274,7 @@ permissions:
 ### Validação end-to-end
 
 - [ ] Merge infra em `dev` → stacks CloudFormation atualizam
-- [ ] Merge backend em `dev` → CI passa; Lambda atualiza no próximo deploy infra
+- [ ] Merge backend em `dev` → deploy-dev publica zip e Lambda dev atualiza
 - [ ] Merge frontend em `dev` → SPA publicada no CloudFront dev
 
 ---

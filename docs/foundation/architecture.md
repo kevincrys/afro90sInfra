@@ -126,10 +126,18 @@ Separação público vs admin documentada em [api-routes.md](../specs/backend/ap
 ## Fluxo de deploy (alvo)
 
 ```
-PR → CI (lint, synth, diff) → Review → Merge → CD (deploy dev) → Promo manual → production
+Infra:  PR → cdk validate → merge → cdk deploy (recursos AWS, Lambda placeholder)
+Backend: PR → ci → merge dev/main → bundle → S3 → update-function-code
+Frontend: PR → ci → merge dev/main → build → S3 sync + CloudFront invalidation
 ```
 
-Implementação: GitHub Actions + `cdk deploy`. Ver [spec CDK](../specs/infra/cdk.md).
+| Repo | Deploy de código | Deploy de infra/config |
+|------|------------------|------------------------|
+| afro90sInfra | — | CDK (`cdk deploy`) |
+| afro90sBackend | S3 + `update-function-code` ([ADR-007](adr/007-backend-lambda-s3-deploy.md)) | Env vars via CDK |
+| afro90sFrontend | S3 + CloudFront | — |
+
+Implementação: GitHub Actions. Ver [github-pipeline-setup.md](github-pipeline-setup.md).
 
 ## Decisões registradas
 
@@ -141,6 +149,7 @@ Implementação: GitHub Actions + `cdk deploy`. Ver [spec CDK](../specs/infra/cd
 | [004](adr/004-serverless-architecture.md) | API Gateway + Lambda + DynamoDB | Aceito |
 | [005](adr/005-admin-auth-v1.md) | Autenticação admin-only v1 | Aceito |
 | [006](adr/006-whatsapp-integration.md) | Integração WhatsApp | Proposto |
+| [007](adr/007-backend-lambda-s3-deploy.md) | Deploy Lambda via S3 (backend) | Aceito |
 
 ## Referências
 

@@ -13,6 +13,7 @@ Catalogar recursos AWS provisionados pelo CDK para o Afro90s.
 |---------|---------------|-----------|
 | S3 | `afro90s-{env}-s3-web` | Build estático da SPA |
 | S3 | `afro90s-{env}-s3-assets` | Imagens de produtos |
+| S3 | `afro90s-{env}-s3-lambda-artifacts` | Pacotes zip da Lambda (deploy via afro90sBackend) |
 | CloudFront | `afro90s-{env}-cf-web` | CDN do frontend |
 | CloudFront | `afro90s-{env}-cf-assets` | CDN das imagens (opcional: mesmo distribution com behavior `/assets/*`) |
 | API Gateway | `afro90s-{env}-apigw-api` | HTTP API REST |
@@ -28,6 +29,14 @@ Catalogar recursos AWS provisionados pelo CDK para o Afro90s.
 - Bucket **privado**; acesso apenas via CloudFront OAC/OAI
 - Deploy do build Vite via CI (`aws s3 sync dist/`)
 - Sem listagem pública
+
+## S3 — Lambda artifacts (`s3-lambda-artifacts`)
+
+- Bucket **privado** para pacotes zip publicados pelo pipeline **afro90sBackend**
+- Chaves: `api/{git-sha}.zip`, `api/latest.zip`
+- Versioning habilitado para rollback
+- Lambda lê o pacote via `update-function-code` (S3 → Lambda)
+- Deploy de **código** = backend; deploy de **config** (env, timeout) = CDK
 
 ## S3 — Assets (`s3-assets`)
 
@@ -60,7 +69,7 @@ Catalogar recursos AWS provisionados pelo CDK para o Afro90s.
 | `lambda-products-admin` | `/admin/products*` | DynamoDB products CRUD, S3 assets write |
 | `lambda-orders-admin` | `/admin/orders*` | DynamoDB orders read/update |
 
-Runtime: **Node.js 20.x**. Bundling: esbuild.
+Runtime: **Node.js 20.x**. Bundling: **esbuild no afro90sBackend**; CDK cria função com placeholder ([ADR-007](../../foundation/adr/007-backend-lambda-s3-deploy.md)).
 
 ## DynamoDB
 

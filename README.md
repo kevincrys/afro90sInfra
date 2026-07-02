@@ -7,7 +7,7 @@ Repositório de **infraestrutura AWS** e **documentação central** do projeto *
 | Repositório | Função |
 |-------------|--------|
 | **afro90sInfra** (este) | CDK, recursos AWS, specs centrais, deploy de infra |
-| [afro90sBackend](https://github.com/kevincrys/afro90sBackend) | API Lambda (Node.js 20 + TypeScript) |
+| [afro90sBackend](https://github.com/kevincrys/afro90sBackend) | API Lambda — CI + deploy código (S3 + update-function-code) |
 | [afro90sFrontend](https://github.com/kevincrys/afro90sFrontend) | SPA React + Vite → S3/CloudFront |
 
 ## Documentação
@@ -72,7 +72,7 @@ afro90sInfra/
 - [x] Documentação de produto, arquitetura e specs (3 esferas)
 - [x] ADRs de stack (002–006)
 - [x] Repositórios separados (Backend, Frontend, Infra)
-- [x] Guia de configuração de pipelines GitHub
+- [x] ADR-007 — deploy Lambda via S3 (backend)
 - [ ] Implementação CDK em `infra/`
 - [ ] Workflows GitHub Actions (validate + deploy)
 - [ ] Provisionar ambiente `dev`

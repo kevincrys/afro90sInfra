@@ -28,7 +28,7 @@ Este arquivo orienta assistentes de IA (Cursor, Copilot, etc.) ao trabalhar nest
 | Esfera | Entry point | Documentos principais |
 |--------|-------------|----------------------|
 | **CDK / Infra** | `docs/specs/infra/overview.md` | `cdk.md`, `resources.md`, `outputs.md` |
-| **Backend** | `docs/specs/backend/overview.md` | `data-models.md`, **`api-routes.md`** |
+| **Backend** | `docs/specs/backend/overview.md` | `data-models.md`, **`api-routes.md`**, **`00-deploy-api.md`** (deploy S3/Lambda) |
 | **Frontend** | `docs/specs/frontend/overview.md` | `ui-ux.md`, `integration.md` |
 
 ## Princípios

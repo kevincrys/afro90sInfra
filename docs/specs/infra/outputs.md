@@ -5,7 +5,7 @@
 
 ## Objetivo
 
-Documentar valores exportados pelo CDK para consumo pelos repositórios `afro90s-api` e `afro90s-web`.
+Documentar valores exportados pelo CDK para consumo pelos repositórios `afro90sBackend` e `afro90sFrontend`.
 
 ## Outputs do CDK (CloudFormation)
 
@@ -20,10 +20,12 @@ Documentar valores exportados pelo CDK para consumo pelos repositórios `afro90s
 | `ProductsTableName` | Nome tabela DynamoDB | backend Lambda |
 | `OrdersTableName` | Nome tabela DynamoDB | backend Lambda |
 | `AssetsBucketName` | Bucket S3 de imagens | backend Lambda |
+| `LambdaFunctionName` | Nome da função API | backend deploy workflow |
+| `LambdaArtifactsBucketName` | Bucket zip da Lambda | backend deploy workflow |
 | `SesFromEmail` | E-mail remetente SES | backend Lambda |
 | `AdminNotificationEmail` | E-mail destino pedidos | backend Lambda |
 
-## Variáveis de ambiente — Frontend (`afro90s-web`)
+## Variáveis de ambiente — Frontend (`afro90sFrontend`)
 
 | Variável | Origem | Exemplo |
 |----------|--------|---------|
@@ -34,7 +36,15 @@ Documentar valores exportados pelo CDK para consumo pelos repositórios `afro90s
 | `VITE_COGNITO_CLIENT_ID` | `CognitoClientId` | `abcdefgh` |
 | `VITE_COGNITO_REGION` | `CognitoRegion` | `sa-east-1` |
 
-## Variáveis de ambiente — Backend (`afro90s-api`)
+## Variáveis GitHub — Backend deploy (`afro90sBackend`)
+
+| Variable | Origem | Exemplo |
+|----------|--------|---------|
+| `LAMBDA_FUNCTION_NAME` | `LambdaFunctionName` | `afro90s-dev-lambda-api` |
+| `ARTIFACT_BUCKET` | `LambdaArtifactsBucketName` | `afro90s-dev-s3-lambda-artifacts` |
+| `AWS_ROLE_ARN` | IAM role OIDC backend | (por environment) |
+
+## Variáveis de ambiente — Backend Lambda (via CDK)
 
 | Variável | Origem |
 |----------|--------|

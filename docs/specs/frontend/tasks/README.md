@@ -97,7 +97,7 @@ Organizado em **4 fases** alinhadas com [`infra/tasks/`](../../infra/tasks/READM
 ## Ordem de deploy por fase
 
 1. **Infra** deploya recursos (`afro90sInfra` → merge `dev`)
-2. **Backend** deploya Lambda (`afro90sBackend` → CI build + CDK atualiza bundle)
+2. **Backend** deploya código Lambda (`afro90sBackend` → bundle + S3 + `update-function-code`)
 3. **Frontend** deploya SPA (`afro90sFrontend` → CI build + `s3 sync`)
 
 ## Referências

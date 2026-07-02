@@ -5,7 +5,7 @@
 
 ## Escopo deste repositório
 
-Pipelines de **validação e deploy de infraestrutura AWS** via CDK. Não inclui CI dos repos de aplicação.
+Pipelines de **validação e deploy de infraestrutura AWS** via CDK. **Não** inclui deploy do código da Lambda — isso é responsabilidade do **afro90sBackend** ([ADR-007](../../foundation/adr/007-backend-lambda-s3-deploy.md)).
 
 ## Workflows planejados
 
@@ -15,34 +15,39 @@ Pipelines de **validação e deploy de infraestrutura AWS** via CDK. Não inclui
 | Deploy dev | `cdk-deploy-dev.yml` | Push em `dev` | `cdk deploy` ambiente dev |
 | Deploy prod | `cdk-deploy-prod.yml` | Push em `main` | `cdk deploy` ambiente production |
 
+## O que o CDK deploya vs o que o backend deploya
+
+| Aspecto | afro90sInfra (CDK) | afro90sBackend (Actions) |
+|---------|-------------------|--------------------------|
+| Lambda function (recurso) | ✅ Cria | — |
+| Lambda **código** (zip) | Placeholder inicial | ✅ S3 + `update-function-code` |
+| API Gateway, DynamoDB, IAM | ✅ | — |
+| Env vars, timeout, memory | ✅ | — |
+| Bucket `s3-lambda-artifacts` | ✅ Cria | ✅ Upload zip |
+
 ## Configuração GitHub
 
 Guia completo: [github-pipeline-setup.md](../../foundation/github-pipeline-setup.md)
-
-Resumo:
-
-- **Environments:** `dev`, `production`
-- **Auth:** OIDC (`id-token: write`) — sem access keys
-- **Variables:** `AWS_REGION`, `AWS_ROLE_ARN_PR` (repo) · `AWS_ROLE_ARN`, `CDK_ENV` (por environment)
 
 ## Tasks de implementação
 
 | Task | Descrição | Status |
 |------|-----------|--------|
-| [00-environments](../infra/tasks/00-environments.md) | OIDC, roles IAM, environments GitHub | pendente |
+| [00-environments](../infra/tasks/00-environments.md) | OIDC, roles IAM (CDK + backend) | pendente |
 | [04-cicd](../infra/tasks/04-cicd.md) | Workflows GitHub Actions | pendente |
+| [10-api-publica](../infra/tasks/10-api-publica.md) | Lambda placeholder + bucket artefatos | pendente |
 | [11-outputs](../infra/tasks/11-outputs.md) | Export outputs pós-deploy | pendente |
 
 ## Relação com outros repos
 
 | Repo | Dependência |
 |------|-------------|
-| afro90sBackend | CDK empacota/deploya Lambda; backend CI deve passar antes do merge |
+| afro90sBackend | Consome outputs (`LAMBDA_FUNCTION_NAME`, `ARTIFACT_BUCKET`); publica código após infra fase 1 |
 | afro90sFrontend | Infra provisiona S3/CloudFront; frontend consome outputs |
 
 ## Critérios de aceite (fase 0)
 
 - [ ] PR em `infra/**` dispara validate e publica `cdk.out`
-- [ ] Push em `dev` faz deploy em ambiente dev
-- [ ] Push em `main` faz deploy em production com approval do environment
+- [ ] Push em `dev` faz deploy em ambiente dev (recursos, não código app)
+- [ ] Outputs disponíveis para workflows do backend e frontend
 - [ ] Nenhum secret AWS no repositório

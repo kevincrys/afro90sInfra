@@ -122,7 +122,43 @@ Criar 3 roles com os trust policies abaixo:
 - [ ] `afro90s-github-cdk-dev` → policy: `AdministratorAccess` (restringir depois da v1)
 - [ ] `afro90s-github-cdk-prod` → policy: `AdministratorAccess` (restringir depois da v1)
 
-### GitHub — Branches e Environments
+### AWS — Roles IAM para CI/CD backend (`afro90sBackend`)
+
+Criar 2 roles (deploy dev/prod). CI em PR **não precisa** de AWS na v1.
+
+**`afro90s-github-backend-dev`** — trust: `repo:kevincrys/afro90sBackend:ref:refs/heads/dev`
+
+**`afro90s-github-backend-prod`** — trust: `repo:kevincrys/afro90sBackend:ref:refs/heads/main`
+
+Policy (ajustar ARNs por ambiente):
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": ["s3:PutObject", "s3:PutObjectAcl"],
+      "Resource": "arn:aws:s3:::afro90s-dev-s3-lambda-artifacts/api/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["lambda:UpdateFunctionCode", "lambda:GetFunction"],
+      "Resource": "arn:aws:lambda:us-east-1:083171867610:function:afro90s-dev-lambda-api"
+    }
+  ]
+}
+```
+
+- [ ] Repetir policy para `prod` com bucket/função prod
+- [ ] Ver [ADR-007](../../../foundation/adr/007-backend-lambda-s3-deploy.md)
+
+### GitHub — afro90sBackend Environments
+
+- [ ] **`dev`**: `AWS_ROLE_ARN`, `AWS_REGION`, `ARTIFACT_BUCKET`, `LAMBDA_FUNCTION_NAME`
+- [ ] **`production`**: idem com valores prod + required reviewers
+
+### GitHub — Branches e Environments (afro90sInfra)
 
 - [ ] Branch `dev` criada no repositório `kevincrys/afro90sInfra`
 - [ ] Branch `main` criada e protegida (exigir PR + checks)
@@ -152,6 +188,6 @@ Nenhum — esta é a primeira task.
 - [ ] `npm run synth:dev` gera CloudFormation (mesmo com stacks vazias)
 - [ ] `aws sts get-caller-identity --profile kevincrys-admin` retorna conta `083171867610`
 - [ ] Stack `CDKToolkit` visível no CloudFormation
-- [ ] Roles IAM das 3 criadas
+- [ ] Roles IAM CDK (3) + backend (2) criadas
 - [ ] Environments configurados no GitHub
 - [ ] Atualizar **Status** para `concluída`

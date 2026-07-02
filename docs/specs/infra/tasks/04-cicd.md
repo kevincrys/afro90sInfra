@@ -19,6 +19,7 @@ Criar os 3 workflows GitHub Actions que validam PRs e fazem deploy automático p
 | Auth AWS | OIDC (`id-token: write`) — sem access keys |
 | Path filter | Só dispara quando `infra/**` muda |
 | Artefato | `cdk.out` guardado em PRs |
+| Código Lambda | **Fora de escopo** — deploy via afro90sBackend ([ADR-007](../../foundation/adr/007-backend-lambda-s3-deploy.md)) |
 
 ## O que implementar
 
