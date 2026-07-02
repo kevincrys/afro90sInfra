@@ -31,12 +31,14 @@ Todas com middleware auth.
 - [ ] `listOrders(filters)` — query em `gsi-status-createdAt`
 - [ ] `getOrder(id)`
 - [ ] `updateOrderStatus(id, newStatus)` — validar transição; `409 INVALID_STATUS_TRANSITION` se inválida
+- [ ] Ao transicionar para `CONCLUIDO` ou `CANCELADO`: definir `expiresAt` (epoch segundos) = agora + **180 dias**
 
 ### Testes
 
 - [ ] Listagem com filtro `status`
 - [ ] Transição válida → `200`
 - [ ] Transição inválida → `409`
+- [ ] Transição para `CONCLUIDO`/`CANCELADO` grava `expiresAt` (+180 dias)
 - [ ] Pedido inexistente → `404`
 
 ## Pré-requisitos

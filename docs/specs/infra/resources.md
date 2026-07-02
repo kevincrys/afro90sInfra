@@ -113,13 +113,17 @@ Runtime: **Node.js 20.x**. Bundling: **esbuild no afro90sBackend**; CDK cria fun
 
 ## DynamoDB
 
+Billing: **on-demand** (`PAY_PER_REQUEST`) — alinhado ao [ADR-004](../../foundation/adr/004-serverless-architecture.md). Tráfego v1 baixo; dev + prod na mesma conta sem capacidade provisionada 24/7. Free tier: **25 GB storage** (conta/região); requisições cobradas por uso.
+
+`removalPolicy`: `DESTROY` (dev) / `RETAIN` (prod). `deletionProtection: true` em prod. PITR: **somente** tabela `orders` em prod. **TTL** em `orders`: atributo `expiresAt` (epoch segundos); pedidos em `CONCLUIDO` ou `CANCELADO` expiram **180 dias** após a transição (backend).
+
 ### Tabela `products`
 
 | Atributo | Tipo | Notas |
 |----------|------|-------|
 | PK `id` | String (UUID) | Partition key |
 | `name` | String | |
-| `nameLower` | String | Para busca case-insensitive (opcional) |
+| `nameLower` | String | lowercase + remoção de acentos (aplicação) |
 | `price` | Number | |
 | `quantity` | Number | |
 | `photos` | List\<String\> | URLs finais |
@@ -129,7 +133,7 @@ Runtime: **Node.js 20.x**. Bundling: **esbuild no afro90sBackend**; CDK cria fun
 
 **GSI `gsi-name`**: PK `nameLower`, SK `id` — busca por prefixo de nome (v1).
 
-Billing: **on-demand**. PITR habilitado em production.
+**GSI `gsi-createdAt`**: PK `createdAt` — listagem pública por data de criação.
 
 ### Tabela `orders`
 
@@ -142,8 +146,11 @@ Billing: **on-demand**. PITR habilitado em production.
 | `customer` | Map | `{ name, address, postalCode, tel }` |
 | `createdAt` | String | |
 | `updatedAt` | String | |
+| `expiresAt` | Number | Epoch segundos (TTL); definido ao atingir `CONCLUIDO` ou `CANCELADO` (+180 dias) |
 
 **GSI `gsi-status-createdAt`**: PK `status`, SK `createdAt` — listagem admin filtrada por status.
+
+**TTL**: DynamoDB remove itens quando `expiresAt` ≤ agora (até ~48h de atraso). Itens sem `expiresAt` permanecem indefinidamente.
 
 ## Cognito
 

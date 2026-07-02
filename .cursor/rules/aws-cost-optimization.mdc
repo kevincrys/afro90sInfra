@@ -21,6 +21,7 @@ especialmente em ambientes serverless e de baixo tráfego (v1).
 ### DynamoDB
 - **Billing**: on-demand (`PAY_PER_REQUEST`) — já decidido no projeto
 - **PITR**: habilitar só em `prod` (custo adicional em `dev`)
+- **TTL**: tabela `orders`, atributo `expiresAt` — 180 dias após `CONCLUIDO`/`CANCELADO` (backend)
 - **Streams**: só se houver caso de uso real
 - **GSIs**: criar apenas os índices usados; cada GSI replica dados e cobra
 
