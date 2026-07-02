@@ -12,7 +12,9 @@
     "diff:dev": "cdk diff -c env=dev",
     "diff:prod": "cdk diff -c env=prod",
     "deploy:dev": "cdk deploy --all -c env=dev",
-    "deploy:prod": "cdk deploy --all -c env=prod"
+    "deploy:prod": "cdk deploy --all -c env=prod",
+    "bootstrap:dev": "cdk bootstrap aws://083171867610/us-east-1 -c env=dev",
+    "bootstrap:prod": "cdk bootstrap aws://083171867610/us-east-1 -c env=prod"
   },
   "devDependencies": {
     "@types/jest": "^30",

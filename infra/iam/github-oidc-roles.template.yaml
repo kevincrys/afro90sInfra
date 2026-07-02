@@ -85,7 +85,9 @@ Resources:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
               StringLike:
-                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubOrg}/afro90sInfra:ref:refs/heads/dev
+                token.actions.githubusercontent.com:sub:
+                  - !Sub repo:${GitHubOrg}/afro90sInfra:environment:dev
+                  - !Sub repo:${GitHubOrg}/afro90sInfra:ref:refs/heads/dev
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
 
@@ -104,7 +106,9 @@ Resources:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
               StringLike:
-                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubOrg}/afro90sInfra:ref:refs/heads/main
+                token.actions.githubusercontent.com:sub:
+                  - !Sub repo:${GitHubOrg}/afro90sInfra:environment:prod
+                  - !Sub repo:${GitHubOrg}/afro90sInfra:ref:refs/heads/main
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AdministratorAccess
 
@@ -123,7 +127,9 @@ Resources:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
               StringLike:
-                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubOrg}/afro90sBackend:ref:refs/heads/dev
+                token.actions.githubusercontent.com:sub:
+                  - !Sub repo:${GitHubOrg}/afro90sBackend:environment:dev
+                  - !Sub repo:${GitHubOrg}/afro90sBackend:ref:refs/heads/dev
       Policies:
         - PolicyName: afro90s-backend-deploy-dev
           PolicyDocument:
@@ -155,7 +161,9 @@ Resources:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
               StringLike:
-                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubOrg}/afro90sBackend:ref:refs/heads/main
+                token.actions.githubusercontent.com:sub:
+                  - !Sub repo:${GitHubOrg}/afro90sBackend:environment:prod
+                  - !Sub repo:${GitHubOrg}/afro90sBackend:ref:refs/heads/main
       Policies:
         - PolicyName: afro90s-backend-deploy-prod
           PolicyDocument:

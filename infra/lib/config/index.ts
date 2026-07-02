@@ -8,5 +8,5 @@ export { devConfig, prodConfig };
 export function getConfig(env: string): AppConfig {
   if (env === 'dev') return devConfig;
   if (env === 'prod') return prodConfig;
-  throw new Error(`env inválido: ${env}`);
+  throw new Error(`Invalid env: ${env}. Expected 'dev' or 'prod'.`);
 }

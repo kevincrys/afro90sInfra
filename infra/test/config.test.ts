@@ -16,6 +16,8 @@ describe('getConfig', () => {
   });
 
   test('throws for invalid env', () => {
-    expect(() => getConfig('staging')).toThrow('env inválido: staging');
+    expect(() => getConfig('staging')).toThrow(
+      "Invalid env: staging. Expected 'dev' or 'prod'.",
+    );
   });
 });

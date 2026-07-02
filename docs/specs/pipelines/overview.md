@@ -29,6 +29,10 @@ Pipelines de **validação e deploy de infraestrutura AWS** via CDK. **Não** in
 
 Guia completo: [github-pipeline-setup.md](../../foundation/github-pipeline-setup.md)
 
+## Convenções de log e erro
+
+Mensagens de falha em workflows (`::error::`), exceções em scripts/CDK e saída de CI devem estar em **inglês**. Documentação e runbooks podem permanecer em português. Ver [cdk.md](../infra/cdk.md#mensagens-de-erro-código-e-ci).
+
 ## Tasks de implementação
 
 Ordem sequencial: ver [tasks/README.md](../infra/tasks/README.md).

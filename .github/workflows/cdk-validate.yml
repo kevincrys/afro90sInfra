@@ -30,9 +30,9 @@ jobs:
       - name: Validate repository variables
         run: |
           if [ -z "${{ vars.AWS_ROLE_ARN_PR }}" ]; then
-            echo "::error::AWS_ROLE_ARN_PR vazio nas Repository variables."
+            echo "::error::AWS_ROLE_ARN_PR is empty in repository variables."
             echo "GitHub → Settings → Secrets and variables → Actions → Variables"
-            echo "Adicione AWS_ROLE_ARN_PR = ARN da role afro90s-github-cdk-pr"
+            echo "Set AWS_ROLE_ARN_PR to the afro90s-github-cdk-pr role ARN"
             exit 1
           fi
 

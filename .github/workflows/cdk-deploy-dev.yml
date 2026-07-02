@@ -29,9 +29,9 @@ jobs:
       - name: Validate GitHub Environment variables
         run: |
           if [ -z "${{ vars.AWS_ROLE_ARN }}" ]; then
-            echo "::error::AWS_ROLE_ARN vazio no Environment 'dev'."
+            echo "::error::AWS_ROLE_ARN is empty in GitHub Environment 'dev'."
             echo "GitHub → Settings → Environments → dev → Environment variables"
-            echo "Adicione AWS_ROLE_ARN = ARN da role afro90s-github-cdk-dev"
+            echo "Set AWS_ROLE_ARN to the afro90s-github-cdk-dev role ARN"
             exit 1
           fi
 
@@ -54,7 +54,7 @@ jobs:
 
       - name: CDK bootstrap
         working-directory: infra
-        run: npx cdk bootstrap aws://083171867610/us-east-1
+        run: npm run bootstrap:dev
 
       - name: Deploy (dev)
         working-directory: infra

@@ -66,11 +66,13 @@ Cada role usa trust policy com `token.actions.githubusercontent.com:sub` restrit
 ### afro90sInfra
 
 
-| Role                      | Trigger GitHub                                    | Policy (v1)                                   |
-| ------------------------- | ------------------------------------------------- | --------------------------------------------- |
+| Role                      | `sub` no token OIDC (GitHub)                        | Policy (v1)                                   |
+| ------------------------- | --------------------------------------------------- | --------------------------------------------- |
 | `afro90s-github-cdk-pr`   | `repo:kevincrys/afro90sInfra:pull_request`        | CFN read + diff + `sts:GetCallerIdentity` (ver template) |
-| `afro90s-github-cdk-dev`  | `repo:kevincrys/afro90sInfra:ref:refs/heads/dev`  | AdministratorAccess*                          |
-| `afro90s-github-cdk-prod` | `repo:kevincrys/afro90sInfra:ref:refs/heads/main` | AdministratorAccess*                          |
+| `afro90s-github-cdk-dev`  | `…:environment:dev` **ou** `…:ref:refs/heads/dev` | AdministratorAccess*                          |
+| `afro90s-github-cdk-prod` | `…:environment:prod` **ou** `…:ref:refs/heads/main` | AdministratorAccess*                          |
+
+> **Workflows com `environment:` no job** enviam `sub` com `environment:dev` / `environment:prod`, **não** `ref:refs/heads/*`. A trust policy da role IAM precisa incluir o claim `environment:*` — senão: *Not authorized to perform sts:AssumeRoleWithWebIdentity*.
 
 
  Restringir após v1 conforme [task 00](../specs/infra/tasks/00-environments.md).
@@ -102,7 +104,9 @@ Cada role usa trust policy com `token.actions.githubusercontent.com:sub` restrit
 
 
 
-### Exemplo de trust policy
+### Exemplo de trust policy (deploy com GitHub Environment)
+
+Role **cdk-prod** — workflow usa `environment: prod`:
 
 ```json
 {
@@ -118,14 +122,17 @@ Cada role usa trust policy com `token.actions.githubusercontent.com:sub` restrit
         "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
       },
       "StringLike": {
-        "token.actions.githubusercontent.com:sub": "repo:kevincrys/afro90sInfra:ref:refs/heads/dev"
+        "token.actions.githubusercontent.com:sub": [
+          "repo:kevincrys/afro90sInfra:environment:prod",
+          "repo:kevincrys/afro90sInfra:ref:refs/heads/main"
+        ]
       }
     }
   }]
 }
 ```
 
-Substitua `sub` conforme a role (repo, branch ou `pull_request`).
+Role **cdk-dev** — substituir por `environment:dev` e `ref:refs/heads/dev`. PR: `pull_request`.
 
 ---
 

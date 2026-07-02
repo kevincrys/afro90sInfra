@@ -20,6 +20,7 @@ Criar os 3 workflows GitHub Actions que validam PRs e fazem deploy automático p
 | Path filter | Só dispara quando `infra/**` muda |
 | Artefato | `cdk.out` guardado em PRs |
 | CDK bootstrap | Idempotente, roda antes de cada deploy |
+| Mensagens de erro (CI/CD e código) | **English** — ver [cdk.md](../cdk.md#mensagens-de-erro-código-e-ci) |
 
 ## O que implementar
 

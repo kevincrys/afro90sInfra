@@ -61,6 +61,29 @@ cdk deploy --all -c env=prod
 
 Configuração centralizada em `lib/config/` (`getConfig(env)`).
 
+## Mensagens de erro (código e CI)
+
+Specs, docs e comentários podem permanecer em português. **Mensagens de erro operacionais** devem ser **sempre em inglês**:
+
+| Escopo | Exemplos | Idioma |
+|--------|----------|--------|
+| `throw new Error(...)` em CDK/scripts | contexto CDK ausente, env inválido | **English** |
+| Annotations `::error::` em GitHub Actions | variável AWS ausente | **English** |
+| Logs de operador / stack traces / CI | synth, bootstrap, deploy | **English** |
+
+Exemplos:
+
+```typescript
+throw new Error('Required context: pass -c env=dev or -c env=prod');
+throw new Error(`Invalid env: ${env}. Expected 'dev' or 'prod'.`);
+```
+
+```yaml
+echo "::error::AWS_ROLE_ARN is empty in GitHub Environment 'prod'."
+```
+
+> Mensagens **voltadas ao usuário final** da API (`ApiError.message`) seguem pt-BR — ver [backend task 01](../../backend/tasks/01-convencoes-globais.md).
+
 | Parâmetro | dev | prod | Origem |
 |-----------|-----|------|--------|
 | `env` | `dev` | `prod` | contexto CDK `-c env=` |

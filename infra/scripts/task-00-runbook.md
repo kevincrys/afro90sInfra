@@ -96,7 +96,7 @@ npm run synth:prod
 O stack `CDKToolkit` (bucket S3 + roles internas do CDK) é criado **automaticamente** na primeira execução dos workflows de deploy ([task 04](../../docs/specs/infra/tasks/04-cicd.md)), via:
 
 ```bash
-npx cdk bootstrap aws://083171867610/us-east-1
+npx cdk bootstrap aws://083171867610/us-east-1 -c env=dev
 ```
 
 Comando idempotente: se já existir, não altera nada.

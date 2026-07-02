@@ -13,7 +13,7 @@ const app = new cdk.App();
 const envName = app.node.tryGetContext('env') as string | undefined;
 
 if (!envName || (envName !== 'dev' && envName !== 'prod')) {
-  throw new Error('Contexto obrigatório: -c env=dev ou -c env=prod');
+  throw new Error('Required context: pass -c env=dev or -c env=prod');
 }
 
 const config = getConfig(envName);
@@ -51,4 +51,6 @@ new FrontendStack(app, stackName(config, 'frontend'), {
   stackName: stackName(config, 'frontend'),
 });
 
-cdk.Aspects.of(app).add(new TaggingAspect(config.env));
+cdk.Aspects.of(app).add(new TaggingAspect(config.env), {
+  priority: cdk.AspectPriority.MUTATING,
+});
