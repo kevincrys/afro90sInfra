@@ -41,6 +41,8 @@ const storageStack = new StorageStack(app, stackName(config, 'storage'), {
 const apiStack = new ApiStack(app, stackName(config, 'api'), {
   ...baseProps,
   stackName: stackName(config, 'api'),
+  productsTable: databaseStack.productsTable,
+  ordersTable: databaseStack.ordersTable,
 });
 apiStack.addDependency(databaseStack);
 apiStack.addDependency(authStack);

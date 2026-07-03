@@ -190,6 +190,18 @@ Billing: **on-demand** (`PAY_PER_REQUEST`) — alinhado ao [ADR-004](../../found
 - Sem credenciais estáticas em código
 - API Gateway → Lambda via resource-based policy automática do CDK
 
+### Role `afro90s-{env}-role-lambda-public` (task 08)
+
+| Permissão | Actions | Resource |
+|-----------|---------|----------|
+| DynamoDB products (read) | `GetItem`, `Query`, `Scan` | tabela + `index/*` |
+| DynamoDB orders (write) | `PutItem` | tabela orders |
+| SSM | `GetParameter` | `/afro90s/{env}/*` |
+| SES | — | *(task 18)* |
+| CloudWatch Logs | via CDK ao criar Lambda | *(task 10)* |
+
+Construct: `lib/constructs/lambda-public-role.ts` · Stack: `ApiStack`
+
 ## Referências
 
 - [ADR-004](../../foundation/adr/004-serverless-architecture.md)

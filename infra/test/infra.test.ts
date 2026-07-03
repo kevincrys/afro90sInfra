@@ -30,6 +30,8 @@ describe('CDK stacks scaffold', () => {
     const apiStack = new ApiStack(app, stackName(devConfig, 'api'), {
       ...baseProps,
       stackName: stackName(devConfig, 'api'),
+      productsTable: databaseStack.productsTable,
+      ordersTable: databaseStack.ordersTable,
     });
     apiStack.addDependency(databaseStack);
     apiStack.addDependency(authStack);
