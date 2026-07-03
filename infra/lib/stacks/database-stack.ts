@@ -3,7 +3,7 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { resourceName } from '../constructs/naming';
-import { Afro90sStackProps } from './stack-props';
+import { Afro90sStackProps, cfnExportName } from './stack-props';
 
 export class DatabaseStack extends cdk.Stack {
   public readonly productsTable: dynamodb.Table;
@@ -64,10 +64,12 @@ export class DatabaseStack extends cdk.Stack {
 
     new cdk.CfnOutput(this, 'ProductsTableName', {
       value: this.productsTable.tableName,
+      exportName: cfnExportName(config, 'ProductsTableName'),
     });
 
     new cdk.CfnOutput(this, 'OrdersTableName', {
       value: this.ordersTable.tableName,
+      exportName: cfnExportName(config, 'OrdersTableName'),
     });
   }
 }

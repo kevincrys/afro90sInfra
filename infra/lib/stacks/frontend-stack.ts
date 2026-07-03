@@ -5,7 +5,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { resourceName } from '../constructs/naming';
-import { Afro90sStackProps } from './stack-props';
+import { Afro90sStackProps, cfnExportName } from './stack-props';
 
 export class FrontendStack extends cdk.Stack {
   public readonly webBucket: s3.Bucket;
@@ -138,10 +138,12 @@ function handler(event) {
 
     new cdk.CfnOutput(this, 'CloudFrontWebUrl', {
       value: cloudFrontWebUrl,
+      exportName: cfnExportName(config, 'CloudFrontWebUrl'),
     });
 
     new cdk.CfnOutput(this, 'AssetsCdnUrl', {
       value: assetsCdnUrl,
+      exportName: cfnExportName(config, 'AssetsCdnUrl'),
     });
   }
 }
