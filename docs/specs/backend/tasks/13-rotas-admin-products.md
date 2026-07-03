@@ -23,8 +23,8 @@ Todas com middleware auth (task 10).
 
 ### `src/services/product.service.ts` (expandir)
 
-- [ ] `createProduct(input, images?)` — gera `id`, `nameLower`, timestamps, upload S3
-- [ ] `updateProduct(id, fields)`
+- [ ] `createProduct(input, images?)` — gera `id`, `nameLower`, timestamps, upload S3; persiste `description`, `options`
+- [ ] `updateProduct(id, fields)` — inclui `description` e `options` (admin only)
 - [ ] `deleteProduct(id)` — remove do DynamoDB + imagens S3
 - [ ] `updateStock(id, quantity)`
 

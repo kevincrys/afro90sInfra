@@ -16,7 +16,7 @@ Implementar envio de e-mail via SES no `POST /orders`. Ativa quando `SES_ENABLED
 | Remetente | `SES_FROM_EMAIL` (SSM) |
 | Assunto | `[Afro90s] Pedido em preparação` |
 | Corpo | HTML via template SES |
-| Variáveis template | `orderId`, `customerName` |
+| Variáveis template | `orderId`, `customerName`, `itemsSummary` (inclui `selectedOption` quando presente) |
 | Falha SES após gravar | `201` + log (sem rollback) |
 | Retry SES | Apenas log CloudWatch |
 
@@ -32,7 +32,7 @@ Implementar envio de e-mail via SES no `POST /orders`. Ativa quando `SES_ENABLED
 - [ ] `sendOrderNotification(order)`:
   - Se `SES_ENABLED !== 'true'`: log e return (comportamento fase 1)
   - `SendTemplatedEmail` com template `afro90s-{env}-ses-new-order`
-  - Template data: `{ orderId, customerName }`
+  - Template data: `{ orderId, customerName, itemsSummary }` — `itemsSummary` lista produto, qty e opção
   - Destino: `ADMIN_EMAIL`
   - Remetente: `SES_FROM_EMAIL`
   - Em falha: log error, não propagar (pedido já gravado)

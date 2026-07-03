@@ -150,6 +150,8 @@ Billing: **on-demand** (`PAY_PER_REQUEST`) — alinhado ao [ADR-004](../../found
 | `price` | Number | |
 | `quantity` | Number | |
 | `photos` | List\<String\> | URLs finais |
+| `description` | String | Texto livre; max 2000 chars; editável via admin |
+| `options` | List\<String\> | Opcional; max 5 variações (ex.: cores) |
 | `category` | String | enum |
 | `createdAt` | String | ISO 8601 |
 | `updatedAt` | String | ISO 8601 |
@@ -164,7 +166,7 @@ Billing: **on-demand** (`PAY_PER_REQUEST`) — alinhado ao [ADR-004](../../found
 |----------|------|-------|
 | PK `id` | String (UUID) | |
 | `status` | String | enum OrderStatus |
-| `items` | List | `{ productId, quantity, unitPrice }` |
+| `items` | List | `{ productId, quantity, unitPrice, selectedOption? }` |
 | `fullPrice` | Number | |
 | `customer` | Map | `{ name, address, postalCode, tel }` |
 | `createdAt` | String | |
