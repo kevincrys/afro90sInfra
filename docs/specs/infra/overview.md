@@ -75,7 +75,9 @@ Definir requisitos de alto nível para a infraestrutura Afro90s antes e durante 
 | 09 | SSM Parameter Store fase 1 | ✅ |
 | 10 | HTTP API + Lambda placeholder + rotas | ✅ |
 | 11 | CfnOutputs + export-outputs.sh | ✅ |
-| 12 | Smoke test + checklist | ✅ (script/CI; aceite manual pós-deploy) |
+| 12 | Smoke test + checklist | ✅ (scripts/CI; aceite manual pós-deploy) |
+
+**Smoke tests:** `infra/scripts/smoke-test-fase1.sh` (infra CI) · `afro90sBackend/scripts/smoke-test-api-fase1.sh` (backend CI)
 
 ## Referências
 
