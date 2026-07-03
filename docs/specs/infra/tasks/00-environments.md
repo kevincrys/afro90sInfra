@@ -46,7 +46,7 @@ Preparar o repositório `afro90sInfra` para desenvolvimento CDK e configurar os 
 
 ### IAM GitHub (CloudFormation)
 
-- [x] Template `infra/iam/github-oidc-roles.template.yaml` (OIDC + 5 roles + policies JSON explícitas)
+- [x] Template `infra/iam/github-oidc-roles.template.yaml` (OIDC + 8 roles + policies JSON explícitas)
 - [x] Runbook `infra/scripts/task-00-runbook.md`
 
 ### AWS — IAM e acesso (console)
@@ -68,7 +68,8 @@ Referência alternativa: template `infra/iam/github-oidc-roles.template.yaml`
 - [x] OIDC provider GitHub (`token.actions.githubusercontent.com`)
 - [x] `afro90s-github-cdk-pr` — CFN read + diff + `sts:GetCallerIdentity`
 - [x] `afro90s-github-cdk-dev` / `-prod` — `AdministratorAccess` (v1)
-- [x] `afro90s-github-backend-dev` / `-prod` — S3 + Lambda (v1)
+- [x] `afro90s-github-backend-dev` / `-prod` — S3 + Lambda + SSM (v1)
+- [ ] `afro90s-github-frontend-pr` / `-dev` / `-prod` — S3 web + CloudFront (ID fixo por env) + SSM (aplicar template com parâmetros `Frontend*CloudFrontDistributionId`)
 
 ### GitHub — afro90sBackend Environments
 

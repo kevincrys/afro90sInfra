@@ -95,11 +95,16 @@ Cada role usa trust policy com `token.actions.githubusercontent.com:sub` restrit
 ### afro90sFrontend
 
 
-| Role                           | Trigger GitHub                                       | Policy (v1)                                                                     |
-| ------------------------------ | ---------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `afro90s-github-frontend-pr`   | `repo:kevincrys/afro90sFrontend:pull_request`        | `sts:GetCallerIdentity`                                                         |
-| `afro90s-github-frontend-dev`  | `repo:kevincrys/afro90sFrontend:ref:refs/heads/dev`  | S3 `PutObject/DeleteObject` no bucket web dev + `cloudfront:CreateInvalidation` |
-| `afro90s-github-frontend-prod` | `repo:kevincrys/afro90sFrontend:ref:refs/heads/main` | Idem para recursos prod                                                         |
+| Role                           | Trigger GitHub (`sub`)                                                                 | Policy (v1)                                                                                    |
+| ------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
+| `afro90s-github-frontend-pr`   | `repo:kevincrys/afro90sFrontend:pull_request`                                        | `sts:GetCallerIdentity`                                                                        |
+| `afro90s-github-frontend-dev`  | `…:environment:dev` **ou** `…:ref:refs/heads/dev`                                    | S3 bucket web **dev** + `CreateInvalidation` na distribuição **dev** + `ssm:GetParameter` dev |
+| `afro90s-github-frontend-prod` | `…:environment:production` **ou** `…:ref:refs/heads/main`                            | Idem recursos **prod** (bucket, distribuição e SSM isolados)                                   |
+
+
+> **CloudFront:** cada role tem ARN fixo `arn:aws:cloudfront::083171867610:distribution/<ID>` — **sem wildcard**. IDs passados como parâmetros `FrontendDevCloudFrontDistributionId` / `FrontendProdCloudFrontDistributionId` no template OIDC (mesmo valor de `CLOUDFRONT_DISTRIBUTION_ID` no GitHub).
+
+> **Build `VITE_*`:** workflow lê SSM após OIDC — não duplicar no GitHub (fase 1). Ver [outputs.md](../specs/infra/outputs.md) § Frontend deploy.
 
 
 
@@ -198,24 +203,24 @@ Nomes das Lambdas: **não** colocar no GitHub. O workflow lê via SSM `/afro90s/
 ### afro90sFrontend
 
 
-| Environment  | Variables                                                              | Protection rules                 |
-| ------------ | ---------------------------------------------------------------------- | -------------------------------- |
-| `dev`        | `AWS_ROLE_ARN` · `S3_BUCKET` · `CLOUDFRONT_DISTRIBUTION_ID` · `VITE_*` | Nenhuma                          |
-| `prod` | Idem com valores prod                                                  | Required reviewers · `main` only |
+| Environment  | Variables                                                                                    | Protection rules                 |
+| ------------ | -------------------------------------------------------------------------------------------- | -------------------------------- |
+| `dev`        | `AWS_ROLE_ARN` · `AWS_REGION` · `S3_BUCKET` · `CLOUDFRONT_DISTRIBUTION_ID`                   | Nenhuma                          |
+| `production` | Idem com valores prod                                                                        | Required reviewers · `main` only |
 
 
-**Repository variables:**
+**Não configurar no GitHub (fase 1):** `VITE_API_BASE_URL`, `VITE_ASSETS_CDN_URL`, `VITE_WHATSAPP_NUMBER` — lidos via SSM no workflow.
 
+**Repository variables:** nenhuma obrigatória (região fica no Environment).
 
-| Nome                   | Valor                                  |
-| ---------------------- | -------------------------------------- |
-| `AWS_REGION`           | `us-east-1`                            |
-| `VITE_API_BASE_URL`    | Output `ApiBaseUrl` da infra (por env) |
-| `VITE_ASSETS_CDN_URL`  | Output `AssetsCdnUrl`                  |
-| `VITE_WHATSAPP_NUMBER` | SSM `/afro90s/{env}/whatsapp-number`   |
+### Setup pós-deploy infra (frontend)
 
-
-> Preferir **Variables** para valores não sensíveis. **Secrets** apenas para tokens que não podem ser variables.
+1. Deploy FrontendStack (task 06) + ApiStack (task 10) em dev/prod
+2. CloudFront console → copiar distribution ID **por ambiente** (dev ≠ prod)
+3. Atualizar stack OIDC com parâmetros `FrontendDevCloudFrontDistributionId` e `FrontendProdCloudFrontDistributionId` (ver [runbook](../../infra/scripts/task-00-runbook.md))
+4. GitHub **`dev`**: `AWS_ROLE_ARN`, `AWS_REGION`, `S3_BUCKET` (`afro90s-dev-s3-web`), `CLOUDFRONT_DISTRIBUTION_ID` (= ID dev)
+5. GitHub **`production`**: mesmas chaves, valores prod
+6. Validar: role dev **não** pode invalidar distribuição prod (ARNs distintos na policy IAM)
 
 ---
 

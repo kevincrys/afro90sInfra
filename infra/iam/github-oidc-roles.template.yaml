@@ -11,6 +11,16 @@ Parameters:
   AwsRegion:
     Type: String
     Default: us-east-1
+  FrontendDevCloudFrontDistributionId:
+    Type: String
+    Description: CloudFront distribution ID (web dev). Mesmo valor de CLOUDFRONT_DISTRIBUTION_ID no GitHub Environment dev do afro90sFrontend.
+    AllowedPattern: '^E[A-Z0-9]+$'
+    ConstraintDescription: ID da distribuição web dev (ex. E1234567890ABC)
+  FrontendProdCloudFrontDistributionId:
+    Type: String
+    Description: CloudFront distribution ID (web prod). Mesmo valor de CLOUDFRONT_DISTRIBUTION_ID no GitHub Environment production do afro90sFrontend.
+    AllowedPattern: '^E[A-Z0-9]+$'
+    ConstraintDescription: ID da distribuição web prod (ex. E9876543210XYZ)
 
 Resources:
   GitHubOidcProvider:
@@ -204,6 +214,122 @@ Resources:
                   - ssm:GetParameter
                 Resource: !Sub arn:aws:ssm:${AwsRegion}:${AwsAccountId}:parameter/afro90s/prod/*
 
+  Afro90sGithubFrontendPrRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: afro90s-github-frontend-pr
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Sub arn:aws:iam::${AwsAccountId}:oidc-provider/token.actions.githubusercontent.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubOrg}/afro90sFrontend:pull_request
+      Policies:
+        - PolicyName: afro90s-frontend-pr-identity
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: STSIdentity
+                Effect: Allow
+                Action: sts:GetCallerIdentity
+                Resource: '*'
+
+  Afro90sGithubFrontendDevRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: afro90s-github-frontend-dev
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Sub arn:aws:iam::${AwsAccountId}:oidc-provider/token.actions.githubusercontent.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub:
+                  - !Sub repo:${GitHubOrg}/afro90sFrontend:environment:dev
+                  - !Sub repo:${GitHubOrg}/afro90sFrontend:ref:refs/heads/dev
+      Policies:
+        - PolicyName: afro90s-frontend-deploy-dev
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: S3ListWebBucket
+                Effect: Allow
+                Action: s3:ListBucket
+                Resource: arn:aws:s3:::afro90s-dev-s3-web
+              - Sid: S3SyncWebObjects
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource: arn:aws:s3:::afro90s-dev-s3-web/*
+              - Sid: CloudFrontInvalidateWebDev
+                Effect: Allow
+                Action: cloudfront:CreateInvalidation
+                Resource: !Sub arn:aws:cloudfront::${AwsAccountId}:distribution/${FrontendDevCloudFrontDistributionId}
+              - Sid: SSMReadViteConfigDev
+                Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                Resource: !Sub arn:aws:ssm:${AwsRegion}:${AwsAccountId}:parameter/afro90s/dev/*
+
+  Afro90sGithubFrontendProdRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: afro90s-github-frontend-prod
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !Sub arn:aws:iam::${AwsAccountId}:oidc-provider/token.actions.githubusercontent.com
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub:
+                  - !Sub repo:${GitHubOrg}/afro90sFrontend:environment:production
+                  - !Sub repo:${GitHubOrg}/afro90sFrontend:ref:refs/heads/main
+      Policies:
+        - PolicyName: afro90s-frontend-deploy-prod
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: S3ListWebBucket
+                Effect: Allow
+                Action: s3:ListBucket
+                Resource: arn:aws:s3:::afro90s-prod-s3-web
+              - Sid: S3SyncWebObjects
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource: arn:aws:s3:::afro90s-prod-s3-web/*
+              - Sid: CloudFrontInvalidateWebProd
+                Effect: Allow
+                Action: cloudfront:CreateInvalidation
+                Resource: !Sub arn:aws:cloudfront::${AwsAccountId}:distribution/${FrontendProdCloudFrontDistributionId}
+              - Sid: SSMReadViteConfigProd
+                Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                  - ssm:GetParameters
+                Resource: !Sub arn:aws:ssm:${AwsRegion}:${AwsAccountId}:parameter/afro90s/prod/*
+
 Outputs:
   CdkPrRoleArn:
     Value: !GetAtt Afro90sGithubCdkPrRole.Arn
@@ -215,5 +341,11 @@ Outputs:
     Value: !GetAtt Afro90sGithubBackendDevRole.Arn
   BackendProdRoleArn:
     Value: !GetAtt Afro90sGithubBackendProdRole.Arn
+  FrontendPrRoleArn:
+    Value: !GetAtt Afro90sGithubFrontendPrRole.Arn
+  FrontendDevRoleArn:
+    Value: !GetAtt Afro90sGithubFrontendDevRole.Arn
+  FrontendProdRoleArn:
+    Value: !GetAtt Afro90sGithubFrontendProdRole.Arn
   OidcProviderArn:
     Value: !GetAtt GitHubOidcProvider.Arn
