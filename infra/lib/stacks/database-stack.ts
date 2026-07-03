@@ -24,12 +24,6 @@ export class DatabaseStack extends cdk.Stack {
     });
 
     this.productsTable.addGlobalSecondaryIndex({
-      indexName: 'gsi-name',
-      partitionKey: { name: 'nameLower', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'id', type: dynamodb.AttributeType.STRING },
-    });
-
-    this.productsTable.addGlobalSecondaryIndex({
       indexName: 'gsi-createdAt',
       partitionKey: { name: 'createdAt', type: dynamodb.AttributeType.STRING },
     });
