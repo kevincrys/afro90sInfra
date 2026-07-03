@@ -12,7 +12,7 @@ Implementar repositórios DynamoDB para `products` e `orders` com queries nos GS
 
 | GSI | Tabela | Uso |
 |-----|--------|-----|
-| `gsi-name` | products | Busca por prefixo de `nameLower` |
+| Atributo `nameLower` | products | Busca por prefixo via Scan na tabela base |
 | `gsi-createdAt` | products | Listagem pública sem filtro de nome |
 | `gsi-status-createdAt` | orders | Listagem admin filtrada por status |
 
@@ -27,8 +27,8 @@ Implementar repositórios DynamoDB para `products` e `orders` com queries nos GS
 
 - [ ] `getById(id)` → `GetItem`
 - [ ] `list({ name?, category?, cursor, limit })`:
-  - Com `name`: Query em `gsi-name` com `begins_with(nameLower, ...)`
-  - Sem `name`: Query em `gsi-createdAt`
+  - Com `name`: Scan na tabela com `begins_with(nameLower, ...)`
+  - Sem `name`: Scan em `gsi-createdAt`
   - Com `category`: FilterExpression em `category`
 - [ ] `create(product)`, `update(id, fields)`, `delete(id)`
 - [ ] `updateStock(id, quantity)` → `UpdateItem` em `quantity`

@@ -27,13 +27,6 @@ describe('DatabaseStack', () => {
       DeletionProtectionEnabled: false,
       GlobalSecondaryIndexes: Match.arrayWith([
         Match.objectLike({
-          IndexName: 'gsi-name',
-          KeySchema: [
-            { AttributeName: 'nameLower', KeyType: 'HASH' },
-            { AttributeName: 'id', KeyType: 'RANGE' },
-          ],
-        }),
-        Match.objectLike({
           IndexName: 'gsi-createdAt',
           KeySchema: [{ AttributeName: 'createdAt', KeyType: 'HASH' }],
         }),
