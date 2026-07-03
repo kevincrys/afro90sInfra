@@ -89,7 +89,7 @@ Nomes das Lambdas: **SSM em runtime** — não configurar no GitHub (ver [output
 
 ## 4. GitHub — afro90sFrontend
 
-Environments **`dev`** e **`production`** com:
+Environments **`dev`** e **`prod`** com:
 
 | Variable | dev |
 |----------|-----|
@@ -98,7 +98,7 @@ Environments **`dev`** e **`production`** com:
 | `S3_BUCKET` | `afro90s-dev-s3-web` |
 | `CLOUDFRONT_DISTRIBUTION_ID` | ID CloudFront web dev (mesmo valor do parâmetro OIDC `FrontendDevCloudFrontDistributionId`) |
 
-(production: valores prod — distribution ID **prod**, bucket `afro90s-prod-s3-web`)
+(prod: valores prod — distribution ID **prod**, bucket `afro90s-prod-s3-web`)
 
 `VITE_*` (fase 1): **SSM em runtime** — não configurar no GitHub. Ver [outputs.md](../../docs/specs/infra/outputs.md) § Frontend deploy.
 

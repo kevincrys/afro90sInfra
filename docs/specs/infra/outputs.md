@@ -49,7 +49,7 @@ Build-time (`VITE_*`) — lidos pelo workflow **via SSM** após OIDC (fase 1):
 | **GitHub Environment** | OIDC + destino do deploy (bucket + distribution ID) |
 | **Workflow** | Lê GitHub vars (deploy) + SSM (build) em runtime |
 
-### GitHub Environment (`dev` / `production`)
+### GitHub Environment (`dev` / `prod`)
 
 Configurar em **Settings → Environments** do repositório `afro90sFrontend`.
 
@@ -69,7 +69,7 @@ Configurar em **Settings → Environments** do repositório `afro90sFrontend`.
 1. CloudFront console (ou stack `afro90s-{env}-stack-frontend` → Resources → `WebDistribution`) → copiar distribution ID **dev** e **prod**
 2. Atualizar stack OIDC com os IDs (ou criar roles manualmente no console)
 3. GitHub Environment **`dev`**: `AWS_ROLE_ARN`, `AWS_REGION`, `S3_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID`
-4. GitHub Environment **`production`**: mesmas chaves, valores prod
+4. GitHub Environment **`prod`**: mesmas chaves, valores prod
 5. `VITE_COGNITO_*`: placeholder até fase 2
 
 ## Variáveis GitHub — Backend deploy (`afro90sBackend`)

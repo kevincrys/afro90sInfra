@@ -15,7 +15,7 @@ Criar workflows GitHub Actions que fazem **build da SPA** e **deploy** no bucket
 | CI | GitHub Actions no repo `kevincrys/afro90sFrontend` |
 | Auth AWS | OIDC — roles IAM abaixo |
 | Deploy dev | Push em `dev` → environment `dev` |
-| Deploy prod | Push em `main` → environment `production` (approval) |
+| Deploy prod | Push em `main` → environment **`prod`** (approval) |
 | Deploy | `aws s3 sync dist/` + `cloudfront:CreateInvalidation` |
 | Build config (`VITE_*` fase 1) | **SSM em runtime** após OIDC |
 | Deploy destino (bucket + CF ID) | **GitHub Environment variables** |
@@ -31,7 +31,7 @@ Template: [`github-oidc-roles.template.yaml`](../../../../infra/iam/github-oidc-
 |----------|-------------|---------------|
 | `afro90s-github-frontend-pr` | CI em PR (opcional) | `repo:kevincrys/afro90sFrontend:pull_request` |
 | **`afro90s-github-frontend-dev`** | **`deploy-dev.yml`** | `…:environment:dev` **ou** `…:ref:refs/heads/dev` |
-| **`afro90s-github-frontend-prod`** | **`deploy-prod.yml`** | `…:environment:production` **ou** `…:ref:refs/heads/main` |
+| **`afro90s-github-frontend-prod`** | **`deploy-prod.yml`** | `…:environment:prod` **ou** `…:ref:refs/heads/main` |
 
 ### Policy das roles dev/prod (mínimo)
 
@@ -70,7 +70,7 @@ Configurar em **Settings → Environments** do repo `afro90sFrontend` (ver [gith
 
 `VITE_COGNITO_*`: placeholder GitHub ou vazio até fase 2.
 
-### Environment `production`
+### Environment `prod`
 
 | Variable | Valor |
 |----------|-------|
@@ -108,8 +108,8 @@ Configurar em **Settings → Environments** do repo `afro90sFrontend` (ver [gith
 ### `.github/workflows/deploy-prod.yml`
 
 - [ ] Trigger: `push` em branch `main`
-- [ ] `environment: production`
-- [ ] Mesmos steps de deploy-dev com `ENV=prod` e variables do environment **production**
+- [ ] `environment: prod`
+- [ ] Mesmos steps de deploy-dev com `ENV=prod` e variables do environment **`prod`**
 
 ### Snippet — carregar SSM + deploy
 
@@ -121,7 +121,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: dev  # ou production
+    environment: dev  # ou prod
     env:
       DEPLOY_ENV: dev   # prod no deploy-prod.yml
     steps:
@@ -155,7 +155,7 @@ jobs:
 - Infra: task 06 (S3 web + CloudFront) deployada em dev/prod
 - Infra: task 10 (SSM `api-base-url`, `whatsapp-number`, etc.)
 - Infra: roles **`afro90s-github-frontend-dev`** e **`afro90s-github-frontend-prod`** no template OIDC (com distribution IDs por ambiente)
-- GitHub Environments `dev` e `production` com 4 variables cada (sem `VITE_*` fase 1)
+- GitHub Environments `dev` e `prod` com 4 variables cada (sem `VITE_*` fase 1)
 
 ## Critérios de conclusão
 

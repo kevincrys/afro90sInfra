@@ -18,7 +18,7 @@ Parameters:
     ConstraintDescription: ID da distribuição web dev (ex. E1234567890ABC)
   FrontendProdCloudFrontDistributionId:
     Type: String
-    Description: CloudFront distribution ID (web prod). Mesmo valor de CLOUDFRONT_DISTRIBUTION_ID no GitHub Environment production do afro90sFrontend.
+    Description: CloudFront distribution ID (web prod). Mesmo valor de CLOUDFRONT_DISTRIBUTION_ID no GitHub Environment prod do afro90sFrontend.
     AllowedPattern: '^E[A-Z0-9]+$'
     ConstraintDescription: ID da distribuição web prod (ex. E9876543210XYZ)
 
@@ -301,7 +301,7 @@ Resources:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
               StringLike:
                 token.actions.githubusercontent.com:sub:
-                  - !Sub repo:${GitHubOrg}/afro90sFrontend:environment:production
+                  - !Sub repo:${GitHubOrg}/afro90sFrontend:environment:prod
                   - !Sub repo:${GitHubOrg}/afro90sFrontend:ref:refs/heads/main
       Policies:
         - PolicyName: afro90s-frontend-deploy-prod

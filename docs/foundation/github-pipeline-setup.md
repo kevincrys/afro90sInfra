@@ -99,8 +99,10 @@ Cada role usa trust policy com `token.actions.githubusercontent.com:sub` restrit
 | ------------------------------ | ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
 | `afro90s-github-frontend-pr`   | `repo:kevincrys/afro90sFrontend:pull_request`                                        | `sts:GetCallerIdentity`                                                                        |
 | `afro90s-github-frontend-dev`  | `…:environment:dev` **ou** `…:ref:refs/heads/dev`                                    | S3 bucket web **dev** + `CreateInvalidation` na distribuição **dev** + `ssm:GetParameter` dev |
-| `afro90s-github-frontend-prod` | `…:environment:production` **ou** `…:ref:refs/heads/main`                            | Idem recursos **prod** (bucket, distribuição e SSM isolados)                                   |
+| `afro90s-github-frontend-prod` | `…:environment:prod` **ou** `…:ref:refs/heads/main`                            | Idem recursos **prod** (bucket, distribuição e SSM isolados)                                   |
 
+
+> **Nome do Environment:** sempre **`prod`** (igual backend e infra) — não usar `production`.
 
 > **CloudFront:** cada role tem ARN fixo `arn:aws:cloudfront::083171867610:distribution/<ID>` — **sem wildcard**. IDs passados como parâmetros `FrontendDevCloudFrontDistributionId` / `FrontendProdCloudFrontDistributionId` no template OIDC (mesmo valor de `CLOUDFRONT_DISTRIBUTION_ID` no GitHub).
 
@@ -206,7 +208,7 @@ Nomes das Lambdas: **não** colocar no GitHub. O workflow lê via SSM `/afro90s/
 | Environment  | Variables                                                                                    | Protection rules                 |
 | ------------ | -------------------------------------------------------------------------------------------- | -------------------------------- |
 | `dev`        | `AWS_ROLE_ARN` · `AWS_REGION` · `S3_BUCKET` · `CLOUDFRONT_DISTRIBUTION_ID`                   | Nenhuma                          |
-| `production` | Idem com valores prod                                                                        | Required reviewers · `main` only |
+| `prod` | Idem com valores prod                                                                        | Required reviewers · `main` only |
 
 
 **Não configurar no GitHub (fase 1):** `VITE_API_BASE_URL`, `VITE_ASSETS_CDN_URL`, `VITE_WHATSAPP_NUMBER` — lidos via SSM no workflow.
@@ -219,7 +221,7 @@ Nomes das Lambdas: **não** colocar no GitHub. O workflow lê via SSM `/afro90s/
 2. CloudFront console → copiar distribution ID **por ambiente** (dev ≠ prod)
 3. Atualizar stack OIDC com parâmetros `FrontendDevCloudFrontDistributionId` e `FrontendProdCloudFrontDistributionId` (ver [runbook](../../infra/scripts/task-00-runbook.md))
 4. GitHub **`dev`**: `AWS_ROLE_ARN`, `AWS_REGION`, `S3_BUCKET` (`afro90s-dev-s3-web`), `CLOUDFRONT_DISTRIBUTION_ID` (= ID dev)
-5. GitHub **`production`**: mesmas chaves, valores prod
+5. GitHub **`prod`**: mesmas chaves, valores prod
 6. Validar: role dev **não** pode invalidar distribuição prod (ARNs distintos na policy IAM)
 
 ---
