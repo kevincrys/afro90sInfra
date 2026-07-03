@@ -49,7 +49,7 @@ Ordem sequencial: ver [tasks/README.md](../infra/tasks/README.md).
 
 | Repo | Dependência |
 |------|-------------|
-| afro90sBackend | Consome outputs (`LAMBDA_FUNCTION_NAME`, `ARTIFACT_BUCKET`); publica código após infra fase 1 |
+| afro90sBackend | GitHub Environment: `ARTIFACT_BUCKET` + OIDC; nomes Lambda via **SSM** no workflow |
 | afro90sFrontend | Infra provisiona S3/CloudFront; frontend consome outputs |
 
 ## Critérios de aceite (fase 0)

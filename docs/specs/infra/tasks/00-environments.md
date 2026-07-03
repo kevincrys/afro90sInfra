@@ -72,7 +72,7 @@ Referência alternativa: template `infra/iam/github-oidc-roles.template.yaml`
 
 ### GitHub — afro90sBackend Environments
 
-- [x] **`dev`**: `AWS_ROLE_ARN`, `AWS_REGION`, `ARTIFACT_BUCKET`, `LAMBDA_FUNCTION_NAME`
+- [x] **`dev`**: `AWS_ROLE_ARN`, `AWS_REGION`, `ARTIFACT_BUCKET` (+ nomes Lambda via SSM/outputs)
 - [x] **`prod`**: idem com valores prod + required reviewers
 
 ### GitHub — Branches e Environments (afro90sInfra)

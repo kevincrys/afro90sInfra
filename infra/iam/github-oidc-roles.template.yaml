@@ -139,12 +139,24 @@ Resources:
                 Action:
                   - s3:PutObject
                   - s3:PutObjectAcl
-                Resource: arn:aws:s3:::afro90s-dev-s3-lambda-artifacts/api/*
+                Resource:
+                  - arn:aws:s3:::afro90s-dev-s3-lambda-artifacts/products-public/*
+                  - arn:aws:s3:::afro90s-dev-s3-lambda-artifacts/orders-public/*
+                  - arn:aws:s3:::afro90s-dev-s3-lambda-artifacts/products-admin/*
+                  - arn:aws:s3:::afro90s-dev-s3-lambda-artifacts/orders-admin/*
               - Effect: Allow
                 Action:
                   - lambda:UpdateFunctionCode
                   - lambda:GetFunction
-                Resource: !Sub arn:aws:lambda:${AwsRegion}:${AwsAccountId}:function:afro90s-dev-lambda-api
+                Resource:
+                  - !Sub arn:aws:lambda:${AwsRegion}:${AwsAccountId}:function:afro90s-dev-lambda-products-public
+                  - !Sub arn:aws:lambda:${AwsRegion}:${AwsAccountId}:function:afro90s-dev-lambda-orders-public
+                  - !Sub arn:aws:lambda:${AwsRegion}:${AwsAccountId}:function:afro90s-dev-lambda-products-admin
+                  - !Sub arn:aws:lambda:${AwsRegion}:${AwsAccountId}:function:afro90s-dev-lambda-orders-admin
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                Resource: !Sub arn:aws:ssm:${AwsRegion}:${AwsAccountId}:parameter/afro90s/dev/*
 
   Afro90sGithubBackendProdRole:
     Type: AWS::IAM::Role
@@ -173,12 +185,24 @@ Resources:
                 Action:
                   - s3:PutObject
                   - s3:PutObjectAcl
-                Resource: arn:aws:s3:::afro90s-prod-s3-lambda-artifacts/api/*
+                Resource:
+                  - arn:aws:s3:::afro90s-prod-s3-lambda-artifacts/products-public/*
+                  - arn:aws:s3:::afro90s-prod-s3-lambda-artifacts/orders-public/*
+                  - arn:aws:s3:::afro90s-prod-s3-lambda-artifacts/products-admin/*
+                  - arn:aws:s3:::afro90s-prod-s3-lambda-artifacts/orders-admin/*
               - Effect: Allow
                 Action:
                   - lambda:UpdateFunctionCode
                   - lambda:GetFunction
-                Resource: !Sub arn:aws:lambda:${AwsRegion}:${AwsAccountId}:function:afro90s-prod-lambda-api
+                Resource:
+                  - !Sub arn:aws:lambda:${AwsRegion}:${AwsAccountId}:function:afro90s-prod-lambda-products-public
+                  - !Sub arn:aws:lambda:${AwsRegion}:${AwsAccountId}:function:afro90s-prod-lambda-orders-public
+                  - !Sub arn:aws:lambda:${AwsRegion}:${AwsAccountId}:function:afro90s-prod-lambda-products-admin
+                  - !Sub arn:aws:lambda:${AwsRegion}:${AwsAccountId}:function:afro90s-prod-lambda-orders-admin
+              - Effect: Allow
+                Action:
+                  - ssm:GetParameter
+                Resource: !Sub arn:aws:ssm:${AwsRegion}:${AwsAccountId}:parameter/afro90s/prod/*
 
 Outputs:
   CdkPrRoleArn:

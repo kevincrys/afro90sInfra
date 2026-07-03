@@ -119,8 +119,12 @@ interface Order {
   customer: Customer;
   createdAt: string;
   updatedAt: string;
+  /** Epoch segundos (TTL DynamoDB). Preenchido ao atingir status terminal. */
+  expiresAt?: number;
 }
 ```
+
+Retenção: ao transicionar para `CONCLUIDO` ou `CANCELADO`, o backend define `expiresAt = floor(now/1000) + 180 * 86400`. Pedidos ativos não recebem `expiresAt`.
 
 ## Tipos auxiliares de resposta
 
