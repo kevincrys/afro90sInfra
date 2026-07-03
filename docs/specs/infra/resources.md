@@ -40,9 +40,13 @@ Helper CDK: `resourceName(config, tipo, nome)` em `infra/lib/constructs/naming.t
 | DynamoDB products | `afro90s-dev-ddb-products` | `afro90s-prod-ddb-products` |
 | DynamoDB orders | `afro90s-dev-ddb-orders` | `afro90s-prod-ddb-orders` |
 | Cognito | `afro90s-dev-cognito-admins` | `afro90s-prod-cognito-admins` |
-| Lambda API | `afro90s-dev-lambda-api` | `afro90s-prod-lambda-api` |
+| Lambda products (public) | `afro90s-dev-lambda-products-public` | `afro90s-prod-lambda-products-public` |
+| Lambda orders (public) | `afro90s-dev-lambda-orders-public` | `afro90s-prod-lambda-orders-public` |
+| Lambda products (admin) | `afro90s-dev-lambda-products-admin` | `afro90s-prod-lambda-products-admin` |
+| Lambda orders (admin) | `afro90s-dev-lambda-orders-admin` | `afro90s-prod-lambda-orders-admin` |
 | API Gateway | `afro90s-dev-apigw-api` | `afro90s-prod-apigw-api` |
-| IAM Lambda pública | `afro90s-dev-role-lambda-public` | `afro90s-prod-role-lambda-public` |
+| IAM Lambda products (public) | `afro90s-dev-role-lambda-products-public` | `afro90s-prod-role-lambda-products-public` |
+| IAM Lambda orders (public) | `afro90s-dev-role-lambda-orders-public` | `afro90s-prod-role-lambda-orders-public` |
 | IAM Lambda admin | `afro90s-dev-role-lambda-admin` | `afro90s-prod-role-lambda-admin` |
 
 Tags obrigatórias em todo recurso (via `TaggingAspect` em `bin/app.ts`): `project=afro90s`, `env`, `managed-by=afro90sInfra`.
@@ -88,7 +92,7 @@ Tags obrigatórias em todo recurso (via `TaggingAspect` em `bin/app.ts`): `proje
 ## S3 — Lambda artifacts (`s3-lambda-artifacts`)
 
 - Bucket **privado** para pacotes zip publicados pelo pipeline **afro90sBackend**
-- Chaves: `api/{git-sha}.zip`, `api/latest.zip`
+- Chaves por fluxo: `{flow}/{git-sha}.zip`, `{flow}/latest.zip` — flows: `products-public`, `orders-public`, `products-admin`, `orders-admin`
 - Versioning habilitado para rollback
 - Lambda lê o pacote via `update-function-code` (S3 → Lambda)
 - Deploy de **código** = backend; deploy de **config** (env, timeout) = CDK
@@ -190,17 +194,26 @@ Billing: **on-demand** (`PAY_PER_REQUEST`) — alinhado ao [ADR-004](../../found
 - Sem credenciais estáticas em código
 - API Gateway → Lambda via resource-based policy automática do CDK
 
-### Role `afro90s-{env}-role-lambda-public` (task 08)
+### Role `afro90s-{env}-role-lambda-products-public` (task 08)
+
+| Permissão | Actions | Resource |
+|-----------|---------|----------|
+| DynamoDB products (read) | `GetItem`, `Query`, `Scan` | tabela + `index/*` |
+| SSM | `GetParameter` | `/afro90s/{env}/*` |
+| SES | — | *(task 18)* |
+| CloudWatch Logs | via CDK ao criar Lambda | *(task 10)* |
+
+### Role `afro90s-{env}-role-lambda-orders-public` (task 08)
 
 | Permissão | Actions | Resource |
 |-----------|---------|----------|
 | DynamoDB products (read) | `GetItem`, `Query`, `Scan` | tabela + `index/*` |
 | DynamoDB orders (write) | `PutItem` | tabela orders |
 | SSM | `GetParameter` | `/afro90s/{env}/*` |
-| SES | — | *(task 18)* |
+| SES | — | *(task 18 — orders-public)* |
 | CloudWatch Logs | via CDK ao criar Lambda | *(task 10)* |
 
-Construct: `lib/constructs/lambda-public-role.ts` · Stack: `ApiStack`
+Construct: `lib/constructs/lambda-products-public-role.ts`, `lambda-orders-public-role.ts`, `lambda-admin-role.ts` · Stack: `ApiStack`
 
 ## Referências
 

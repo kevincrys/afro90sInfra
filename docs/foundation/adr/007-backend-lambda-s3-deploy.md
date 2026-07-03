@@ -22,17 +22,19 @@ Adotar **Opção 2 — S3 + `update-function-code`**:
 ### Fluxo de deploy
 
 1. Merge em `dev` ou `main` no **afro90sBackend**
-2. Workflow `deploy-dev.yml` / `deploy-prod.yml`:
-   - `npm run bundle` → `lambda.zip`
-   - `aws s3 cp` → `s3://afro90s-{env}-s3-lambda-artifacts/api/{sha}.zip` e `api/latest.zip`
-   - `aws lambda update-function-code` apontando para `api/latest.zip`
+2. Workflow `deploy-dev.yml` / `deploy-prod.yml` (por fluxo alterado ou todos):
+   - `npm run bundle:{flow}` → `{flow}.zip`
+   - `aws s3 cp` → `s3://afro90s-{env}-s3-lambda-artifacts/{flow}/{sha}.zip` e `{flow}/latest.zip`
+   - `aws lambda update-function-code` apontando para `{flow}/latest.zip`
 3. CDK **não** redeploya código da Lambda em deploys subsequentes — apenas config (env, timeout, IAM)
+
+Fluxos: `products-public`, `orders-public`, `products-admin`, `orders-admin`.
 
 ### Recursos AWS
 
 - Bucket: `afro90s-{env}-s3-lambda-artifacts` (privado, lifecycle opcional)
 - Lambda inicial: `Code.fromInline` placeholder até primeiro deploy do backend
-- IAM role GitHub backend: `s3:PutObject` no prefixo `api/*` + `lambda:UpdateFunctionCode`
+- IAM role GitHub backend: `s3:PutObject` nos prefixos `{flow}/*` + `lambda:UpdateFunctionCode` + `ssm:GetParameter` em `/afro90s/{env}/*`
 
 ### Custo incremental
 
@@ -59,7 +61,8 @@ Desprezível para o volume do projeto (~centavos/mês): S3 storage mínimo, PUTs
 
 - Dois lugares definem aspectos da Lambda (CDK = config, backend = code)
 - Disciplina: infra não deve usar `NodejsFunction` com source após ADR-007
-- Variáveis GitHub adicionais no backend (`ARTIFACT_BUCKET`, `LAMBDA_FUNCTION_NAME`)
+- Variáveis GitHub no backend: `AWS_ROLE_ARN`, `AWS_REGION`, `ARTIFACT_BUCKET` (copiadas dos outputs CDK)
+- Nomes das funções: lidos via **SSM** no workflow (`/afro90s/{env}/lambda-{flow}-name`) — não duplicar no GitHub
 
 ## Referências
 

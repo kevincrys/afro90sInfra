@@ -171,7 +171,7 @@ Configurar em **Settings → Environments** de cada repositório.
 
 | Environment  | Variables                                                                  | Protection rules                 |
 | ------------ | -------------------------------------------------------------------------- | -------------------------------- |
-| `dev`        | `AWS_ROLE_ARN` · `AWS_REGION` · `ARTIFACT_BUCKET` · `LAMBDA_FUNCTION_NAME` | Nenhuma                          |
+| `dev`        | `AWS_ROLE_ARN` · `AWS_REGION` · `ARTIFACT_BUCKET` | Nenhuma                          |
 | `prod` | Idem (valores prod)                                                        | Required reviewers · `main` only |
 
 
@@ -184,7 +184,16 @@ Configurar em **Settings → Environments** de cada repositório.
 | `NODE_VERSION` | `20`        |
 
 
-Valores de `ARTIFACT_BUCKET` e `LAMBDA_FUNCTION_NAME` vêm dos [outputs CDK](../specs/infra/outputs.md) por ambiente.
+Valores de `ARTIFACT_BUCKET` vêm dos [outputs CDK](../specs/infra/outputs.md) — copiar manualmente para o Environment após deploy infra.
+
+Nomes das Lambdas: **não** colocar no GitHub. O workflow lê via SSM `/afro90s/{env}/lambda-{flow}-name` após OIDC (ver [outputs.md](../specs/infra/outputs.md) § Configuração CI).
+
+### Setup pós-deploy infra (backend)
+
+1. Rodar `export-outputs.sh dev` (ou ler CloudFormation console)
+2. Environment **`dev`**: `AWS_ROLE_ARN`, `AWS_REGION`, `ARTIFACT_BUCKET`
+3. Environment **`prod`**: mesmas variables com valores prod
+4. Validar: role backend tem `ssm:GetParameter` em `/afro90s/{env}/*`
 
 ### afro90sFrontend
 
@@ -296,7 +305,7 @@ Spec: [infra/tasks/04-cicd.md](../specs/infra/tasks/04-cicd.md)
 
 Steps CI: `npm ci` → `npm run build` → `npm run test:coverage` → `npm run lint`
 
-Steps deploy: `npm run bundle` → zip → S3 `api/{sha}.zip` + `api/latest.zip` → `lambda update-function-code`
+Steps deploy (por fluxo): `npm run bundle:{flow}` → zip → S3 `{flow}/{sha}.zip` + `{flow}/latest.zip` → `lambda update-function-code`
 
 Spec: [backend/tasks/00-deploy-api.md](../specs/backend/tasks/00-deploy-api.md)
 

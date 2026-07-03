@@ -74,8 +74,9 @@ Environments `dev` e `prod` com:
 |----------|-----|
 | `AWS_ROLE_ARN` | ARN role `afro90s-github-backend-dev` |
 | `AWS_REGION` | `us-east-1` |
-| `ARTIFACT_BUCKET` | `afro90s-dev-s3-lambda-artifacts` |
-| `LAMBDA_FUNCTION_NAME` | `afro90s-dev-lambda-api` |
+| `ARTIFACT_BUCKET` | Output `LambdaArtifactsBucketName` (copiar 1x para GitHub Environment) |
+
+Nomes das Lambdas: **SSM em runtime** — não configurar no GitHub (ver [outputs.md](../../infra/outputs.md)).
 
 (prod: valores `prod` após task 10)
 

@@ -32,7 +32,12 @@ Criados nas respectivas stacks:
 | `/afro90s/{env}/cloudfront-web-url` | FrontendStack | auto (CF domain) |
 | `/afro90s/{env}/assets-cdn-url` | FrontendStack | auto (CF + `/assets`) |
 | `/afro90s/{env}/api-base-url` | ApiStack *(task 10)* | auto (APIGW URL) |
-| `/afro90s/{env}/whatsapp-number` | ApiStack *(task 10)* | placeholder (preencher) |
+| `/afro90s/{env}/lambda-products-public-name` | ApiStack *(task 10)* | auto |
+| `/afro90s/{env}/lambda-orders-public-name` | ApiStack *(task 10)* | auto |
+| `/afro90s/{env}/lambda-products-admin-name` | ApiStack *(task 10)* | auto |
+| `/afro90s/{env}/lambda-orders-admin-name` | ApiStack *(task 10)* | auto |
+| `/afro90s/{env}/lambda-artifacts-bucket` | ApiStack *(task 10)* | auto |
+| `/afro90s/{env}/whatsapp-number` | ApiStack *(task 10)* | `5521920051220` |
 
 ### Parâmetros adicionados em fases posteriores
 
