@@ -21,7 +21,7 @@ Implementar listagem e atualização de status de pedidos nas rotas `/admin/orde
 ### `src/routes/admin/orders.ts`
 
 - [ ] `GET /admin/orders` — listagem com `status?`, `cursor`, `limit`
-- [ ] `GET /admin/orders/{id}` — detalhe completo com `customer` e `items`
+- [ ] `GET /admin/orders/{id}` — detalhe completo com `customer`, `items` (incl. `selectedOption` por item)
 - [ ] `PUT /admin/orders/{id}` — atualizar status
 
 Todas com middleware auth.

@@ -30,14 +30,47 @@ Documentar valores exportados pelo CDK para consumo pelos repositórios `afro90s
 
 ## Variáveis de ambiente — Frontend (`afro90sFrontend`)
 
-| Variável | Origem | Exemplo |
-|----------|--------|---------|
-| `VITE_API_BASE_URL` | `ApiBaseUrl` | `https://abc123.execute-api.sa-east-1.amazonaws.com/dev` |
-| `VITE_ASSETS_CDN_URL` | `AssetsCdnUrl` | `https://d111111.cloudfront.net` |
-| `VITE_WHATSAPP_NUMBER` | SSM / manual | `5511999999999` |
-| `VITE_COGNITO_USER_POOL_ID` | `CognitoUserPoolId` | `sa-east-1_xxxxx` |
-| `VITE_COGNITO_CLIENT_ID` | `CognitoClientId` | `abcdefgh` |
-| `VITE_COGNITO_REGION` | `CognitoRegion` | `sa-east-1` |
+Build-time (`VITE_*`) — lidos pelo workflow **via SSM** após OIDC (fase 1):
+
+| Variável build | Path SSM |
+|----------------|----------|
+| `VITE_API_BASE_URL` | `/afro90s/{env}/api-base-url` |
+| `VITE_ASSETS_CDN_URL` | `/afro90s/{env}/assets-cdn-url` |
+| `VITE_WHATSAPP_NUMBER` | `/afro90s/{env}/whatsapp-number` |
+| `VITE_COGNITO_*` | Outputs Cognito (fase 2+) — GitHub vars ou placeholder |
+
+## Variáveis GitHub — Frontend deploy (`afro90sFrontend`)
+
+### Onde cada valor vive
+
+| Camada | Papel |
+|--------|--------|
+| **AWS (fonte da verdade)** | CDK cria SSM para `VITE_*`; bucket e CloudFront são recursos fixos por env |
+| **GitHub Environment** | OIDC + destino do deploy (bucket + distribution ID) |
+| **Workflow** | Lê GitHub vars (deploy) + SSM (build) em runtime |
+
+### GitHub Environment (`dev` / `prod`)
+
+Configurar em **Settings → Environments** do repositório `afro90sFrontend`.
+
+| Variable | Origem (AWS) | Exemplo dev | Onde o workflow lê |
+|----------|--------------|-------------|-------------------|
+| `AWS_ROLE_ARN` | IAM (template OIDC) | `arn:aws:iam::083171867610:role/afro90s-github-frontend-dev` | `${{ vars.AWS_ROLE_ARN }}` — **obrigatório** |
+| `AWS_REGION` | fixo | `us-east-1` | `${{ vars.AWS_REGION }}` |
+| `S3_BUCKET` | convenção naming / bucket web CDK | `afro90s-dev-s3-web` | `${{ vars.S3_BUCKET }}` — sync S3 |
+| `CLOUDFRONT_DISTRIBUTION_ID` | CloudFront console ou CF stack frontend → resource `WebDistribution` | `E1234567890ABC` | `${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}` — invalidação |
+
+> **`CLOUDFRONT_DISTRIBUTION_ID` deve ser o mesmo ID** usado no parâmetro `FrontendDevCloudFrontDistributionId` / `FrontendProdCloudFrontDistributionId` do template [`github-oidc-roles.template.yaml`](../../../infra/iam/github-oidc-roles.template.yaml). Cada role só pode invalidar **a distribuição do seu ambiente** — dev nunca compartilha ARN com prod.
+
+> **`VITE_*` (fase 1) não vão no GitHub** — o workflow lê SSM após `configure-aws-credentials`. Role frontend precisa de `ssm:GetParameter` em `/afro90s/{env}/*`.
+
+### Setup inicial (após `cdk deploy` task 06 + 10)
+
+1. CloudFront console (ou stack `afro90s-{env}-stack-frontend` → Resources → `WebDistribution`) → copiar distribution ID **dev** e **prod**
+2. Atualizar stack OIDC com os IDs (ou criar roles manualmente no console)
+3. GitHub Environment **`dev`**: `AWS_ROLE_ARN`, `AWS_REGION`, `S3_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID`
+4. GitHub Environment **`prod`**: mesmas chaves, valores prod
+5. `VITE_COGNITO_*`: placeholder até fase 2
 
 ## Variáveis GitHub — Backend deploy (`afro90sBackend`)
 

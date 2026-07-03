@@ -6,9 +6,10 @@ Termos usados neste repositório e no ecossistema Afro90s.
 |-------|-----------|
 | **Afro90s** | Projeto principal — e-commerce com temática anos 90 para público negro. |
 | **afro90sInfra** | Repositório de infraestrutura (CDK) e documentação central de specs. |
-| **afro90s-api** | Repositório futuro do backend (Lambda handlers). |
-| **afro90s-web** | Repositório futuro do frontend (React SPA). |
-| **Product** | Item do catálogo: nome, preço, estoque, fotos, categoria. |
+| **afro90sBackend** | Repositório da API (Lambda handlers, deploy S3). |
+| **afro90sFrontend** | Repositório da SPA React. |
+| **Product** | Item do catálogo: nome, descrição, preço, estoque, fotos, categoria, opções (variações). |
+| **selectedOption** | Variação escolhida por item no pedido (ex.: cor); snapshot em `OrderItem`. |
 | **Order** | Pedido de compra criado pelo cliente no checkout. |
 | **OrderStatus** | Estado do pedido: `SOLICITADO`, `EM_ATENDIMENTO`, `AGUARDANDO_PAGAMENTO`, `EM_PREPARACAO`, `ENVIADO`, `CONCLUIDO`, `CANCELADO`. |
 | **Category** | Categoria de produto: `oculos`, `acessorios`, `maquiagem`. |
