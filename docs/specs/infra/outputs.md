@@ -58,6 +58,23 @@ Documentar valores exportados pelo CDK para consumo pelos repositórios `afro90s
 
 > Lambdas recebem essas variáveis via CDK `environment` no deploy — não commitar valores em `.env`.
 
+## Parâmetros SSM Parameter Store (fase 1)
+
+Criados via CDK `StringParameter` em `us-east-1`. Paths sob `/afro90s/{env}/`.
+
+| Path | Stack | Disponível desde |
+|------|-------|------------------|
+| `/afro90s/{env}/products-table-name` | DatabaseStack | task 05 |
+| `/afro90s/{env}/orders-table-name` | DatabaseStack | task 05 |
+| `/afro90s/{env}/assets-bucket-name` | StorageStack | task 07 |
+| `/afro90s/{env}/assets-bucket-arn` | StorageStack | task 07 |
+| `/afro90s/{env}/cloudfront-web-url` | FrontendStack | task 06 |
+| `/afro90s/{env}/assets-cdn-url` | FrontendStack | task 06 |
+| `/afro90s/{env}/api-base-url` | ApiStack | task 10 |
+| `/afro90s/{env}/whatsapp-number` | ApiStack | task 10 |
+
+Leitura pela Lambda pública: `ssm:GetParameter` em `/afro90s/{env}/*` (task 08).
+
 ## Convenções
 
 - URLs sem barra final
