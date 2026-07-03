@@ -46,7 +46,7 @@ describe('ApiStack — four flow Lambdas (task 10)', () => {
     ]) {
       template.hasResourceProperties('AWS::Lambda::Function', {
         FunctionName: `afro90s-dev-lambda-${flow}`,
-        Runtime: 'nodejs20.x',
+        Runtime: 'nodejs24.x',
         Handler: 'handler.handler',
         MemorySize: 256,
         Timeout: 29,

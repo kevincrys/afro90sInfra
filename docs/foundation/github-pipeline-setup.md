@@ -188,7 +188,7 @@ Configurar em **Settings → Environments** de cada repositório.
 | Nome           | Valor       |
 | -------------- | ----------- |
 | `AWS_REGION`   | `us-east-1` |
-| `NODE_VERSION` | `20`        |
+| `NODE_VERSION` | `24`        |
 
 
 Valores de `ARTIFACT_BUCKET` vêm dos [outputs CDK](../specs/infra/outputs.md) — copiar manualmente para o Environment após deploy infra.

@@ -283,7 +283,7 @@ export class ApiStack extends cdk.Stack {
     // Placeholder until afro90sBackend publishes {flow}/latest.zip (ADR-007).
     return new lambda.Function(this, id, {
       functionName,
-      runtime: lambda.Runtime.NODEJS_20_X,
+      runtime: lambda.Runtime.NODEJS_24_X,
       handler: 'handler.handler',
       memorySize: 256,
       timeout: cdk.Duration.seconds(29),
