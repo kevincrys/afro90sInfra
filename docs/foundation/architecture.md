@@ -150,6 +150,7 @@ Implementação: GitHub Actions. Ver [github-pipeline-setup.md](github-pipeline-
 | [005](adr/005-admin-auth-v1.md) | Autenticação admin-only v1 | Aceito |
 | [006](adr/006-whatsapp-integration.md) | Integração WhatsApp | Proposto |
 | [007](adr/007-backend-lambda-s3-deploy.md) | Deploy Lambda via S3 (backend) | Aceito |
+| [009](adr/009-products-catalog-gsi-by-name.md) | GSI catálogo ordenado por nome | Proposto |
 
 ## Referências
 
