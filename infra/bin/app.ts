@@ -38,21 +38,23 @@ const storageStack = new StorageStack(app, stackName(config, 'storage'), {
   stackName: stackName(config, 'storage'),
 });
 
-const apiStack = new ApiStack(app, stackName(config, 'api'), {
-  ...baseProps,
-  stackName: stackName(config, 'api'),
-  productsTable: databaseStack.productsTable,
-  ordersTable: databaseStack.ordersTable,
-});
-apiStack.addDependency(databaseStack);
-apiStack.addDependency(authStack);
-apiStack.addDependency(storageStack);
-
 const frontendStack = new FrontendStack(app, stackName(config, 'frontend'), {
   ...baseProps,
   stackName: stackName(config, 'frontend'),
 });
 frontendStack.addDependency(storageStack);
+
+const apiStack = new ApiStack(app, stackName(config, 'api'), {
+  ...baseProps,
+  stackName: stackName(config, 'api'),
+  productsTable: databaseStack.productsTable,
+  ordersTable: databaseStack.ordersTable,
+  assetsBucket: storageStack.assetsBucket,
+});
+apiStack.addDependency(databaseStack);
+apiStack.addDependency(authStack);
+apiStack.addDependency(storageStack);
+apiStack.addDependency(frontendStack);
 
 cdk.Aspects.of(app).add(new TaggingAspect(config.env), {
   priority: cdk.AspectPriority.MUTATING,

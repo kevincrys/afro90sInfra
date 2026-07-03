@@ -4,24 +4,24 @@ import { Construct } from 'constructs';
 import { AppConfig } from '../config';
 import { resourceName } from './naming';
 
-export interface LambdaPublicRoleProps {
+export interface LambdaOrdersPublicRoleProps {
   config: AppConfig;
   productsTable: dynamodb.ITable;
   ordersTable: dynamodb.ITable;
 }
 
-export class LambdaPublicRole extends Construct {
+export class LambdaOrdersPublicRole extends Construct {
   public readonly role: iam.Role;
 
-  constructor(scope: Construct, id: string, props: LambdaPublicRoleProps) {
+  constructor(scope: Construct, id: string, props: LambdaOrdersPublicRoleProps) {
     super(scope, id);
 
     const { config, productsTable, ordersTable } = props;
 
     this.role = new iam.Role(this, 'Role', {
-      roleName: resourceName(config, 'role', 'lambda-public'),
+      roleName: resourceName(config, 'role', 'lambda-orders-public'),
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
-      description: 'Execution role for public API Lambda (products read, orders write)',
+      description: 'Order creation (POST /orders) with products read for validation',
     });
 
     this.role.addToPolicy(
@@ -45,6 +45,10 @@ export class LambdaPublicRole extends Construct {
           `arn:aws:ssm:${config.region}:${config.account}:parameter/afro90s/${config.env}/*`,
         ],
       }),
+    );
+
+    this.role.addManagedPolicy(
+      iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
     );
   }
 }

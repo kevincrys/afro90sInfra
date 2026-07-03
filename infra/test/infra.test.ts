@@ -27,21 +27,24 @@ describe('CDK stacks scaffold', () => {
       ...baseProps,
       stackName: stackName(devConfig, 'storage'),
     });
-    const apiStack = new ApiStack(app, stackName(devConfig, 'api'), {
-      ...baseProps,
-      stackName: stackName(devConfig, 'api'),
-      productsTable: databaseStack.productsTable,
-      ordersTable: databaseStack.ordersTable,
-    });
-    apiStack.addDependency(databaseStack);
-    apiStack.addDependency(authStack);
-    apiStack.addDependency(storageStack);
 
     const frontendStack = new FrontendStack(app, stackName(devConfig, 'frontend'), {
       ...baseProps,
       stackName: stackName(devConfig, 'frontend'),
     });
     frontendStack.addDependency(storageStack);
+
+    const apiStack = new ApiStack(app, stackName(devConfig, 'api'), {
+      ...baseProps,
+      stackName: stackName(devConfig, 'api'),
+      productsTable: databaseStack.productsTable,
+      ordersTable: databaseStack.ordersTable,
+      assetsBucket: storageStack.assetsBucket,
+    });
+    apiStack.addDependency(databaseStack);
+    apiStack.addDependency(authStack);
+    apiStack.addDependency(storageStack);
+    apiStack.addDependency(frontendStack);
 
     for (const stack of [databaseStack, authStack, storageStack, apiStack, frontendStack]) {
       Template.fromStack(stack);
