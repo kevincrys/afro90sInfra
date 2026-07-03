@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import * as apigwv2 from 'aws-cdk-lib/aws-apigatewayv2';
+import * as apigwv2Authorizers from 'aws-cdk-lib/aws-apigatewayv2-authorizers';
 import * as apigwv2Integrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
@@ -39,6 +40,7 @@ export class ApiStack extends cdk.Stack {
   public readonly productsAdminFunction: lambda.Function;
   public readonly ordersAdminFunction: lambda.Function;
   public readonly httpApi: apigwv2.HttpApi;
+  public readonly cognitoAuthorizer: apigwv2Authorizers.HttpJwtAuthorizer;
   public readonly lambdaArtifactsBucket: s3.Bucket;
 
   constructor(scope: Construct, id: string, props: ApiStackProps) {
@@ -169,6 +171,25 @@ export class ApiStack extends cdk.Stack {
         burstLimit: 10,
       },
     });
+
+    const cognitoUserPoolId = ssm.StringParameter.valueForStringParameter(
+      this,
+      `/afro90s/${config.env}/cognito-user-pool-id`,
+    );
+    const cognitoClientId = ssm.StringParameter.valueForStringParameter(
+      this,
+      `/afro90s/${config.env}/cognito-client-id`,
+    );
+    const cognitoIssuer = `https://cognito-idp.${config.region}.amazonaws.com/${cognitoUserPoolId}`;
+
+    // Criado na fase 2; rotas /admin/* aplicam na task 16.
+    this.cognitoAuthorizer = new apigwv2Authorizers.HttpJwtAuthorizer(
+      'CognitoAuthorizer',
+      cognitoIssuer,
+      {
+        jwtAudience: [cognitoClientId],
+      },
+    );
 
     const productsIntegration = new apigwv2Integrations.HttpLambdaIntegration(
       'ProductsPublicIntegration',

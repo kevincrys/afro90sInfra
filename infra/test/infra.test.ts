@@ -46,6 +46,8 @@ describe('CDK stacks scaffold', () => {
     apiStack.addDependency(storageStack);
     apiStack.addDependency(frontendStack);
 
+    expect(apiStack.cognitoAuthorizer).toBeDefined();
+
     for (const stack of [databaseStack, authStack, storageStack, apiStack, frontendStack]) {
       Template.fromStack(stack);
     }

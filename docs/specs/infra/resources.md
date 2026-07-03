@@ -179,10 +179,12 @@ Billing: **on-demand** (`PAY_PER_REQUEST`) — alinhado ao [ADR-004](../../found
 
 ## Cognito
 
-- User Pool: admins apenas
-- `selfSignUpEnabled: false`
-- App client sem secret (SPA admin)
-- Grupos: `admins` (v1 único grupo)
+- User Pool: `afro90s-{env}-cognito-admins` (`AuthStack`)
+- `selfSignUpEnabled: false`, `Mfa.OFF`
+- App client SPA: sem secret, `ALLOW_USER_SRP_AUTH`, `preventUserExistenceErrors`
+- Grupo: `admins` (v1 único grupo)
+- SSM: `/afro90s/{env}/cognito-user-pool-id`, `cognito-client-id`, `cognito-region`
+- JWT authorizer na `ApiStack` (`cognitoAuthorizer`) — rotas `/admin/*` na task 16
 
 ## SES
 

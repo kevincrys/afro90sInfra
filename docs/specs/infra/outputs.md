@@ -37,7 +37,9 @@ Build-time (`VITE_*`) — lidos pelo workflow **via SSM** após OIDC (fase 1):
 | `VITE_API_BASE_URL` | `/afro90s/{env}/api-base-url` |
 | `VITE_ASSETS_CDN_URL` | `/afro90s/{env}/assets-cdn-url` |
 | `VITE_WHATSAPP_NUMBER` | `/afro90s/{env}/whatsapp-number` |
-| `VITE_COGNITO_*` | Outputs Cognito (fase 2+) — GitHub vars ou placeholder |
+| `VITE_COGNITO_USER_POOL_ID` | `/afro90s/{env}/cognito-user-pool-id` |
+| `VITE_COGNITO_CLIENT_ID` | `/afro90s/{env}/cognito-client-id` |
+| `VITE_COGNITO_REGION` | `/afro90s/{env}/cognito-region` |
 
 ## Variáveis GitHub — Frontend deploy (`afro90sFrontend`)
 
@@ -70,7 +72,7 @@ Configurar em **Settings → Environments** do repositório `afro90sFrontend`.
 2. Atualizar stack OIDC com os IDs (ou criar roles manualmente no console)
 3. GitHub Environment **`dev`**: `AWS_ROLE_ARN`, `AWS_REGION`, `S3_BUCKET`, `CLOUDFRONT_DISTRIBUTION_ID`
 4. GitHub Environment **`prod`**: mesmas chaves, valores prod
-5. `VITE_COGNITO_*`: placeholder até fase 2
+5. `VITE_COGNITO_*`: lidos do SSM (task 13) no workflow de deploy
 
 ## Variáveis GitHub — Backend deploy (`afro90sBackend`)
 
@@ -163,6 +165,9 @@ Criados via CDK `StringParameter` em `us-east-1`. Paths sob `/afro90s/{env}/`.
 | `/afro90s/{env}/lambda-orders-admin-name` | ApiStack | task 10 |
 | `/afro90s/{env}/lambda-artifacts-bucket` | ApiStack | task 10 |
 | `/afro90s/{env}/whatsapp-number` | ApiStack | task 10 |
+| `/afro90s/{env}/cognito-user-pool-id` | AuthStack | task 13 |
+| `/afro90s/{env}/cognito-client-id` | AuthStack | task 13 |
+| `/afro90s/{env}/cognito-region` | AuthStack | task 13 |
 
 Leitura pela Lambda pública: `ssm:GetParameter` em `/afro90s/{env}/*` (task 08).
 

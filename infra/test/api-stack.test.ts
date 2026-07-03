@@ -111,5 +111,7 @@ describe('ApiStack — four flow Lambdas (task 10)', () => {
     template.hasOutput('LambdaOrdersPublicFunctionName', {
       Export: { Name: 'afro90s-dev-LambdaOrdersPublicFunctionName' },
     });
+
+    expect(apiStack.cognitoAuthorizer).toBeDefined();
   });
 });

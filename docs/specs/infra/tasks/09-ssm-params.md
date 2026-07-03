@@ -43,8 +43,9 @@ Criados nas respectivas stacks:
 
 | Path | Fase | Task |
 |------|------|------|
-| `/afro90s/{env}/cognito-user-pool-id` | 2 | task 13 |
-| `/afro90s/{env}/cognito-client-id` | 2 | task 13 |
+| `/afro90s/{env}/cognito-user-pool-id` | 2 | task 13 ✅ |
+| `/afro90s/{env}/cognito-client-id` | 2 | task 13 ✅ |
+| `/afro90s/{env}/cognito-region` | 2 | task 13 ✅ |
 | `/afro90s/{env}/ses-from-email` | 4 | task 18 |
 | `/afro90s/{env}/admin-notification-email` | 4 | task 18 |
 
