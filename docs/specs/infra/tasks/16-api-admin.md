@@ -32,7 +32,7 @@ Adicionar as rotas `/admin/*` ao HTTP API com o authorizer Cognito JWT e conecta
 - [x] `PUT /admin/products/{id}/stock` → `lambda-products-admin` + authorizer
 - [x] `GET /admin/orders` → `lambda-orders-admin` + authorizer
 - [x] `GET /admin/orders/{id}` → `lambda-orders-admin` + authorizer
-- [x] `PUT /admin/orders/{id}` → `lambda-orders-admin` + authorizer
+- [x] `PUT /admin/orders/{id}` → `lambda-orders-admin` + authorizer (única mutação; body `{ "status": "..." }`)
 
 ### Lambdas admin (já criadas na task 10)
 
