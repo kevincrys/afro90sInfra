@@ -119,7 +119,7 @@ Tags obrigatórias em todo recurso (via `TaggingAspect` em `bin/app.ts`): `proje
 
 - Stage por ambiente: `dev`, `prod`
 - CORS: `Access-Control-Allow-Origin` = domínio CloudFront frontend
-- Authorizer Cognito JWT nas rotas `/admin/*`
+- Authorizer Cognito JWT nas rotas `/admin/*` (8 rotas, task 16)
 - Mapeamento de rotas: ver [api-routes.md](../backend/api-routes.md)
 - Limite de payload: **10 MB** (relevante para upload base64 de imagens)
 
@@ -184,7 +184,7 @@ Billing: **on-demand** (`PAY_PER_REQUEST`) — alinhado ao [ADR-004](../../found
 - App client SPA: sem secret, `ALLOW_USER_SRP_AUTH`, `preventUserExistenceErrors`
 - Grupo: `admins` (v1 único grupo)
 - SSM: `/afro90s/{env}/cognito-user-pool-id`, `cognito-client-id`, `cognito-region`
-- JWT authorizer na `ApiStack` (`cognitoAuthorizer`) — rotas `/admin/*` na task 16
+- JWT authorizer na `ApiStack` (`cognitoAuthorizer`) — aplicado em todas as rotas `/admin/*`
 
 ## SES
 
@@ -215,6 +215,17 @@ Billing: **on-demand** (`PAY_PER_REQUEST`) — alinhado ao [ADR-004](../../found
 | DynamoDB orders (write) | `PutItem` | tabela orders |
 | SSM | `GetParameter` | `/afro90s/{env}/*` |
 | SES | — | *(task 18 — orders-public)* |
+| CloudWatch Logs | via CDK ao criar Lambda | *(task 10)* |
+
+### Role `afro90s-{env}-role-lambda-admin` (task 15)
+
+| Permissão | Actions | Resource |
+|-----------|---------|----------|
+| DynamoDB products (CRUD) | `GetItem`, `PutItem`, `UpdateItem`, `DeleteItem`, `Query`, `Scan` | tabela + `index/*` |
+| DynamoDB orders (read/update) | `GetItem`, `Query`, `UpdateItem` | tabela + `index/*` |
+| S3 assets (upload) | `PutObject`, `DeleteObject` | `s3-assets/products/*` |
+| SSM | `GetParameter` | `/afro90s/{env}/*` |
+| SES | — | *(task 18)* |
 | CloudWatch Logs | via CDK ao criar Lambda | *(task 10)* |
 
 Construct: `lib/constructs/lambda-products-public-role.ts`, `lambda-orders-public-role.ts`, `lambda-admin-role.ts` · Stack: `ApiStack`

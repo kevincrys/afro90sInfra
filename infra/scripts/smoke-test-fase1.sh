@@ -86,10 +86,12 @@ if [ "${BACKEND_DEPLOYED}" = "1" ]; then
     fi
   fi
 
-  echo -n "GET /admin/products (404 or 403)... "
+  echo -n "GET /admin/products (401 without token)... "
   ADMIN_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$(api_url /admin/products)")
-  if [ "${ADMIN_STATUS}" = "404" ] || [ "${ADMIN_STATUS}" = "403" ]; then
-    echo "OK (${ADMIN_STATUS})"
+  if [ "${ADMIN_STATUS}" = "401" ]; then
+    echo "OK"
+  elif [ "${ADMIN_STATUS}" = "404" ] || [ "${ADMIN_STATUS}" = "403" ]; then
+    echo "WARN (${ADMIN_STATUS} — task 16 admin routes not deployed yet)"
   else
     echo "WARN (${ADMIN_STATUS})"
   fi

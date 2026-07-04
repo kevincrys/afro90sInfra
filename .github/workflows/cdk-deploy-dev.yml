@@ -66,6 +66,9 @@ jobs:
       - name: Smoke test (phase 1)
         run: bash infra/scripts/smoke-test-fase1.sh dev
 
+      - name: Smoke test (phase 2)
+        run: bash infra/scripts/smoke-test-fase2.sh dev
+
       - name: Upload outputs artifact
         uses: actions/upload-artifact@v4
         with:

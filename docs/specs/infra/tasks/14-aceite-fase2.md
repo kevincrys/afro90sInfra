@@ -1,7 +1,7 @@
 # Task 14 — Aceite Fase 2 (Login admin)
 
 **Fase:** 2 — Login admin  
-**Status:** pendente  
+**Status:** concluída  
 **Arquivos alvo:** [`overview.md`](../overview.md)
 
 ## Objetivo
@@ -10,15 +10,20 @@ Validar que o login de admin via Cognito está funcional. As rotas `/admin/*` ai
 
 ## Checklist de aceite
 
-- [ ] `cdk deploy --all -c env=dev` sem erros após adicionar `AuthStack`
-- [ ] User Pool `afro90s-dev-cognito-admins` visível no console Cognito
-- [ ] Usuário admin criado e adicionado ao grupo `admins`
-- [ ] Login funcional: obter token de acesso via Cognito (Postman ou frontend)
-- [ ] Token JWT decodificado contém `cognito:groups: ["admins"]`
-- [ ] `GET /admin/products` com token válido retorna `404` ou `501` (rota ainda não existe, mas **não** `401`)
+- [x] `cdk deploy --all -c env=dev` sem erros após adicionar `AuthStack`
+- [x] User Pool `afro90s-dev-cognito-admins` visível no console Cognito
+- [x] Usuário admin criado e adicionado ao grupo `admins`
+- [x] Login funcional: obter token de acesso via Cognito (Postman ou frontend)
+- [x] Token JWT decodificado contém `cognito:groups: ["admins"]`
+- [x] `GET /admin/products` com token válido retorna `404` ou `501` (rota ainda não existe, mas **não** `401`)
   - Confirmar que o authorizer aceita o token (não rejeita com `401`)
-- [ ] Rotas públicas da fase 1 continuam funcionando (regressão)
-- [ ] Outputs `CognitoUserPoolId` e `CognitoClientId` disponíveis no CloudFormation
+- [x] Rotas públicas da fase 1 continuam funcionando (regressão)
+- [x] Outputs `CognitoUserPoolId` e `CognitoClientId` disponíveis no CloudFormation
+
+### Script `smoke-test-fase2.sh`
+
+- [x] `infra/scripts/smoke-test-fase2.sh` — SSM Cognito + regressão API pública
+- [x] Opcional: `ADMIN_ACCESS_TOKEN=<jwt> bash infra/scripts/smoke-test-fase2.sh dev`
 
 ## Pré-requisitos
 
@@ -26,6 +31,6 @@ Validar que o login de admin via Cognito está funcional. As rotas `/admin/*` ai
 
 ## Critérios de conclusão
 
-- [ ] Todos os itens do checklist marcados
-- [ ] `overview.md` atualizado com status da fase 2
-- [ ] Atualizar **Status** para `concluída` — **fase 2 entregue**
+- [x] Todos os itens do checklist marcados
+- [x] `overview.md` atualizado com status da fase 2
+- [x] **Status** concluída — **fase 2 entregue**

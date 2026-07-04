@@ -90,7 +90,22 @@ describe('ApiStack — four flow Lambdas (task 10)', () => {
       ProtocolType: 'HTTP',
     });
 
-    template.resourceCountIs('AWS::ApiGatewayV2::Route', 3);
+    template.resourceCountIs('AWS::ApiGatewayV2::Route', 11);
+
+    template.hasResourceProperties('AWS::ApiGatewayV2::Route', {
+      RouteKey: 'GET /admin/products',
+      AuthorizationType: 'JWT',
+    });
+
+    template.hasResourceProperties('AWS::ApiGatewayV2::Route', {
+      RouteKey: 'GET /admin/orders',
+      AuthorizationType: 'JWT',
+    });
+
+    template.hasResourceProperties('AWS::ApiGatewayV2::Route', {
+      RouteKey: 'GET /products',
+      AuthorizationType: 'NONE',
+    });
 
     template.hasResourceProperties('AWS::SSM::Parameter', {
       Name: '/afro90s/dev/lambda-products-public-name',

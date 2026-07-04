@@ -182,7 +182,7 @@ export class ApiStack extends cdk.Stack {
     );
     const cognitoIssuer = `https://cognito-idp.${config.region}.amazonaws.com/${cognitoUserPoolId}`;
 
-    // Criado na fase 2; rotas /admin/* aplicam na task 16.
+    // JWT authorizer aplicado em todas as rotas /admin/* (task 16).
     this.cognitoAuthorizer = new apigwv2Authorizers.HttpJwtAuthorizer(
       'CognitoAuthorizer',
       cognitoIssuer,
@@ -203,6 +203,20 @@ export class ApiStack extends cdk.Stack {
       { payloadFormatVersion: apigwv2.PayloadFormatVersion.VERSION_2_0 },
     );
 
+    const productsAdminIntegration = new apigwv2Integrations.HttpLambdaIntegration(
+      'ProductsAdminIntegration',
+      this.productsAdminFunction,
+      { payloadFormatVersion: apigwv2.PayloadFormatVersion.VERSION_2_0 },
+    );
+
+    const ordersAdminIntegration = new apigwv2Integrations.HttpLambdaIntegration(
+      'OrdersAdminIntegration',
+      this.ordersAdminFunction,
+      { payloadFormatVersion: apigwv2.PayloadFormatVersion.VERSION_2_0 },
+    );
+
+    const adminAuthorizer = this.cognitoAuthorizer;
+
     this.httpApi.addRoutes({
       path: '/products',
       methods: [apigwv2.HttpMethod.GET],
@@ -220,6 +234,56 @@ export class ApiStack extends cdk.Stack {
       methods: [apigwv2.HttpMethod.POST],
       integration: ordersIntegration,
     });
+
+    const adminProductRoutes: Array<{
+      id: string;
+      path: string;
+      methods: apigwv2.HttpMethod[];
+    }> = [
+      { id: 'AdminProductsList', path: '/admin/products', methods: [apigwv2.HttpMethod.GET] },
+      { id: 'AdminProductsCreate', path: '/admin/products', methods: [apigwv2.HttpMethod.POST] },
+      {
+        id: 'AdminProductsUpdate',
+        path: '/admin/products/{id}',
+        methods: [apigwv2.HttpMethod.PUT],
+      },
+      {
+        id: 'AdminProductsDelete',
+        path: '/admin/products/{id}',
+        methods: [apigwv2.HttpMethod.DELETE],
+      },
+      {
+        id: 'AdminProductsStock',
+        path: '/admin/products/{id}/stock',
+        methods: [apigwv2.HttpMethod.PUT],
+      },
+    ];
+
+    for (const route of adminProductRoutes) {
+      this.httpApi.addRoutes({
+        path: route.path,
+        methods: route.methods,
+        integration: productsAdminIntegration,
+        authorizer: adminAuthorizer,
+      });
+    }
+
+    const adminOrderRoutes: Array<{
+      path: string;
+      methods: apigwv2.HttpMethod[];
+    }> = [
+      { path: '/admin/orders', methods: [apigwv2.HttpMethod.GET] },
+      { path: '/admin/orders/{id}', methods: [apigwv2.HttpMethod.GET, apigwv2.HttpMethod.PUT] },
+    ];
+
+    for (const route of adminOrderRoutes) {
+      this.httpApi.addRoutes({
+        path: route.path,
+        methods: route.methods,
+        integration: ordersAdminIntegration,
+        authorizer: adminAuthorizer,
+      });
+    }
 
     const apiBaseUrl = this.httpApi.apiEndpoint;
 

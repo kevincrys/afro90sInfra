@@ -77,7 +77,24 @@ Definir requisitos de alto nível para a infraestrutura Afro90s antes e durante 
 | 11 | CfnOutputs + export-outputs.sh | ✅ |
 | 12 | Smoke test + checklist | ✅ (scripts/CI; aceite manual pós-deploy) |
 
-**Smoke tests:** `infra/scripts/smoke-test-fase1.sh` (infra CI) · `afro90sBackend/scripts/smoke-test-api-fase1.sh` (backend CI)
+**Smoke tests:** `infra/scripts/smoke-test-fase1.sh` (infra CI) · `infra/scripts/smoke-test-fase2.sh` (aceite fase 2) · `afro90sBackend/scripts/smoke-test-api-fase1.sh` (backend CI)
+
+### Status fase 2 (2025-06-23)
+
+| Task | Descrição | Código |
+|------|-----------|--------|
+| 13 | Cognito User Pool + JWT authorizer | ✅ |
+| 14 | Aceite login admin + smoke fase 2 | ✅ |
+
+**Resultado:** admin obtém token JWT; rotas `/admin/*` protegidas por authorizer.
+
+### Status fase 3 (2025-06-23)
+
+| Task | Descrição | Código |
+|------|-----------|--------|
+| 15 | IAM role Lambda admin | ✅ |
+| 16 | 8 rotas `/admin/*` + authorizer aplicado | ✅ (backend deploy pendente) |
+| 17 | Aceite CRUD admin | pendente |
 
 ## Referências
 
