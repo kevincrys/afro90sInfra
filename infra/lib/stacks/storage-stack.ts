@@ -21,7 +21,7 @@ export class StorageStack extends cdk.Stack {
       versioned: false,
       removalPolicy: isProd ? cdk.RemovalPolicy.RETAIN : cdk.RemovalPolicy.DESTROY,
       autoDeleteObjects: !isProd,
-      enforceSSL: true,
+      enforceSSL: false,
       lifecycleRules: [
         {
           id: 'AbortIncompleteMultipartUploads',

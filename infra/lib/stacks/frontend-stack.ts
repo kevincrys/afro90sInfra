@@ -16,6 +16,8 @@ export class FrontendStack extends cdk.Stack {
 
     const { config } = props;
     const isProd = config.env === 'prod';
+    const assetsBucketName = resourceName(config, 's3', 'assets');
+    const assetsBucketArn = `arn:aws:s3:::${assetsBucketName}`;
 
     this.webBucket = new s3.Bucket(this, 'WebBucket', {
       bucketName: resourceName(config, 's3', 'web'),
@@ -63,11 +65,7 @@ function handler(event) {
     });
 
     const webOrigin = origins.S3BucketOrigin.withOriginAccessControl(this.webBucket);
-    const assetsBucket = s3.Bucket.fromBucketArn(
-      this,
-      'ImportedAssetsBucket',
-      `arn:aws:s3:::${resourceName(config, 's3', 'assets')}`,
-    );
+    const assetsBucket = s3.Bucket.fromBucketName(this, 'ImportedAssetsBucket', assetsBucketName);
     const assetsOrigin = origins.S3BucketOrigin.withOriginAccessControl(assetsBucket);
 
     const viewerProtocolPolicy = cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS;
@@ -122,6 +120,36 @@ function handler(event) {
           ttl: cdk.Duration.seconds(0),
         },
       ],
+    });
+
+    // Imported bucket: CDK cannot attach OAC policy automatically — set it here (same stack as distribution).
+    new s3.CfnBucketPolicy(this, 'AssetsBucketCloudFrontPolicy', {
+      bucket: assetsBucketName,
+      policyDocument: {
+        Version: '2012-10-17',
+        Statement: [
+          {
+            Sid: 'DenyInsecureTransport',
+            Effect: 'Deny',
+            Principal: { AWS: '*' },
+            Action: 's3:*',
+            Resource: [assetsBucketArn, `${assetsBucketArn}/*`],
+            Condition: { Bool: { 'aws:SecureTransport': 'false' } },
+          },
+          {
+            Sid: 'AllowCloudFrontOACRead',
+            Effect: 'Allow',
+            Principal: { Service: 'cloudfront.amazonaws.com' },
+            Action: 's3:GetObject',
+            Resource: `${assetsBucketArn}/*`,
+            Condition: {
+              StringEquals: {
+                'AWS:SourceArn': this.webDistribution.distributionArn,
+              },
+            },
+          },
+        ],
+      },
     });
 
     const cloudFrontWebUrl = `https://${this.webDistribution.distributionDomainName}`;

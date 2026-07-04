@@ -58,6 +58,19 @@ describe('FrontendStack', () => {
 
     template.resourceCountIs('AWS::CloudFront::Function', 1);
 
+    template.hasResourceProperties('AWS::S3::BucketPolicy', {
+      Bucket: 'afro90s-dev-s3-assets',
+      PolicyDocument: {
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Action: 's3:GetObject',
+            Effect: 'Allow',
+            Principal: { Service: 'cloudfront.amazonaws.com' },
+          }),
+        ]),
+      },
+    });
+
     template.hasResourceProperties('AWS::SSM::Parameter', {
       Name: '/afro90s/dev/cloudfront-web-url',
       Type: 'String',
