@@ -43,7 +43,7 @@ export class LambdaAdminRole extends Construct {
 
     this.role.addToPolicy(
       new iam.PolicyStatement({
-        actions: ['dynamodb:GetItem', 'dynamodb:Query', 'dynamodb:UpdateItem'],
+        actions: ['dynamodb:GetItem', 'dynamodb:Query', 'dynamodb:Scan', 'dynamodb:UpdateItem'],
         resources: [ordersTable.tableArn, `${ordersTable.tableArn}/index/*`],
       }),
     );

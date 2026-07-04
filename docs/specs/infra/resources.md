@@ -222,7 +222,7 @@ Billing: **on-demand** (`PAY_PER_REQUEST`) — alinhado ao [ADR-004](../../found
 | Permissão | Actions | Resource |
 |-----------|---------|----------|
 | DynamoDB products (CRUD) | `GetItem`, `PutItem`, `UpdateItem`, `DeleteItem`, `Query`, `Scan` | tabela + `index/*` |
-| DynamoDB orders (read/update) | `GetItem`, `Query`, `UpdateItem` | tabela + `index/*` |
+| DynamoDB orders (read/update) | `GetItem`, `Query`, `Scan`, `UpdateItem` | tabela + `index/*` |
 | S3 assets (upload) | `PutObject`, `DeleteObject` | `s3-assets/products/*` |
 | SSM | `GetParameter` | `/afro90s/{env}/*` |
 | SES | — | *(task 18)* |
