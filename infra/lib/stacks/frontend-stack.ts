@@ -100,7 +100,8 @@ function handler(event) {
         cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
       },
       additionalBehaviors: {
-        'assets/products/*': {
+        // S3 key: products/{productId}/{uuid}.ext — two segments after /assets/products/
+        'assets/products/*/*': {
           ...assetsBehaviorBase,
           cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
         },

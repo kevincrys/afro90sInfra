@@ -37,7 +37,7 @@ describe('FrontendStack', () => {
         Origins: Match.arrayWith([Match.objectLike({ Id: Match.anyValue() })]),
         CacheBehaviors: Match.arrayWith([
           Match.objectLike({
-            PathPattern: 'assets/products/*',
+            PathPattern: 'assets/products/*/*',
             ViewerProtocolPolicy: 'redirect-to-https',
             AllowedMethods: ['GET', 'HEAD'],
           }),
