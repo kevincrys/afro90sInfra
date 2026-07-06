@@ -1,7 +1,7 @@
 # Modelos de dados — Backend
 
 **Status:** Aprovado  
-**Última atualização:** 2026-07-03
+**Última atualização:** 2026-07-06
 
 ## Objetivo
 
@@ -102,11 +102,21 @@ Limites sugeridos (editáveis):
 ```typescript
 interface OrderItem {
   productId: string;
+  productName?: string;      // snapshot de Product.name; omitido em pedidos legados
   quantity: number;          // inteiro >= 1
   unitPrice: number;         // preço no momento do pedido (snapshot)
   selectedOption?: string;   // variação escolhida (ex.: cor); snapshot; ver regras abaixo
 }
 ```
+
+### Regras — `OrderItem.productName`
+
+| Campo | Regra |
+|-------|-------|
+| Origem | Snapshot de `Product.name` no `POST /orders` |
+| Request | Não enviado pelo cliente (`CreateOrderItem` inalterado) |
+| Validação | 2–120 caracteres (igual `Product.name`) |
+| Legado | Opcional na leitura; pedidos novos sempre preenchidos |
 
 ### Regras — `OrderItem.selectedOption`
 
