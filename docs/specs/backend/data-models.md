@@ -139,12 +139,20 @@ interface Order {
   items: OrderItem[];
   fullPrice: number;
   customer: Customer;
+  customerNameLower?: string;  // interno (filtro de busca admin); não exposto em GET
   createdAt: string;
   updatedAt: string;
   /** Epoch segundos (TTL DynamoDB). Preenchido ao atingir status terminal. */
   expiresAt?: number;
 }
 ```
+
+### Regras — `Order`
+
+| Campo | Regra |
+|-------|-------|
+| `customerNameLower` | Gerado no servidor ao criar pedido: `normalizeNameLower(customer.name)`. Optional para pedidos legados |
+| Leitura admin | `GET /admin/orders*` **não** retorna `customerNameLower` |
 
 Retenção: ao transicionar para `CONCLUIDO` ou `CANCELADO`, o backend define `expiresAt = floor(now/1000) + 180 * 86400`. Pedidos ativos não recebem `expiresAt`.
 

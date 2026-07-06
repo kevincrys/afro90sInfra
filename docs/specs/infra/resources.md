@@ -172,6 +172,7 @@ Billing: **on-demand** (`PAY_PER_REQUEST`) — alinhado ao [ADR-004](../../found
 | `items` | List | `{ productId, quantity, unitPrice, selectedOption? }` |
 | `fullPrice` | Number | |
 | `customer` | Map | `{ name, address, postalCode, tel }` |
+| `customerNameLower` | String | Interno — `normalizeNameLower(customer.name)`; busca admin via `Scan` + `begins_with` (task 20; sem GSI novo) |
 | `createdAt` | String | |
 | `updatedAt` | String | |
 | `expiresAt` | Number | Epoch segundos (TTL); definido ao atingir `CONCLUIDO` ou `CANCELADO` (+180 dias) |
