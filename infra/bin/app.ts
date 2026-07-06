@@ -50,6 +50,7 @@ const apiStack = new ApiStack(app, stackName(config, 'api'), {
   productsTable: databaseStack.productsTable,
   ordersTable: databaseStack.ordersTable,
   assetsBucket: storageStack.assetsBucket,
+  siteCertificate: frontendStack.siteCertificate,
 });
 apiStack.addDependency(databaseStack);
 apiStack.addDependency(authStack);

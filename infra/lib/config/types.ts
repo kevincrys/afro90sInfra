@@ -3,5 +3,7 @@ export interface AppConfig {
   region: string;
   account: string;
   domainName?: string;
+  apiSubdomain?: string;
+  hostedZoneId?: string;
   adminEmail: string;
 }

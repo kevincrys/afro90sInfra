@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { devConfig, prodConfig } from '../lib/config';
+import { prodDomainConfig } from './fixtures/prod-domain-config';
 import { FrontendStack } from '../lib/stacks/frontend-stack';
 import { stackName } from '../lib/stacks/stack-props';
 
@@ -91,6 +92,44 @@ describe('FrontendStack', () => {
       Value: Match.objectLike({
         'Fn::Join': Match.anyValue(),
       }),
+    });
+  });
+
+  test('prod with custom domain: ACM cert, Route53 alias, custom SSM URLs', () => {
+    const app = new cdk.App();
+    const stack = new FrontendStack(app, stackName(prodDomainConfig, 'frontend'), {
+      config: prodDomainConfig,
+      env: envFor(prodDomainConfig),
+      stackName: stackName(prodDomainConfig, 'frontend'),
+    });
+    const template = Template.fromStack(stack);
+
+    template.resourceCountIs('AWS::CertificateManager::Certificate', 1);
+
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: Match.objectLike({
+        Aliases: ['afroo90s.com.br'],
+      }),
+    });
+
+    template.hasResourceProperties('AWS::Route53::RecordSet', {
+      Name: 'afroo90s.com.br.',
+      Type: 'A',
+    });
+
+    template.hasResourceProperties('AWS::SSM::Parameter', {
+      Name: '/afro90s/prod/cloudfront-web-url',
+      Value: 'https://afroo90s.com.br',
+    });
+
+    template.hasResourceProperties('AWS::SSM::Parameter', {
+      Name: '/afro90s/prod/assets-cdn-url',
+      Value: 'https://afroo90s.com.br/assets',
+    });
+
+    template.hasResourceProperties('AWS::SSM::Parameter', {
+      Name: '/afro90s/prod/site-certificate-arn',
+      Type: 'String',
     });
   });
 

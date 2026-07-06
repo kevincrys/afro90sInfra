@@ -1,8 +1,10 @@
 import * as cdk from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { devConfig } from '../lib/config';
+import { prodDomainConfig } from './fixtures/prod-domain-config';
 import { ApiStack } from '../lib/stacks/api-stack';
 import { DatabaseStack } from '../lib/stacks/database-stack';
+import { FrontendStack } from '../lib/stacks/frontend-stack';
 import { StorageStack } from '../lib/stacks/storage-stack';
 import { stackName } from '../lib/stacks/stack-props';
 
@@ -34,6 +36,7 @@ describe('ApiStack — four flow Lambdas (task 10)', () => {
       productsTable: databaseStack.productsTable,
       ordersTable: databaseStack.ordersTable,
       assetsBucket: storageStack.assetsBucket,
+      siteCertificate: undefined,
     });
 
     const template = Template.fromStack(apiStack);
@@ -128,5 +131,74 @@ describe('ApiStack — four flow Lambdas (task 10)', () => {
     });
 
     expect(apiStack.cognitoAuthorizer).toBeDefined();
+  });
+
+  test('prod with custom domain: API domain, mapping, CORS origin, Lambda env', () => {
+    const app = new cdk.App();
+
+    const databaseStack = new DatabaseStack(app, stackName(prodDomainConfig, 'database'), {
+      config: prodDomainConfig,
+      env: envFor(prodDomainConfig),
+      stackName: stackName(prodDomainConfig, 'database'),
+    });
+
+    const storageStack = new StorageStack(app, stackName(prodDomainConfig, 'storage'), {
+      config: prodDomainConfig,
+      env: envFor(prodDomainConfig),
+      stackName: stackName(prodDomainConfig, 'storage'),
+    });
+
+    const frontendStack = new FrontendStack(app, stackName(prodDomainConfig, 'frontend'), {
+      config: prodDomainConfig,
+      env: envFor(prodDomainConfig),
+      stackName: stackName(prodDomainConfig, 'frontend'),
+    });
+    frontendStack.addDependency(storageStack);
+
+    const apiStack = new ApiStack(app, stackName(prodDomainConfig, 'api'), {
+      config: prodDomainConfig,
+      env: envFor(prodDomainConfig),
+      stackName: stackName(prodDomainConfig, 'api'),
+      productsTable: databaseStack.productsTable,
+      ordersTable: databaseStack.ordersTable,
+      assetsBucket: storageStack.assetsBucket,
+      siteCertificate: frontendStack.siteCertificate,
+    });
+    apiStack.addDependency(frontendStack);
+
+    const template = Template.fromStack(apiStack);
+
+    template.hasResourceProperties('AWS::ApiGatewayV2::DomainName', {
+      DomainName: 'api.afroo90s.com.br',
+    });
+
+    template.hasResourceProperties('AWS::ApiGatewayV2::ApiMapping', {
+      Stage: 'prod',
+    });
+
+    template.hasResourceProperties('AWS::Route53::RecordSet', {
+      Name: 'api.afroo90s.com.br.',
+      Type: 'A',
+    });
+
+    template.hasResourceProperties('AWS::ApiGatewayV2::Api', {
+      CorsConfiguration: Match.objectLike({
+        AllowOrigins: ['https://afroo90s.com.br'],
+      }),
+    });
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      FunctionName: 'afro90s-prod-lambda-products-public',
+      Environment: {
+        Variables: Match.objectLike({
+          CLOUDFRONT_WEB_URL: 'https://afroo90s.com.br',
+        }),
+      },
+    });
+
+    template.hasResourceProperties('AWS::SSM::Parameter', {
+      Name: '/afro90s/prod/api-base-url',
+      Value: 'https://api.afroo90s.com.br',
+    });
   });
 });

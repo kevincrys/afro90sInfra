@@ -2,6 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import * as cognito from 'aws-cdk-lib/aws-cognito';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
+import { hasCustomDomain, webOriginUrl } from '../constructs/hosted-zone';
 import { resourceName } from '../constructs/naming';
 import { Afro90sStackProps, cfnExportName } from './stack-props';
 
@@ -14,6 +15,8 @@ export class AuthStack extends cdk.Stack {
 
     const { config } = props;
     const isProd = config.env === 'prod';
+    const customDomain = hasCustomDomain(config);
+    const webUrl = customDomain ? webOriginUrl(config) : undefined;
     const poolName = resourceName(config, 'cognito', 'admins');
 
     this.userPool = new cognito.UserPool(this, 'AdminsUserPool', {
@@ -36,6 +39,12 @@ export class AuthStack extends cdk.Stack {
         userSrp: true,
       },
       preventUserExistenceErrors: true,
+      ...(webUrl
+        ? {
+            callbackUrls: [`${webUrl}/admin`, `${webUrl}/admin/login`],
+            logoutUrls: [`${webUrl}/admin/login`],
+          }
+        : {}),
     });
 
     new ssm.StringParameter(this, 'CognitoUserPoolIdParam', {

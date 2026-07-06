@@ -24,7 +24,7 @@ infra/
 │   │   ├── storage-stack.ts   # S3 assets
 │   │   ├── api-stack.ts       # API Gateway + Lambda
 │   │   └── frontend-stack.ts  # S3 web + CloudFront
-│   └── constructs/            # constructs reutilizáveis
+│   └── constructs/            # constructs reutilizáveis (site-certificate, hosted-zone — task 21)
 ├── test/
 ├── cdk.json
 ├── package.json
@@ -44,13 +44,15 @@ Nomes físicos: `afro90s-{env}-stack-{nome}`
 | FrontendStack | `frontend` | S3 web + CloudFront (task 06) |
 
 ```
-DatabaseStack ──┬──► ApiStack
-AuthStack      ──┤
-StorageStack   ──┘
-FrontendStack (independente — CORS via SSM)
+DatabaseStack ──┬──► ApiStack ◄── siteCertificate (cross-stack ref)
+AuthStack      ──┤         ▲
+StorageStack   ──┼──► FrontendStack (ACM cert + SSM)
+                 └── (ApiStack depends on FrontendStack)
 ```
 
-Ordem de instanciação em `bin/app.ts`: Database → Auth → Storage → Api → Frontend.
+Ordem de instanciação em `bin/app.ts`: Database → Auth → Storage → Frontend → Api.
+
+Deploy CI: `cdk deploy --all -c env=prod` (`cdk-deploy-prod.yml`) — dependências CDK definem a ordem; não é necessário deploy manual por stack.
 
 ## Contexto de ambiente
 
@@ -89,9 +91,11 @@ echo "::error::AWS_ROLE_ARN is empty in GitHub Environment 'prod'."
 | `env` | `dev` | `prod` | contexto CDK `-c env=` |
 | `account` | `083171867610` | `083171867610` | `lib/config/{env}.ts` |
 | `region` | `us-east-1` | `us-east-1` | `lib/config/{env}.ts` |
-| `domainName` | *(opcional)* | *(opcional)* | `lib/config/{env}.ts` — domínio a comprar |
+| `domainName` | *(opcional)* | `afroo90s.com.br` | `lib/config/prod.ts` — task 21 |
+| `apiSubdomain` | *(opcional)* | `api` | `lib/config/prod.ts` — task 21 |
+| `hostedZoneId` | *(opcional)* | Route 53 zone ID | `lib/config/prod.ts` — substituir `REPLACE_WITH_HOSTED_ZONE_ID` antes do deploy |
 | `adminEmail` | *(preencher)* | *(preencher)* | `lib/config/{env}.ts` — SES (fase 4) |
-| `corsAllowedOrigins` | URL CloudFront dev | URL CloudFront prod | SSM / outputs (fase 1) |
+| CORS origin (prod) | URL CloudFront dev | `https://afroo90s.com.br` | ApiStack + Lambda `CLOUDFRONT_WEB_URL` (task 21) |
 
 ## Tags obrigatórias
 

@@ -86,8 +86,9 @@ Tags obrigatórias em todo recurso (via `TaggingAspect` em `bin/app.ts`): `proje
 - Custom errors: `403 → /index.html` (200) para SPA routing; **404 não** é reescrito para `index.html`
 - Behaviors: default + `index.html` → `CACHING_DISABLED`; `assets/*` → `CACHING_OPTIMIZED`
 - Security headers: HSTS + `X-Content-Type-Options`
-- Alias customizado: `config.domainName` quando definido (requer certificado ACM — fase futura)
-- Output / SSM: `CloudFrontWebUrl` (`https://{domain}` sem barra final)
+- Alias customizado: `config.domainName` + certificado ACM wildcard (task 21 — **somente prod**)
+- Route 53 A alias (apex) → CloudFront quando `hostedZoneId` definido
+- Output / SSM: `CloudFrontWebUrl` — prod: `https://afroo90s.com.br`; dev: `https://{cf-domain}`
 
 ## S3 — Lambda artifacts (`s3-lambda-artifacts`)
 
@@ -118,7 +119,9 @@ Tags obrigatórias em todo recurso (via `TaggingAspect` em `bin/app.ts`): `proje
 ## API Gateway (HTTP API)
 
 - Stage por ambiente: `dev`, `prod`
-- CORS: `Access-Control-Allow-Origin` = domínio CloudFront frontend
+- CORS: `Access-Control-Allow-Origin` = URL do frontend (`cloudfront-web-url` em dev; `https://{domainName}` em prod — task 21)
+- Custom domain prod: `api.{domainName}` via `apigwv2.DomainName` + `ApiMapping` (task 21)
+- Lambdas prod: env `CLOUDFRONT_WEB_URL` = `https://{domainName}` (task 21)
 - Authorizer Cognito JWT nas rotas `/admin/*` (8 rotas, task 16)
 - Mapeamento de rotas: ver [api-routes.md](../backend/api-routes.md)
 - Limite de payload: **10 MB** (relevante para upload base64 de imagens)

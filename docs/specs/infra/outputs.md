@@ -156,9 +156,10 @@ Criados via CDK `StringParameter` em `us-east-1`. Paths sob `/afro90s/{env}/`.
 | `/afro90s/{env}/orders-table-name` | DatabaseStack | task 05 |
 | `/afro90s/{env}/assets-bucket-name` | StorageStack | task 07 |
 | `/afro90s/{env}/assets-bucket-arn` | StorageStack | task 07 |
-| `/afro90s/{env}/cloudfront-web-url` | FrontendStack | task 06 |
-| `/afro90s/{env}/assets-cdn-url` | FrontendStack | task 06 |
-| `/afro90s/{env}/api-base-url` | ApiStack | task 10 |
+| `/afro90s/{env}/cloudfront-web-url` | FrontendStack | task 06; prod custom domain task 21 |
+| `/afro90s/{env}/assets-cdn-url` | FrontendStack | task 06; prod custom domain task 21 |
+| `/afro90s/{env}/site-certificate-arn` | FrontendStack | task 21 (prod) — referência; ApiStack usa cross-stack ref |
+| `/afro90s/{env}/api-base-url` | ApiStack | task 10; prod: `https://api.{domain}` (task 21) |
 | `/afro90s/{env}/lambda-products-public-name` | ApiStack | task 10 |
 | `/afro90s/{env}/lambda-orders-public-name` | ApiStack | task 10 |
 | `/afro90s/{env}/lambda-products-admin-name` | ApiStack | task 10 |

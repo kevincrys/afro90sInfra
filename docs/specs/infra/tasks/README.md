@@ -97,12 +97,25 @@ Cada task depende apenas da anterior (`task N` requer `task N-1` concluída), sa
 
 ---
 
+## Fase 5 — Domínio customizado (prod)
+
+> **Entregável:** `afroo90s.com.br` (SPA) + `api.afroo90s.com.br` (API) com CORS e SSM corretos. Dev inalterado.
+
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 21 | [21-dominio-customizado-prod.md](21-dominio-customizado-prod.md) | ACM wildcard, CloudFront alias, API custom domain, CORS, Cognito callbacks |
+
+**✓ Resultado:** frontend e API em domínios customizados; CORS origin `https://afroo90s.com.br`.
+
+---
+
 ## Cadeia de dependências
 
 | Task | Depende de |
 |------|------------|
 | 00 | — |
 | 01–20 | task anterior (`N-1`) |
+| 21 | task 20 |
 
 ## Referências
 

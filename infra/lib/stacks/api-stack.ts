@@ -1,4 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
+import * as acm from 'aws-cdk-lib/aws-certificatemanager';
 import * as apigwv2 from 'aws-cdk-lib/aws-apigatewayv2';
 import * as apigwv2Authorizers from 'aws-cdk-lib/aws-apigatewayv2-authorizers';
 import * as apigwv2Integrations from 'aws-cdk-lib/aws-apigatewayv2-integrations';
@@ -6,12 +7,20 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as logs from 'aws-cdk-lib/aws-logs';
+import * as route53 from 'aws-cdk-lib/aws-route53';
+import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { LambdaAdminRole } from '../constructs/lambda-admin-role';
 import { LambdaOrdersPublicRole } from '../constructs/lambda-orders-public-role';
 import { LambdaProductsPublicRole } from '../constructs/lambda-products-public-role';
+import {
+  apiFqdn,
+  hasCustomDomain,
+  resolveHostedZone,
+  webOriginUrl,
+} from '../constructs/hosted-zone';
 import { AppConfig } from '../config';
 import { resourceName } from '../constructs/naming';
 import { Afro90sStackProps, cfnExportName } from './stack-props';
@@ -20,6 +29,8 @@ export interface ApiStackProps extends Afro90sStackProps {
   productsTable: dynamodb.ITable;
   ordersTable: dynamodb.ITable;
   assetsBucket: s3.IBucket;
+  /** ACM cert from FrontendStack (cross-stack ref; required for API custom domain). */
+  siteCertificate?: acm.ICertificate;
 }
 
 const LAMBDA_FLOWS = [
@@ -46,13 +57,18 @@ export class ApiStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: ApiStackProps) {
     super(scope, id, props);
 
-    const { config, productsTable, ordersTable, assetsBucket } = props;
+    const { config, productsTable, ordersTable, assetsBucket, siteCertificate } = props;
     const isProd = config.env === 'prod';
+    const customDomain = hasCustomDomain(config) && Boolean(config.apiSubdomain);
 
     const cloudFrontWebUrl = ssm.StringParameter.valueForStringParameter(
       this,
       `/afro90s/${config.env}/cloudfront-web-url`,
     );
+    const corsOrigin = customDomain ? webOriginUrl(config) : cloudFrontWebUrl;
+    const lambdaCorsEnv: Record<string, string> = customDomain
+      ? { CLOUDFRONT_WEB_URL: webOriginUrl(config) }
+      : {};
     const assetsCdnUrl = ssm.StringParameter.valueForStringParameter(
       this,
       `/afro90s/${config.env}/assets-cdn-url`,
@@ -102,6 +118,7 @@ export class ApiStack extends cdk.Stack {
       environment: {
         PRODUCTS_TABLE: productsTable.tableName,
         ASSETS_CDN_URL: assetsCdnUrl,
+        ...lambdaCorsEnv,
         ...sesDisabled,
       },
     });
@@ -116,6 +133,7 @@ export class ApiStack extends cdk.Stack {
         PRODUCTS_TABLE: productsTable.tableName,
         ORDERS_TABLE: ordersTable.tableName,
         ASSETS_CDN_URL: assetsCdnUrl,
+        ...lambdaCorsEnv,
         ...sesDisabled,
       },
     });
@@ -125,6 +143,7 @@ export class ApiStack extends cdk.Stack {
       ORDERS_TABLE: ordersTable.tableName,
       ASSETS_BUCKET: assetsBucket.bucketName,
       ASSETS_CDN_URL: assetsCdnUrl,
+      ...lambdaCorsEnv,
       ...sesDisabled,
     };
 
@@ -150,7 +169,7 @@ export class ApiStack extends cdk.Stack {
       apiName: resourceName(config, 'apigw', 'api'),
       createDefaultStage: false,
       corsPreflight: {
-        allowOrigins: [cloudFrontWebUrl],
+        allowOrigins: [corsOrigin],
         allowMethods: [
           apigwv2.CorsHttpMethod.GET,
           apigwv2.CorsHttpMethod.POST,
@@ -162,7 +181,7 @@ export class ApiStack extends cdk.Stack {
       },
     });
 
-    new apigwv2.HttpStage(this, 'ApiStage', {
+    const apiStage = new apigwv2.HttpStage(this, 'ApiStage', {
       httpApi: this.httpApi,
       stageName: config.env,
       autoDeploy: true,
@@ -285,7 +304,37 @@ export class ApiStack extends cdk.Stack {
       });
     }
 
-    const apiBaseUrl = this.httpApi.apiEndpoint;
+    const apiBaseUrl = customDomain
+      ? `https://${apiFqdn(config)}`
+      : this.httpApi.apiEndpoint;
+
+    if (customDomain && siteCertificate) {
+      const hostedZone = resolveHostedZone(this, 'ApiHostedZone', config);
+
+      const apiDomainName = new apigwv2.DomainName(this, 'ApiDomainName', {
+        domainName: apiFqdn(config)!,
+        certificate: siteCertificate,
+      });
+
+      new apigwv2.ApiMapping(this, 'ApiDomainMapping', {
+        api: this.httpApi,
+        domainName: apiDomainName,
+        stage: apiStage,
+      });
+
+      if (hostedZone) {
+        new route53.ARecord(this, 'ApiAliasRecord', {
+          zone: hostedZone,
+          recordName: config.apiSubdomain,
+          target: route53.RecordTarget.fromAlias(
+            new route53Targets.ApiGatewayv2DomainProperties(
+              apiDomainName.regionalDomainName,
+              apiDomainName.regionalHostedZoneId,
+            ),
+          ),
+        });
+      }
+    }
 
     new ssm.StringParameter(this, 'ApiBaseUrlParam', {
       parameterName: `/afro90s/${config.env}/api-base-url`,
