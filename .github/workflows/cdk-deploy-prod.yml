@@ -7,6 +7,7 @@ on:
     paths:
       - 'infra/**'
       - '.github/workflows/cdk-deploy-prod.yml'
+      - '.github/workflows/cdk-validate-reusable.yml'
   workflow_dispatch:
 
 permissions:
@@ -17,8 +18,16 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
+  validate:
+    environment: prod
+    uses: ./.github/workflows/cdk-validate-reusable.yml
+    with:
+      aws_role_arn: ${{ vars.AWS_ROLE_ARN }}
+      upload_artifact: false
+
   deploy:
     name: cdk-deploy-prod
+    needs: validate
     runs-on: ubuntu-latest
     environment: prod
 

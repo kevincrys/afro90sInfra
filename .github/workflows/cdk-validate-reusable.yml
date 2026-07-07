@@ -1,0 +1,73 @@
+name: CDK validate (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      aws_role_arn:
+        required: true
+        type: string
+      upload_artifact:
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  validate:
+    name: cdk-validate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate AWS role ARN
+        run: |
+          if [ -z "${{ inputs.aws_role_arn }}" ]; then
+            echo "::error::AWS role ARN is empty."
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: infra/package-lock.json
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ inputs.aws_role_arn }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Synth (dev)
+        run: npm run synth:dev
+
+      - name: Diff (dev)
+        run: npm run diff:dev
+        continue-on-error: true
+
+      - name: Upload cdk.out artifact
+        if: inputs.upload_artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cdk-out-dev
+          path: infra/cdk.out/
+          if-no-files-found: error
+          retention-days: 7
