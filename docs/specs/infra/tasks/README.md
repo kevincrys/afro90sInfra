@@ -119,6 +119,7 @@ Cada task depende apenas da anterior (`task N` requer `task N-1` concluída), sa
 
 ## Referências
 
+- [Plano BDD — testes manuais em produção](../plano-bdd-testes-manuais-prod.md)
 - [Specs CDK](../cdk.md)
 - [Recursos AWS](../resources.md)
 - [Outputs](../outputs.md)

@@ -49,6 +49,12 @@ echo ""
 echo "=== Smoke test completo OK ==="
 ```
 
+## Testes manuais BDD (produção)
+
+Checklist Gherkin completo para go/no-go de lançamento (segurança, loja, admin, integrações):
+
+- [plano-bdd-testes-manuais-prod.md](../plano-bdd-testes-manuais-prod.md)
+
 ## Checklist de aceite final
 
 ### Fase 4 — SES
