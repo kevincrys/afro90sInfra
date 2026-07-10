@@ -39,6 +39,7 @@ jobs:
         run: |
           if [ -z "${{ inputs.aws_role_arn }}" ]; then
             echo "::error::AWS role ARN is empty."
+            echo "If AWS_ROLE_ARN is an Environment variable, the caller job must set environment: dev (or prod)."
             exit 1
           fi
 

@@ -19,6 +19,7 @@ env:
 
 jobs:
   validate:
+    environment: prod
     uses: ./.github/workflows/cdk-validate-reusable.yml
     secrets: inherit
     with:
