@@ -20,9 +20,10 @@ env:
 jobs:
   validate:
     uses: ./.github/workflows/cdk-validate-reusable.yml
+    secrets: inherit
     with:
       aws_role_arn: ${{ vars.AWS_ROLE_ARN }}
-      environment: prod
+      deployment_environment: prod
       upload_artifact: false
 
   deploy:

@@ -6,7 +6,7 @@ on:
       aws_role_arn:
         required: true
         type: string
-      environment:
+      deployment_environment:
         required: false
         type: string
         default: ''
@@ -26,7 +26,7 @@ jobs:
   validate:
     name: cdk-validate
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment }}
+    environment: ${{ inputs.deployment_environment }}
     defaults:
       run:
         working-directory: infra
