@@ -18,18 +18,34 @@ env:
   AWS_REGION: us-east-1
 
 jobs:
-  validate:
+  resolve-config:
+    name: resolve-dev-config
+    runs-on: ubuntu-latest
     environment: dev
+    outputs:
+      aws_role_arn: ${{ steps.vars.outputs.aws_role_arn }}
+    steps:
+      - id: vars
+        run: |
+          if [ -z "${{ vars.AWS_ROLE_ARN }}" ]; then
+            echo "::error::AWS_ROLE_ARN is empty in GitHub Environment 'dev'."
+            echo "GitHub → Settings → Environments → dev → Environment variables"
+            exit 1
+          fi
+          echo "aws_role_arn=${{ vars.AWS_ROLE_ARN }}" >> "$GITHUB_OUTPUT"
+
+  validate:
+    needs: resolve-config
     uses: ./.github/workflows/cdk-validate-reusable.yml
     secrets: inherit
     with:
-      aws_role_arn: ${{ vars.AWS_ROLE_ARN }}
+      aws_role_arn: ${{ needs.resolve-config.outputs.aws_role_arn }}
       deployment_environment: dev
       upload_artifact: false
 
   deploy:
     name: cdk-deploy-dev
-    needs: validate
+    needs: [resolve-config, validate]
     runs-on: ubuntu-latest
     environment: dev
 
