@@ -1,7 +1,7 @@
 # Plano BDD — Testes manuais em produção (pré-lançamento)
 
 **Status:** Aprovado  
-**Última atualização:** 2026-07-10  
+**Última atualização:** 2026-07-09  
 **Escopo:** Afro90s v1 — loja pública + painel admin  
 **Ambiente:** Produção (`{FRONTEND}` + `{API}`)  
 **Formato:** Gherkin (Dado / Quando / Então)  
@@ -775,129 +775,21 @@ curl -s -o /dev/null -w "%{http_code}" "{API}/admin/orders?limit=1" \
 
 | # | Critério | P | Status |
 |---|----------|---|--------|
-| 1 | Nenhuma rota `/admin/*` acessível sem JWT válido + grupo `admins` (API + bypass frontend/DevTools) | P0 | ☐ |
-| 2 | Payloads de injeção na API **pública** (`name`, `category`, paginação) não causam 500 nem vazamento | P0 | ☐ |
-| 3 | Não existe listagem pública de pedidos; IDOR em `/admin/orders/*` sem auth → 401 | P0 | ☐ |
-| 4 | API pública e resposta admin **não** expõem `customerNameLower` (PII do cliente no admin é esperado) | P0 | ☐ |
-| 5 | Preço sempre calculado no servidor; estoque insuficiente → 409; produto inexistente → 404 | P0 | ☐ |
-| 6 | Checkout completo + pedido visível no admin | P0 | ☐ |
-| 7 | Busca admin por UUID, prefixo de ID, nome e modo idOrName funciona | P0 | ☐ |
-| 8 | Robustez de busca admin (produtos + pedidos): especiais/Unicode/payloads → 200/400, nunca 500 | P0 | ☐ |
-| 9 | Transições de status respeitam regras (fluxo completo + transição inválida) | P0 | ☐ |
-| 10 | CRUD produto + upload de imagem via CDN | P0 | ☐ |
-| 11 | Login / logout / sessão expirada admin | P0 | ☐ |
-| 12 | Smoke pós-deploy (health, CDN, SPA routing) | P0 | ☐ |
-| 13 | Responsivo mobile loja + admin | P1 | ☐ |
-| 14 | CORS restrito e erros sem stack trace | P1 | ☐ |
-| 15 | WhatsApp e e-mail (se habilitados) | P1 | ☐ |
-| 16 | Paginação com busca ativa (`q` + cursor); gap cursor/`q` trocado documentado | P1 | ☐ |
+| 1 | Nenhuma rota `/admin/*` acessível sem JWT válido + grupo `admins` | P0 | ☐ |
+| 2 | Payloads de injeção na API **pública** não causam 500 nem vazamento | P0 | ☐ |
+| 3 | Não existe listagem pública de pedidos | P0 | ☐ |
+| 4 | Preço sempre calculado no servidor | P0 | ☐ |
+| 5 | Checkout completo + pedido visível no admin | P0 | ☐ |
+| 6 | Busca admin por ID, nome e UUID funciona | P0 | ☐ |
+| 7 | Transições de status respeitam regras | P0 | ☐ |
+| 8 | CRUD produto + imagem CDN | P0 | ☐ |
+| 9 | Login/logout admin | P0 | ☐ |
+| 10 | Responsivo mobile loja + admin | P1 | ☐ |
+| 11 | CORS e erros sem stack trace | P1 | ☐ |
+| 12 | WhatsApp e e-mail (se habilitados) | P1 | ☐ |
 
 **Go:** todos P0 aprovados, zero falhas de segurança abertas.  
-**No-go:** qualquer P0 falhou, especialmente acesso admin indevido, vazamento na superfície pública ou injeção com erro 500.
-
----
-
-## Checklist de cenários (execução)
-
-Marcar cada cenário após executar. IDs alinhados ao registro abaixo.
-
-### SEG — Segurança e injeção (P0 / P1)
-
-| ID | Cenário | P | Status |
-|----|---------|---|--------|
-| SEG-01 | Busca de produtos com payload SQL/XSS/path traversal (`name`) | P0 | ☐ |
-| SEG-02 | Filtro de categoria com payload malicioso | P0 | ☐ |
-| SEG-03 | Parâmetros de paginação inválidos na API pública | P0 | ☐ |
-| SEG-04 | Rotas admin sem autenticação → 401 | P0 | ☐ |
-| SEG-05 | Token JWT inválido ou expirado → 401 | P0 | ☐ |
-| SEG-06 | Usuário Cognito sem grupo `admins` → 401 | P0 | ☐ |
-| SEG-07 | Bypass via frontend (`/admin` sem sessão → login) | P0 | ☐ |
-| SEG-08 | Bypass via DevTools (token forjado → 401) | P0 | ☐ |
-| SEG-09 | Pedidos não listáveis publicamente (`GET /orders`) | P0 | ☐ |
-| SEG-10 | Dados internos ausentes na API pública | P0 | ☐ |
-| SEG-11 | IDOR admin sem auth (`/admin/orders/{id}`) → 401 | P0 | ☐ |
-| SEG-12 | Resposta admin não expõe `customerNameLower` (PII do cliente presente) | P0 | ☐ |
-| SEG-13 | Cliente não define preço no checkout | P0 | ☐ |
-| SEG-14 | Quantidade acima do estoque → 409 | P0 | ☐ |
-| SEG-15 | Produto inexistente no pedido → 404 | P0 | ☐ |
-| SEG-16 | CORS restrito à origem do site | P1 | ☐ |
-| SEG-17 | Respostas de erro não vazam stack | P1 | ☐ |
-
-### LOJA — Loja pública (P0)
-
-| ID | Cenário | P | Status |
-|----|---------|---|--------|
-| LOJA-01 | Home carrega produtos | P0 | ☐ |
-| LOJA-02 | Filtro por categoria (válida + `hack` → 400) | P0 | ☐ |
-| LOJA-03 | Busca por nome na loja | P0 | ☐ |
-| LOJA-04 | Paginação "carregar mais" | P0 | ☐ |
-| LOJA-05 | Deep link de produto (existente + 404) | P0 | ☐ |
-| LOJA-06 | Adicionar ao carrinho | P0 | ☐ |
-| LOJA-07 | Produto com opções obrigatórias (`INVALID_OPTION`) | P0 | ☐ |
-| LOJA-08 | Checkout com dados válidos + WhatsApp | P0 | ☐ |
-| LOJA-09 | Validação de campos do cliente | P0 | ☐ |
-
-### AUTH — Autenticação admin (P0)
-
-| ID | Cenário | P | Status |
-|----|---------|---|--------|
-| AUTH-01 | Login com credenciais válidas | P0 | ☐ |
-| AUTH-02 | Login com credenciais inválidas | P0 | ☐ |
-| AUTH-03 | Logout | P0 | ☐ |
-| AUTH-04 | Sessão expirada | P0 | ☐ |
-
-### PROD — Admin produtos (P0 / P1)
-
-| ID | Cenário | P | Status |
-|----|---------|---|--------|
-| PROD-01 | Listar produtos admin + filtro por nome | P0 | ☐ |
-| PROD-02 | Busca de produtos com caracteres especiais (robustez) | P0 | ☐ |
-| PROD-03 | Criar produto (JSON) | P0 | ☐ |
-| PROD-04 | Upload de imagem (válido + rejeição >5 MB/PDF) | P0 | ☐ |
-| PROD-05 | Editar produto | P0 | ☐ |
-| PROD-06 | Ajuste de estoque (delta + / − / insuficiente) | P0 | ☐ |
-| PROD-07 | Excluir produto | P0 | ☐ |
-
-### PED — Admin pedidos (P0)
-
-| ID | Cenário | P | Status |
-|----|---------|---|--------|
-| PED-01 | Listar pedidos por status | P0 | ☐ |
-| PED-02 | Busca por UUID completo | P0 | ☐ |
-| PED-03 | Busca por prefixo de ID | P0 | ☐ |
-| PED-04 | Busca por nome do cliente | P0 | ☐ |
-| PED-05 | Busca com menos de 2 caracteres → 400 | P0 | ☐ |
-| PED-06 | Modo idOrName (hex sem dígitos, ex.: `dead`) | P0 | ☐ |
-| PED-07 | Paginação com busca ativa (`q` + cursor; gap `q` trocado) | P0 | ☐ |
-| PED-08 | Busca com caracteres especiais, Unicode e payloads (robustez) | P0 | ☐ |
-| PED-09 | Busca com string extremamente longa (5001 chars) | P0 | ☐ |
-| PED-10 | Pedido inexistente → 404 | P0 | ☐ |
-| PED-11 | Atualização de status válida + transição inválida | P0 | ☐ |
-| PED-12 | Fluxo completo de status até terminal (+ CANCELADO) | P0 | ☐ |
-
-### INT — Integrações (P1)
-
-| ID | Cenário | P | Status |
-|----|---------|---|--------|
-| INT-01 | Notificação de novo pedido (e-mail SES) | P1 | ☐ |
-| INT-02 | WhatsApp pós-checkout | P1 | ☐ |
-
-### UX — UX / responsividade (P1 / P2)
-
-| ID | Cenário | P | Status |
-|----|---------|---|--------|
-| UX-01 | Mobile 375px — loja | P1 | ☐ |
-| UX-02 | Mobile — admin | P1 | ☐ |
-| UX-03 | Desktop 1280px (4 colunas) | P2 | ☐ |
-| UX-04 | Estados de loading e erro (offline) | P1 | ☐ |
-
-### INFRA — Smoke pós-deploy (P0)
-
-| ID | Cenário | P | Status |
-|----|---------|---|--------|
-| INFRA-01 | Health check mínimo pós-lançamento | P0 | ☐ |
-| INFRA-02 | Assets e CDN | P0 | ☐ |
-| INFRA-03 | SPA routing (reload produto + admin) | P0 | ☐ |
+**No-go:** qualquer P0 falhou, especialmente acesso admin indevido, vazamento de PII ou injeção com erro 500.
 
 ---
 
@@ -905,64 +797,14 @@ Marcar cada cenário após executar. IDs alinhados ao registro abaixo.
 
 | ID | Cenário | Executado em | Tester | Resultado | Evidência | Bug |
 |----|---------|--------------|--------|-----------|-----------|-----|
-| SEG-01 | Payload SQL/XSS em `name` (API pública) | | | PASS/FAIL | | |
-| SEG-02 | Categoria maliciosa | | | | | |
-| SEG-03 | Paginação inválida (pública) | | | | | |
-| SEG-04 | Admin sem token | | | | | |
-| SEG-05 | Token inválido/expirado | | | | | |
-| SEG-06 | Usuário sem grupo `admins` | | | | | |
-| SEG-07 | Bypass frontend `/admin` | | | | | |
-| SEG-08 | Token forjado (DevTools) | | | | | |
-| SEG-09 | Pedidos não públicos | | | | | |
-| SEG-10 | Sem dados internos na API pública | | | | | |
-| SEG-11 | IDOR admin sem auth | | | | | |
-| SEG-12 | Sem `customerNameLower` na resposta admin | | | | | |
-| SEG-13 | Preço no servidor | | | | | |
-| SEG-14 | Estoque insuficiente | | | | | |
-| SEG-15 | Produto inexistente no pedido | | | | | |
-| SEG-16 | CORS | | | | | |
-| SEG-17 | Erros sem stack | | | | | |
-| LOJA-01 | Home | | | | | |
-| LOJA-02 | Filtro categoria | | | | | |
-| LOJA-03 | Busca nome | | | | | |
-| LOJA-04 | Carregar mais | | | | | |
-| LOJA-05 | Deep link | | | | | |
-| LOJA-06 | Carrinho | | | | | |
-| LOJA-07 | Opções obrigatórias | | | | | |
-| LOJA-08 | Checkout completo | | | | | |
-| LOJA-09 | Validação customer | | | | | |
-| AUTH-01 | Login válido | | | | | |
-| AUTH-02 | Login inválido | | | | | |
-| AUTH-03 | Logout | | | | | |
-| AUTH-04 | Sessão expirada | | | | | |
-| PROD-01 | Listar + filtro | | | | | |
-| PROD-02 | Busca robustez (produtos) | | | | | |
-| PROD-03 | Criar produto | | | | | |
-| PROD-04 | Upload imagem | | | | | |
-| PROD-05 | Editar produto | | | | | |
-| PROD-06 | Ajuste estoque | | | | | |
-| PROD-07 | Excluir produto | | | | | |
-| PED-01 | Filtro status | | | | | |
-| PED-02 | Busca UUID | | | | | |
-| PED-03 | Busca prefixo ID | | | | | |
-| PED-04 | Busca nome cliente | | | | | |
-| PED-05 | `q` < 2 chars | | | | | |
-| PED-06 | Modo idOrName | | | | | |
-| PED-07 | Paginação + `q` / gap cursor | | | | | |
-| PED-08 | Busca robustez (pedidos) | | | | | |
-| PED-09 | String 5001 chars | | | | | |
-| PED-10 | Pedido 404 | | | | | |
-| PED-11 | Status válida/inválida | | | | | |
-| PED-12 | Fluxo status completo | | | | | |
-| INT-01 | E-mail SES | | | | | |
-| INT-02 | WhatsApp | | | | | |
-| UX-01 | Mobile loja | | | | | |
-| UX-02 | Mobile admin | | | | | |
-| UX-03 | Desktop 1280 | | | | | |
-| UX-04 | Loading/erro offline | | | | | |
-| INFRA-01 | Smoke health | | | | | |
-| INFRA-02 | CDN | | | | | |
-| INFRA-03 | SPA routing | | | | | |
+| SEG-01 | SQL payload em name | | | PASS/FAIL | screenshot | |
+| SEG-02 | Admin sem token | | | | | |
+| SEG-03 | Pedidos não públicos | | | | | |
+| LOJA-01 | Checkout completo | | | | | |
+| AUTH-01 | Login admin | | | | | |
+| PROD-01 | CRUD produto | | | | | |
+| PED-01 | Busca por nome/ID | | | | | |
+| INFRA-01 | Smoke pós-deploy | | | | | |
 
 ---
 
