@@ -15,6 +15,8 @@ Implementar `AuthStack` com o User Pool Cognito e configurar o authorizer JWT no
 | Self sign-up | Desativado |
 | MFA | Não (fora de escopo v1) |
 | App client | Sem secret (SPA), fluxo SRP |
+| Access / ID token | 1 hora |
+| Refresh token | 1 dia (padrão Cognito era 30 dias) |
 | Criação de admins | Console AWS manualmente |
 | Grupo | `admins` (único) |
 | Hosted UI | Não necessário na v1 |
@@ -36,6 +38,8 @@ Implementar `AuthStack` com o User Pool Cognito e configurar o authorizer JWT no
   - `generateSecret: false`
   - `authFlows: { userSrp: true }`
   - `preventUserExistenceErrors: true`
+  - `accessTokenValidity` / `idTokenValidity`: 1h
+  - `refreshTokenValidity`: 1 dia
 
 ### Authorizer JWT no HTTP API
 

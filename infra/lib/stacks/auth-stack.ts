@@ -39,6 +39,9 @@ export class AuthStack extends cdk.Stack {
         userSrp: true,
       },
       preventUserExistenceErrors: true,
+      accessTokenValidity: cdk.Duration.hours(1),
+      idTokenValidity: cdk.Duration.hours(1),
+      refreshTokenValidity: cdk.Duration.days(1),
       ...(webUrl
         ? {
             callbackUrls: [`${webUrl}/admin`, `${webUrl}/admin/login`],

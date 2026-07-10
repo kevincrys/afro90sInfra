@@ -32,6 +32,14 @@ describe('AuthStack — Cognito admins (task 13)', () => {
       GenerateSecret: false,
       PreventUserExistenceErrors: 'ENABLED',
       ExplicitAuthFlows: Match.arrayWith(['ALLOW_USER_SRP_AUTH']),
+      AccessTokenValidity: 60,
+      IdTokenValidity: 60,
+      RefreshTokenValidity: 1440,
+      TokenValidityUnits: {
+        AccessToken: 'minutes',
+        IdToken: 'minutes',
+        RefreshToken: 'minutes',
+      },
     });
 
     template.hasResourceProperties('AWS::Cognito::UserPoolGroup', {
