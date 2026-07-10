@@ -24,7 +24,7 @@ infra/
 │   │   ├── storage-stack.ts   # S3 assets
 │   │   ├── api-stack.ts       # API Gateway + Lambda
 │   │   └── frontend-stack.ts  # S3 web + CloudFront
-│   └── constructs/            # constructs reutilizáveis (site-certificate, hosted-zone — task 21)
+│   └── constructs/            # constructs reutilizáveis (site-certificate, hosted-zone — task 21; dev-access-gate-function — task 22)
 ├── test/
 ├── cdk.json
 ├── package.json
@@ -95,6 +95,7 @@ echo "::error::AWS_ROLE_ARN is empty in GitHub Environment 'prod'."
 | `apiSubdomain` | *(opcional)* | `api` | `lib/config/prod.ts` — task 21 |
 | `hostedZoneId` | *(opcional)* | Route 53 zone ID | `lib/config/prod.ts` — substituir `REPLACE_WITH_HOSTED_ZONE_ID` antes do deploy |
 | `adminEmail` | *(preencher)* | *(preencher)* | `lib/config/{env}.ts` — SES (fase 4) |
+| `devAccess` | — | — | GitHub Secrets (`dev` env) no CI; `lib/config/dev.access.local.json` local (gitignored, task 22) |
 | CORS origin (prod) | URL CloudFront dev | `https://afroo90s.com.br` | ApiStack + Lambda `CLOUDFRONT_WEB_URL` (task 21) |
 
 ## Tags obrigatórias

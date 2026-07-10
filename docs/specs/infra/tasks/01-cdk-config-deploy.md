@@ -22,6 +22,8 @@ Criar os arquivos de configuração por ambiente (`dev` e `prod`) e a interface 
 
 - [x] Criar `lib/config/types.ts` com interface `AppConfig`
 
+> **Task 22:** campo opcional `devAccess` em `AppConfig` — preenchido somente em `dev.ts` (IP allowlist + Basic Auth CloudFront). Ver [22-dev-access-restriction.md](22-dev-access-restriction.md).
+
 ### Arquivos de config
 
 - [x] Criar `lib/config/dev.ts`

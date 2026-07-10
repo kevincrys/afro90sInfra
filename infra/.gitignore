@@ -1,5 +1,6 @@
 node_modules
 .env
+lib/config/dev.access.local.json
 
 # TypeScript build output
 dist/

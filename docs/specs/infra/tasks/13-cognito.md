@@ -62,6 +62,8 @@ Implementar `AuthStack` com o User Pool Cognito e configurar o authorizer JWT no
 3. Groups → Adicionar usuário ao grupo "admins"
 ```
 
+> **Dev (task 22):** manter **apenas um** usuário admin no pool dev. Ver [22-dev-access-restriction.md](22-dev-access-restriction.md).
+
 ## Pré-requisitos
 
 - [Task 12](12-aceite-fase1.md) concluída (fase 1 entregue)

@@ -18,6 +18,20 @@ Descrever como o frontend consome a API, Cognito e WhatsApp.
 | `VITE_COGNITO_CLIENT_ID` | Login admin |
 | `VITE_COGNITO_REGION` | Região Cognito |
 
+## Ambiente dev restrito (task 22)
+
+Quando a infra dev tiver `devAccess` ativo:
+
+| Cenário | Como acessar |
+|---------|--------------|
+| SPA hospedada no CloudFront dev | URL CloudFront + popup **Basic Auth** (credenciais em GitHub Secrets `dev` ou `dev.access.local.json`) |
+| API dev | Requisições só do IP na allowlist (`allowedApiSourceIps`) |
+| IP mudou / teste rápido | Frontend local: `npm run dev` com `VITE_API_BASE_URL` apontando para API dev (IP atual deve estar na allowlist) |
+
+Prod não usa gate nem policy de IP.
+
+Spec completa: [infra task 22](../../infra/tasks/22-dev-access-restriction.md).
+
 ## Cliente HTTP
 
 ```typescript

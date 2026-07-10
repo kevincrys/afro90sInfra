@@ -2,7 +2,8 @@ import { devConfig } from './dev';
 import { prodConfig } from './prod';
 import { AppConfig } from './types';
 
-export type { AppConfig } from './types';
+export type { AppConfig, DevAccessConfig } from './types';
+export { isDevAccessEnabled } from './types';
 export { devConfig, prodConfig };
 
 export function getConfig(env: string): AppConfig {

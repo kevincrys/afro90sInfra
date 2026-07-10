@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { devConfig } from '../lib/config';
+import { devAccessConfig } from './fixtures/dev-access-config';
 import { prodDomainConfig } from './fixtures/prod-domain-config';
 import { ApiStack } from '../lib/stacks/api-stack';
 import { DatabaseStack } from '../lib/stacks/database-stack';
@@ -93,6 +94,9 @@ describe('ApiStack — four flow Lambdas (task 10)', () => {
       ProtocolType: 'HTTP',
     });
 
+    const devApis = template.findResources('AWS::ApiGatewayV2::Api');
+    expect(Object.values(devApis)[0].Properties.Policy).toBeUndefined();
+
     template.resourceCountIs('AWS::ApiGatewayV2::Route', 11);
 
     template.hasResourceProperties('AWS::ApiGatewayV2::Route', {
@@ -131,6 +135,51 @@ describe('ApiStack — four flow Lambdas (task 10)', () => {
     });
 
     expect(apiStack.cognitoAuthorizer).toBeDefined();
+  });
+
+  test('dev with devAccess: API resource policy restricts source IP (task 22)', () => {
+    const app = new cdk.App();
+
+    const databaseStack = new DatabaseStack(app, stackName(devAccessConfig, 'database'), {
+      config: devAccessConfig,
+      env: envFor(devAccessConfig),
+      stackName: stackName(devAccessConfig, 'database'),
+    });
+
+    const storageStack = new StorageStack(app, stackName(devAccessConfig, 'storage'), {
+      config: devAccessConfig,
+      env: envFor(devAccessConfig),
+      stackName: stackName(devAccessConfig, 'storage'),
+    });
+
+    const apiStack = new ApiStack(app, stackName(devAccessConfig, 'api'), {
+      config: devAccessConfig,
+      env: envFor(devAccessConfig),
+      stackName: stackName(devAccessConfig, 'api'),
+      productsTable: databaseStack.productsTable,
+      ordersTable: databaseStack.ordersTable,
+      assetsBucket: storageStack.assetsBucket,
+      siteCertificate: undefined,
+    });
+
+    const template = Template.fromStack(apiStack);
+    const apis = template.findResources('AWS::ApiGatewayV2::Api');
+    const policy = Object.values(apis)[0].Properties.Policy as {
+      Statement: Array<{ Condition: { IpAddress: { 'aws:SourceIp': string[] } } }>;
+    };
+
+    expect(policy.Statement).toEqual([
+      expect.objectContaining({
+        Effect: 'Allow',
+        Principal: '*',
+        Action: 'execute-api:Invoke',
+        Condition: {
+          IpAddress: {
+            'aws:SourceIp': ['203.0.113.10/32'],
+          },
+        },
+      }),
+    ]);
   });
 
   test('prod with custom domain: API domain, mapping, CORS origin, Lambda env', () => {
@@ -200,5 +249,8 @@ describe('ApiStack — four flow Lambdas (task 10)', () => {
       Name: '/afro90s/prod/api-base-url',
       Value: 'https://api.afroo90s.com.br',
     });
+
+    const prodApis = template.findResources('AWS::ApiGatewayV2::Api');
+    expect(Object.values(prodApis)[0].Properties.Policy).toBeUndefined();
   });
 });

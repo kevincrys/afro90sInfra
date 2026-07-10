@@ -7,7 +7,9 @@ import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
+import { DevAccessGateFunction } from '../constructs/dev-access-gate-function';
 import { hasCustomDomain, resolveHostedZone, webOriginUrl } from '../constructs/hosted-zone';
+import { isDevAccessEnabled } from '../config/types';
 import { resourceName } from '../constructs/naming';
 import { SiteCertificate } from '../constructs/site-certificate';
 import { Afro90sStackProps, cfnExportName } from './stack-props';
@@ -72,6 +74,22 @@ function handler(event) {
 `.trim()),
     });
 
+    const devAccessGate = isDevAccessEnabled(config)
+      ? new DevAccessGateFunction(this, 'DevAccessGate', {
+          config,
+          devAccess: config.devAccess!,
+        })
+      : undefined;
+
+    const spaViewerRequestAssociations: cloudfront.FunctionAssociation[] = devAccessGate
+      ? [
+          {
+            function: devAccessGate.function,
+            eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+          },
+        ]
+      : [];
+
     const webOrigin = origins.S3BucketOrigin.withOriginAccessControl(this.webBucket);
     const assetsBucket = s3.Bucket.fromBucketName(this, 'ImportedAssetsBucket', assetsBucketName);
     const assetsOrigin = origins.S3BucketOrigin.withOriginAccessControl(assetsBucket);
@@ -81,6 +99,9 @@ function handler(event) {
       origin: webOrigin,
       viewerProtocolPolicy,
       responseHeadersPolicy: securityHeadersPolicy,
+      ...(spaViewerRequestAssociations.length > 0
+        ? { functionAssociations: spaViewerRequestAssociations }
+        : {}),
     };
 
     const assetsBehaviorBase = {

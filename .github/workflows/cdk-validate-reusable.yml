@@ -6,6 +6,10 @@ on:
       aws_role_arn:
         required: true
         type: string
+      environment:
+        required: false
+        type: string
+        default: ''
       upload_artifact:
         required: false
         type: boolean
@@ -22,6 +26,7 @@ jobs:
   validate:
     name: cdk-validate
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     defaults:
       run:
         working-directory: infra
@@ -57,9 +62,17 @@ jobs:
         run: npm run build
 
       - name: Synth (dev)
+        env:
+          AFRO90S_DEV_ACCESS_ALLOWED_IPS: ${{ secrets.DEV_ACCESS_ALLOWED_IPS }}
+          AFRO90S_DEV_ACCESS_BASIC_AUTH_USERNAME: ${{ secrets.DEV_ACCESS_BASIC_AUTH_USERNAME }}
+          AFRO90S_DEV_ACCESS_BASIC_AUTH_PASSWORD: ${{ secrets.DEV_ACCESS_BASIC_AUTH_PASSWORD }}
         run: npm run synth:dev
 
       - name: Diff (dev)
+        env:
+          AFRO90S_DEV_ACCESS_ALLOWED_IPS: ${{ secrets.DEV_ACCESS_ALLOWED_IPS }}
+          AFRO90S_DEV_ACCESS_BASIC_AUTH_USERNAME: ${{ secrets.DEV_ACCESS_BASIC_AUTH_USERNAME }}
+          AFRO90S_DEV_ACCESS_BASIC_AUTH_PASSWORD: ${{ secrets.DEV_ACCESS_BASIC_AUTH_PASSWORD }}
         run: npm run diff:dev
         continue-on-error: true
 

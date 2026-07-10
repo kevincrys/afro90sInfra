@@ -72,3 +72,5 @@ Implementar `FrontendStack`: bucket S3 privado + distribuição CloudFront com O
 - [ ] Output `CloudFrontWebUrl` no CloudFormation
 - [x] `resources.md` atualizado
 - [x] Atualizar **Status** para `concluída`
+
+> **Task 22:** gate Basic Auth via CloudFront Function no viewer-request (`default` + `index.html`) — somente dev. Ver [22-dev-access-restriction.md](22-dev-access-restriction.md).

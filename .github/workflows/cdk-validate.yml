@@ -17,4 +17,5 @@ jobs:
     uses: ./.github/workflows/cdk-validate-reusable.yml
     with:
       aws_role_arn: ${{ vars.AWS_ROLE_ARN_PR }}
+      environment: dev
       upload_artifact: true

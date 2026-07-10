@@ -19,10 +19,10 @@ env:
 
 jobs:
   validate:
-    environment: dev
     uses: ./.github/workflows/cdk-validate-reusable.yml
     with:
       aws_role_arn: ${{ vars.AWS_ROLE_ARN }}
+      environment: dev
       upload_artifact: false
 
   deploy:
@@ -57,6 +57,19 @@ jobs:
           role-to-assume: ${{ vars.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Validate dev access secrets
+        run: |
+          if [ -z "${{ secrets.DEV_ACCESS_ALLOWED_IPS }}" ] || \
+             [ -z "${{ secrets.DEV_ACCESS_BASIC_AUTH_USERNAME }}" ] || \
+             [ -z "${{ secrets.DEV_ACCESS_BASIC_AUTH_PASSWORD }}" ]; then
+            echo "::error::Dev access secrets missing in GitHub Environment 'dev'."
+            echo "Settings → Environments → dev → Environment secrets:"
+            echo "  DEV_ACCESS_ALLOWED_IPS (JSON array, e.g. [\"203.0.113.0/24\"])"
+            echo "  DEV_ACCESS_BASIC_AUTH_USERNAME"
+            echo "  DEV_ACCESS_BASIC_AUTH_PASSWORD"
+            exit 1
+          fi
+
       - name: Install and build
         working-directory: infra
         run: npm ci && npm run build
@@ -67,6 +80,10 @@ jobs:
 
       - name: Deploy (dev)
         working-directory: infra
+        env:
+          AFRO90S_DEV_ACCESS_ALLOWED_IPS: ${{ secrets.DEV_ACCESS_ALLOWED_IPS }}
+          AFRO90S_DEV_ACCESS_BASIC_AUTH_USERNAME: ${{ secrets.DEV_ACCESS_BASIC_AUTH_USERNAME }}
+          AFRO90S_DEV_ACCESS_BASIC_AUTH_PASSWORD: ${{ secrets.DEV_ACCESS_BASIC_AUTH_PASSWORD }}
         run: npm run deploy:dev -- --require-approval never
 
       - name: Export outputs

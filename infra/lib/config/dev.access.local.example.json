@@ -1,0 +1,10 @@
+{
+  "allowedApiSourceIps": [
+    "203.0.113.0/24",
+    "2001:db8:1234:5678::/48"
+  ],
+  "cloudFrontBasicAuth": {
+    "username": "dev",
+    "password": "YOUR_STRONG_PASSWORD_HERE"
+  }
+}

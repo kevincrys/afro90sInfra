@@ -109,6 +109,18 @@ Cada task depende apenas da anterior (`task N` requer `task N-1` concluída), sa
 
 ---
 
+## Fase 6 — Restrição de acesso dev (free tier)
+
+> **Entregável:** ambiente dev acessível apenas pelo operador (sem WAF pago).
+
+| # | Arquivo | O que entrega |
+|---|---------|---------------|
+| 22 | [22-dev-access-restriction.md](22-dev-access-restriction.md) | API resource policy (IP) + CloudFront Basic Auth gate |
+
+**✓ Resultado:** dev bloqueado para terceiros; prod inalterado.
+
+---
+
 ## Cadeia de dependências
 
 | Task | Depende de |
@@ -116,10 +128,12 @@ Cada task depende apenas da anterior (`task N` requer `task N-1` concluída), sa
 | 00 | — |
 | 01–20 | task anterior (`N-1`) |
 | 21 | task 20 |
+| 22 | task 21 |
 
 ## Referências
 
 - [Plano BDD — testes manuais em produção](../plano-bdd-testes-manuais-prod.md)
+- [Task 22 — restrição dev (free tier)](tasks/22-dev-access-restriction.md)
 - [Specs CDK](../cdk.md)
 - [Recursos AWS](../resources.md)
 - [Outputs](../outputs.md)

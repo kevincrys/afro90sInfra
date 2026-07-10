@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Match, Template } from 'aws-cdk-lib/assertions';
 import { devConfig, prodConfig } from '../lib/config';
+import { devAccessConfig } from './fixtures/dev-access-config';
 import { prodDomainConfig } from './fixtures/prod-domain-config';
 import { FrontendStack } from '../lib/stacks/frontend-stack';
 import { stackName } from '../lib/stacks/stack-props';
@@ -91,6 +92,46 @@ describe('FrontendStack', () => {
     template.hasOutput('AssetsCdnUrl', {
       Value: Match.objectLike({
         'Fn::Join': Match.anyValue(),
+      }),
+    });
+  });
+
+  test('dev with devAccess: Basic Auth gate on SPA behaviors (task 22)', () => {
+    const app = new cdk.App();
+    const stack = new FrontendStack(app, stackName(devAccessConfig, 'frontend'), {
+      config: devAccessConfig,
+      env: envFor(devAccessConfig),
+      stackName: stackName(devAccessConfig, 'frontend'),
+    });
+    const template = Template.fromStack(stack);
+
+    template.resourceCountIs('AWS::CloudFront::Function', 2);
+
+    template.hasResourceProperties('AWS::CloudFront::Function', {
+      Name: 'afro90s-dev-cf-dev-access-gate',
+      FunctionConfig: Match.objectLike({
+        Comment: Match.anyValue(),
+      }),
+    });
+
+    template.hasResourceProperties('AWS::CloudFront::Distribution', {
+      DistributionConfig: Match.objectLike({
+        DefaultCacheBehavior: Match.objectLike({
+          FunctionAssociations: Match.arrayWith([
+            Match.objectLike({
+              EventType: 'viewer-request',
+              FunctionARN: Match.anyValue(),
+            }),
+          ]),
+        }),
+        CacheBehaviors: Match.arrayWith([
+          Match.objectLike({
+            PathPattern: 'index.html',
+            FunctionAssociations: Match.arrayWith([
+              Match.objectLike({ EventType: 'viewer-request' }),
+            ]),
+          }),
+        ]),
       }),
     });
   });

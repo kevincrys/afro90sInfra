@@ -99,3 +99,5 @@ Para cada função:
 - [ ] Rota inexistente retorna `404` (após deploy do backend)
 - [x] Output `ApiBaseUrl` no CloudFormation
 - [x] Atualizar **Status** para `concluída`
+
+> **Task 22:** resource policy de IP no HTTP API dev (`devAccess.allowedApiSourceIps`). Prod sem policy. Ver [22-dev-access-restriction.md](22-dev-access-restriction.md).

@@ -19,10 +19,10 @@ env:
 
 jobs:
   validate:
-    environment: prod
     uses: ./.github/workflows/cdk-validate-reusable.yml
     with:
       aws_role_arn: ${{ vars.AWS_ROLE_ARN }}
+      environment: prod
       upload_artifact: false
 
   deploy:

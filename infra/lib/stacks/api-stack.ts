@@ -21,7 +21,7 @@ import {
   resolveHostedZone,
   webOriginUrl,
 } from '../constructs/hosted-zone';
-import { AppConfig } from '../config';
+import { AppConfig, isDevAccessEnabled } from '../config';
 import { resourceName } from '../constructs/naming';
 import { Afro90sStackProps, cfnExportName } from './stack-props';
 
@@ -180,6 +180,31 @@ export class ApiStack extends cdk.Stack {
         allowHeaders: ['Content-Type', 'Authorization'],
       },
     });
+
+    if (isDevAccessEnabled(config)) {
+      const cfnApi = this.httpApi.node.defaultChild as apigwv2.CfnApi;
+      const allowedIps = config.devAccess!.allowedApiSourceIps;
+      if (allowedIps.some((cidr) => cidr.includes(':'))) {
+        cfnApi.ipAddressType = 'dualstack';
+      }
+      // Avoid Ref-to-self on the API resource (CFN cycle). Account-scoped ARN is fine for dev.
+      cfnApi.addPropertyOverride('Policy', {
+        Version: '2012-10-17',
+        Statement: [
+          {
+            Effect: 'Allow',
+            Principal: '*',
+            Action: 'execute-api:Invoke',
+            Resource: `arn:aws:execute-api:${config.region}:${config.account}:*/*`,
+            Condition: {
+              IpAddress: {
+                'aws:SourceIp': allowedIps,
+              },
+            },
+          },
+        ],
+      });
+    }
 
     const apiStage = new apigwv2.HttpStage(this, 'ApiStage', {
       httpApi: this.httpApi,

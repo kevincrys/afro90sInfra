@@ -125,8 +125,19 @@ Tags obrigatórias em todo recurso (via `TaggingAspect` em `bin/app.ts`): `proje
 - Authorizer Cognito JWT nas rotas `/admin/*` (8 rotas, task 16)
 - Mapeamento de rotas: ver [api-routes.md](../backend/api-routes.md)
 - Limite de payload: **10 MB** (relevante para upload base64 de imagens)
+- **Dev only (task 22):** resource policy com `aws:SourceIp` allowlist — `addPropertyOverride('Policy')` no `AWS::ApiGatewayV2::Api`; ARN escopo conta `arn:aws:execute-api:{region}:{account}:*/*`
 
-## Lambda
+## CloudFront — dev access gate (task 22)
+
+Somente `env=dev` quando `devAccess` está definido em `lib/config/dev.ts`:
+
+| Recurso | Nome | Propósito |
+|---------|------|-----------|
+| CloudFront Function | `afro90s-dev-cf-dev-access-gate` | Basic Auth no viewer-request da SPA |
+| Behaviors protegidos | `default`, `index.html` | Popup de credencial no browser |
+| Behaviors **sem** gate | `assets/products/*/*`, `assets/*` | Imagens CDN continuam acessíveis por URL direta |
+
+Prod: sem function de gate adicional (apenas `strip-assets-prefix` existente).
 
 | Function | Rotas | Permissões |
 |----------|-------|------------|
@@ -189,8 +200,7 @@ Billing: **on-demand** (`PAY_PER_REQUEST`) — alinhado ao [ADR-004](../../found
 - Grupo: `admins` (v1 único grupo)
 - SSM: `/afro90s/{env}/cognito-user-pool-id`, `cognito-client-id`, `cognito-region`
 - JWT authorizer na `ApiStack` (`cognitoAuthorizer`) — aplicado em todas as rotas `/admin/*`
-
-## SES
+- **Dev (task 22):** manter **um único** usuário no grupo `admins`; self sign-up já desativado
 
 - Identidade verificada (domínio ou e-mail)
 - Template `new-order-notification` com variáveis: `orderId`, `customerName`, `fullPrice`, `itemsSummary`
