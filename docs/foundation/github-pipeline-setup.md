@@ -371,16 +371,16 @@ env:
 
 ### Tasks 01–04 — fundação CDK (em sequência)
 
-- [ ] **01** — config por ambiente (`lib/config/`) ✅
-- [ ] **02** — stacks scaffold ✅
-- [ ] **03** — tags e naming ✅
-- [ ] **04** — workflows + bootstrap na pipeline ✅
+- [x] **01** — config por ambiente (`lib/config/`)
+- [x] **02** — stacks scaffold
+- [x] **03** — tags e naming
+- [x] **04** — workflows + bootstrap na pipeline
 
 ### Validação end-to-end (após stacks CDK existirem)
 
-- [ ] Merge infra em `dev` → stacks CloudFormation atualizam
-- [ ] Merge backend em `dev` → deploy-dev publica zip e Lambda dev atualiza
-- [ ] Merge frontend em `dev` → SPA publicada no CloudFront dev
+- [x] Merge infra em `dev` → stacks CloudFormation atualizam
+- [x] Merge backend em `dev` → deploy-dev publica zip e Lambda dev atualiza
+- [x] Merge frontend em `dev` → SPA publicada no CloudFront dev
 
 ---
 

@@ -1,7 +1,7 @@
 # Task 20 — Aceite Fase 4 (Email + aceite final)
 
 **Fase:** 4 — Email  
-**Status:** pendente  
+**Status:** parcial — regressão fases 1–3 OK (BDD); **SES / observabilidade dashboard** pendentes  
 **Arquivos alvo:** [`overview.md`](../overview.md), [`tasks/README.md`](README.md)
 
 ## Objetivo
@@ -10,84 +10,46 @@ Validar o envio de e-mail no fluxo de pedido e declarar a infraestrutura v1 comp
 
 ## Script de smoke test completo
 
-- [ ] Criar `infra/scripts/smoke-test-completo.sh`:
-
-```bash
-#!/bin/bash
-set -e
-ENV=${1:-dev}
-
-API=$(aws ssm get-parameter --name "/afro90s/${ENV}/api-base-url" --query Parameter.Value --output text)
-CF=$(aws ssm get-parameter --name "/afro90s/${ENV}/cloudfront-web-url" --query Parameter.Value --output text)
-
-echo "=== Smoke test completo — ${ENV} ==="
-
-# Fase 1
-echo -n "GET /products (200)... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${API}/products")
-[ "$STATUS" = "200" ] && echo "OK" || (echo "FALHOU ($STATUS)" && exit 1)
-
-echo -n "CloudFront (200)... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${CF}")
-[ "$STATUS" = "200" ] && echo "OK" || (echo "FALHOU ($STATUS)" && exit 1)
-
-# Fase 2 e 3
-echo -n "GET /admin/products sem token (401)... "
-STATUS=$(curl -s -o /dev/null -w "%{http_code}" "${API}/admin/products")
-[ "$STATUS" = "401" ] && echo "OK" || (echo "FALHOU ($STATUS)" && exit 1)
-
-# Fase 4 — POST /orders com e-mail
-echo -n "POST /orders (201 + e-mail esperado)... "
-RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${API}/orders" \
-  -H "Content-Type: application/json" \
-  -d '{"customer":{"name":"Teste","address":"Rua A","postalCode":"00000-000","tel":"11999999999"},"items":[]}')
-STATUS=$(echo "$RESPONSE" | tail -1)
-[ "$STATUS" = "201" ] && echo "OK ($STATUS)" || (echo "FALHOU ($STATUS)" && exit 1)
-echo "  → Verificar recebimento do e-mail manualmente no sandbox"
-
-echo ""
-echo "=== Smoke test completo OK ==="
-```
+- [ ] Criar/executar `infra/scripts/smoke-test-completo.sh` (inclui SES) — **pendente com task 18**
 
 ## Testes manuais BDD (produção)
 
-Checklist Gherkin completo para go/no-go de lançamento (segurança, loja, admin, integrações):
+Checklist Gherkin: [plano-bdd-testes-manuais-prod.md](../plano-bdd-testes-manuais-prod.md)
 
-- [plano-bdd-testes-manuais-prod.md](../plano-bdd-testes-manuais-prod.md)
+- [x] Cenários P0 (exceto SES) executados
+- [ ] Cenários SES / e-mail — **pendente**
 
 ## Checklist de aceite final
 
 ### Fase 4 — SES
 
-- [ ] Template `afro90s-dev-ses-new-order` visível no console SES
+- [ ] Template `afro90s-{env}-ses-new-order` visível no console SES
 - [ ] `POST /orders` → `201` + e-mail recebido no endereço admin verificado
 - [ ] E-mail contém `orderId` e `customerName` corretos
 - [ ] Variável `SES_ENABLED=true` na Lambda
 
 ### Infraestrutura completa
 
-- [ ] Todas as 5 stacks com status `CREATE_COMPLETE` ou `UPDATE_COMPLETE` no CloudFormation
-- [ ] Dashboard `afro90s-dev-dashboard` com métricas após invocações
-- [ ] Log groups com retenção 14 dias
-- [ ] Script `smoke-test-completo.sh dev` executa sem erros
-- [ ] Pipeline CI: validate/diff em PRs + deploy automático por branch funcionando
-- [ ] `outputs-dev.json` gerado corretamente pelo CI
+- [x] Stacks principais com status `CREATE_COMPLETE` / `UPDATE_COMPLETE`
+- [ ] Dashboard CloudWatch (task 19) — se ainda não deployado
+- [ ] Log groups com retenção 14 dias (task 19)
+- [ ] Script `smoke-test-completo.sh` com SES
+- [x] Pipeline CI: validate/diff em PRs + deploy automático
+- [x] Outputs / SSM disponíveis para frontend e backend
 
 ### Regressão completa
 
-- [ ] Fase 1: site público + rotas públicas + POST /orders
-- [ ] Fase 2: login Cognito funcional
-- [ ] Fase 3: CRUD products + orders admin via token
+- [x] Fase 1: site público + rotas públicas + POST /orders
+- [x] Fase 2: login Cognito funcional
+- [x] Fase 3: CRUD products + orders admin via token
 - [ ] Fase 4: e-mail enviado no POST /orders
 
 ## Pré-requisitos
 
-- [Task 19](19-observabilidade.md) concluída
+- [Task 18](18-ses.md) e [Task 19](19-observabilidade.md) para fechar SES + dashboard
 
 ## Critérios de conclusão
 
-- [ ] Script `smoke-test-completo.sh dev` passa sem erros
+- [ ] Script smoke completo com SES passa
 - [ ] Todos os itens do checklist marcados
-- [ ] `overview.md` critérios de aceite marcados como cumpridos
-- [ ] `tasks/README.md` com todas as tasks `concluída`
 - [ ] Atualizar **Status** para `concluída` — **infraestrutura v1 completa**

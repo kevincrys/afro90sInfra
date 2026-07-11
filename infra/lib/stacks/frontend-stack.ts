@@ -61,9 +61,58 @@ export class FrontendStack extends cdk.Stack {
       },
     );
 
+    // CloudFront allows one Function per event type per behavior.
+    // Prod custom domain: www→apex redirect; assets behaviors merge redirect + strip /assets.
+    const wwwRedirectCode = `
+function wwwRedirect(request) {
+  var host = request.headers.host.value;
+  if (host.indexOf('www.') === 0) {
+    var qs = '';
+    var keys = Object.keys(request.querystring);
+    if (keys.length > 0) {
+      var parts = [];
+      for (var i = 0; i < keys.length; i++) {
+        var k = keys[i];
+        var entry = request.querystring[k];
+        if (entry.multiValue) {
+          for (var j = 0; j < entry.multiValue.length; j++) {
+            parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(entry.multiValue[j].value));
+          }
+        } else {
+          parts.push(encodeURIComponent(k) + '=' + encodeURIComponent(entry.value));
+        }
+      }
+      qs = '?' + parts.join('&');
+    }
+    return {
+      statusCode: 301,
+      statusDescription: 'Moved Permanently',
+      headers: {
+        location: { value: 'https://' + host.substring(4) + request.uri + qs },
+      },
+    };
+  }
+  return null;
+}
+`.trim();
+
     const stripAssetsPrefixFn = new cloudfront.Function(this, 'StripAssetsPrefixFn', {
       functionName: resourceName(config, 'cf', 'strip-assets-prefix'),
-      code: cloudfront.FunctionCode.fromInline(`
+      code: cloudfront.FunctionCode.fromInline(
+        customDomain
+          ? `
+${wwwRedirectCode}
+function handler(event) {
+  var request = event.request;
+  var redirect = wwwRedirect(request);
+  if (redirect) return redirect;
+  if (request.uri.startsWith('/assets')) {
+    request.uri = request.uri.substring(7) || '/';
+  }
+  return request;
+}
+`.trim()
+          : `
 function handler(event) {
   var request = event.request;
   if (request.uri.startsWith('/assets')) {
@@ -71,8 +120,26 @@ function handler(event) {
   }
   return request;
 }
-`.trim()),
+`.trim(),
+      ),
     });
+
+    const wwwRedirectFn = customDomain
+      ? new cloudfront.Function(this, 'WwwRedirectFn', {
+          functionName: resourceName(config, 'cf', 'www-redirect'),
+          code: cloudfront.FunctionCode.fromInline(
+            `
+${wwwRedirectCode}
+function handler(event) {
+  var request = event.request;
+  var redirect = wwwRedirect(request);
+  if (redirect) return redirect;
+  return request;
+}
+`.trim(),
+          ),
+        })
+      : undefined;
 
     const devAccessGate = isDevAccessEnabled(config)
       ? new DevAccessGateFunction(this, 'DevAccessGate', {
@@ -81,14 +148,22 @@ function handler(event) {
         })
       : undefined;
 
-    const spaViewerRequestAssociations: cloudfront.FunctionAssociation[] = devAccessGate
+    // Prod custom domain uses www redirect; never overlaps with dev-access gate (dev only).
+    const spaViewerRequestAssociations: cloudfront.FunctionAssociation[] = wwwRedirectFn
       ? [
           {
-            function: devAccessGate.function,
+            function: wwwRedirectFn,
             eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
           },
         ]
-      : [];
+      : devAccessGate
+        ? [
+            {
+              function: devAccessGate.function,
+              eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+            },
+          ]
+        : [];
 
     const webOrigin = origins.S3BucketOrigin.withOriginAccessControl(this.webBucket);
     const assetsBucket = s3.Bucket.fromBucketName(this, 'ImportedAssetsBucket', assetsBucketName);
@@ -124,11 +199,14 @@ function handler(event) {
         : undefined;
     this.siteCertificate = siteCertificateConstruct?.certificate;
 
+    const apexDomain = customDomain ? config.domainName! : undefined;
+    const wwwDomain = apexDomain ? `www.${apexDomain}` : undefined;
+
     this.webDistribution = new cloudfront.Distribution(this, 'WebDistribution', {
       comment: resourceName(config, 'cf', 'web'),
       defaultRootObject: 'index.html',
       priceClass: cloudfront.PriceClass.PRICE_CLASS_200,
-      domainNames: customDomain ? [config.domainName!] : undefined,
+      domainNames: apexDomain && wwwDomain ? [apexDomain, wwwDomain] : undefined,
       certificate: this.siteCertificate,
       defaultBehavior: {
         ...webBehaviorBase,
@@ -162,6 +240,14 @@ function handler(event) {
     if (customDomain && hostedZone) {
       new route53.ARecord(this, 'WebAliasRecord', {
         zone: hostedZone,
+        target: route53.RecordTarget.fromAlias(
+          new route53Targets.CloudFrontTarget(this.webDistribution),
+        ),
+      });
+
+      new route53.ARecord(this, 'WwwAliasRecord', {
+        zone: hostedZone,
+        recordName: 'www',
         target: route53.RecordTarget.fromAlias(
           new route53Targets.CloudFrontTarget(this.webDistribution),
         ),

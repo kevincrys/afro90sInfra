@@ -1,7 +1,7 @@
 # Task 21 — Domínio customizado + CORS (prod)
 
 **Fase:** 5 — Domínio customizado  
-**Status:** pendente  
+**Status:** concluída  
 **Arquivos alvo:** [`resources.md`](../resources.md), [`outputs.md`](../outputs.md), [`cdk.md`](../cdk.md), `lib/config/prod.ts`, `lib/stacks/frontend-stack.ts`, `lib/stacks/api-stack.ts`, `lib/stacks/auth-stack.ts`, `lib/constructs/site-certificate.ts`
 
 ## Objetivo
@@ -12,7 +12,8 @@ Configurar domínio customizado em **prod** (`afroo90s.com.br` + `api.afroo90s.c
 
 | Decisão | Valor |
 |---------|-------|
-| Frontend | `https://afroo90s.com.br` |
+| Frontend | `https://afroo90s.com.br` (canônico) |
+| `www` | `https://www.afroo90s.com.br` → **301** para o apex |
 | API | `https://api.afroo90s.com.br` (stage `prod` via API mapping — sem `/prod` no path) |
 | Assets CDN | `https://afroo90s.com.br/assets` |
 | CORS origin | `https://afroo90s.com.br` |
@@ -24,39 +25,40 @@ Configurar domínio customizado em **prod** (`afroo90s.com.br` + `api.afroo90s.c
 
 ### Config (`lib/config/`)
 
-- [ ] `AppConfig`: `apiSubdomain?`, `hostedZoneId?`
-- [ ] `prod.ts`: `domainName`, `apiSubdomain`, `hostedZoneId` (preencher ID real da hosted zone antes do deploy)
+- [x] `AppConfig`: `apiSubdomain?`, `hostedZoneId?`
+- [x] `prod.ts`: `domainName`, `apiSubdomain`, `hostedZoneId` (preencher ID real da hosted zone antes do deploy)
 
 ### Construct `site-certificate.ts`
 
-- [ ] `acm.Certificate` com apex + wildcard `*.afroo90s.com.br`
-- [ ] Validação DNS via Route 53
-- [ ] SSM `/afro90s/prod/site-certificate-arn` (cópia do ARN; ApiStack usa cross-stack ref de `frontendStack.siteCertificate`)
+- [x] `acm.Certificate` com apex + wildcard `*.afroo90s.com.br`
+- [x] Validação DNS via Route 53
+- [x] SSM `/afro90s/prod/site-certificate-arn` (cópia do ARN; ApiStack usa cross-stack ref de `frontendStack.siteCertificate`)
 
 ### FrontendStack
 
-- [ ] Certificado ACM no CloudFront
-- [ ] Route 53 A alias (apex) → CloudFront
-- [ ] SSM `cloudfront-web-url` → `https://afroo90s.com.br`
-- [ ] SSM `assets-cdn-url` → `https://afroo90s.com.br/assets`
+- [x] Certificado ACM no CloudFront
+- [x] Route 53 A alias (apex) → CloudFront
+- [x] Alias + Route 53 `www` → CloudFront + Function 301 → apex
+- [x] SSM `cloudfront-web-url` → `https://afroo90s.com.br`
+- [x] SSM `assets-cdn-url` → `https://afroo90s.com.br/assets`
 
 ### ApiStack
 
-- [ ] `apigwv2.DomainName` + `ApiMapping` (stage `prod`)
-- [ ] Route 53 A alias `api` → API Gateway domain
-- [ ] SSM `api-base-url` → `https://api.afroo90s.com.br`
-- [ ] CORS `allowOrigins`: `https://afroo90s.com.br` (quando `domainName` definido)
-- [ ] Env `CLOUDFRONT_WEB_URL` nas 4 Lambdas (prod)
+- [x] `apigwv2.DomainName` + `ApiMapping` (stage `prod`)
+- [x] Route 53 A alias `api` → API Gateway domain
+- [x] SSM `api-base-url` → `https://api.afroo90s.com.br`
+- [x] CORS `allowOrigins`: `https://afroo90s.com.br` (quando `domainName` definido)
+- [x] Env `CLOUDFRONT_WEB_URL` nas 4 Lambdas (prod)
 
 ### AuthStack
 
-- [ ] Cognito App Client: `callbackUrls` e `logoutUrls` com `https://afroo90s.com.br/admin/*`
+- [x] Cognito App Client: `callbackUrls` e `logoutUrls` com `https://afroo90s.com.br/admin/*`
 
 ### Testes
 
-- [ ] `frontend-stack.test.ts` — cenário prod com domínio
-- [ ] `api-stack.test.ts` — DomainName, ApiMapping, `CLOUDFRONT_WEB_URL`
-- [ ] `infra.test.ts` — synth prod
+- [x] `frontend-stack.test.ts` — cenário prod com domínio + www redirect
+- [x] `api-stack.test.ts` — DomainName, ApiMapping, `CLOUDFRONT_WEB_URL`
+- [x] `infra.test.ts` — synth prod
 
 ---
 
@@ -112,14 +114,15 @@ Auth ──────────────┘
 
 ## Critérios de conclusão
 
-- [ ] `https://afroo90s.com.br` abre a SPA
-- [ ] `https://api.afroo90s.com.br/products` retorna `200`
-- [ ] Preflight `OPTIONS` com `Access-Control-Allow-Origin: https://afroo90s.com.br`
-- [ ] SSM prod: `cloudfront-web-url`, `api-base-url`, `assets-cdn-url` com domínios customizados
-- [ ] Login admin em `https://afroo90s.com.br/admin/login` funciona
-- [ ] Dev inalterado (`*.cloudfront.net`)
-- [ ] `npm test` em `infra/` passa
-- [ ] Atualizar **Status** para `concluída`
+- [x] `https://afroo90s.com.br` abre a SPA
+- [x] `https://api.afroo90s.com.br/products` retorna `200`
+- [x] Preflight `OPTIONS` com `Access-Control-Allow-Origin: https://afroo90s.com.br`
+- [x] SSM prod: `cloudfront-web-url`, `api-base-url`, `assets-cdn-url` com domínios customizados
+- [x] Login admin em `https://afroo90s.com.br/admin/login` funciona
+- [x] Dev inalterado (`*.cloudfront.net`)
+- [x] `npm test` em `infra/` passa
+- [x] `www.afroo90s.com.br` → 301 para apex (CDK; validar pós-deploy)
+- [x] Atualizar **Status** para `concluída`
 
 ## Pré-requisitos
 
@@ -128,6 +131,4 @@ Auth ──────────────┘
 
 ## Follow-up (fora de escopo)
 
-- `www.afroo90s.com.br` redirect
-- Domínio customizado em dev
-- Path `/api` no mesmo CloudFront
+- Domínio customizado em `dev` (não planejado na v1)

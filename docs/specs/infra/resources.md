@@ -86,8 +86,9 @@ Tags obrigatórias em todo recurso (via `TaggingAspect` em `bin/app.ts`): `proje
 - Custom errors: `403 → /index.html` (200) para SPA routing; **404 não** é reescrito para `index.html`
 - Behaviors: default + `index.html` → `CACHING_DISABLED`; `assets/*` → `CACHING_OPTIMIZED`
 - Security headers: HSTS + `X-Content-Type-Options`
-- Alias customizado: `config.domainName` + certificado ACM wildcard (task 21 — **somente prod**)
-- Route 53 A alias (apex) → CloudFront quando `hostedZoneId` definido
+- Alias customizado: `config.domainName` + `www.{domainName}` + certificado ACM wildcard (task 21 — **somente prod**)
+- Route 53 A alias (apex + `www`) → CloudFront quando `hostedZoneId` definido
+- `www` → CloudFront Function **301** para o apex (URL canônica); CORS/Cognito/SSM usam só o apex
 - Output / SSM: `CloudFrontWebUrl` — prod: `https://afroo90s.com.br`; dev: `https://{cf-domain}`
 
 ## S3 — Lambda artifacts (`s3-lambda-artifacts`)

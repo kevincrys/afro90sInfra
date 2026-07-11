@@ -1,7 +1,7 @@
 # Spec: Infraestrutura — Overview
 
 **Status:** Aprovado  
-**Última atualização:** 2025-06-23
+**Última atualização:** 2026-07-10
 
 ## Objetivo
 
@@ -12,7 +12,7 @@ Definir requisitos de alto nível para a infraestrutura Afro90s antes e durante 
 ### Ambientes
 
 - [x] Dois ambientes na v1: `dev`, `production`
-- [ ] Isolamento entre ambientes (conta, stack ou equivalente)
+- [x] Isolamento entre ambientes (stacks + naming por `env`)
 - [x] Naming convention: `afro90s-{env}-{tipo}-{nome}`
 
 > `staging` não faz parte do escopo inicial. Adicionar depois exige ADR e atualização desta spec.
@@ -20,33 +20,33 @@ Definir requisitos de alto nível para a infraestrutura Afro90s antes e durante 
 ### Segurança
 
 - [x] Nenhum secret commitado no repositório
-- [ ] IAM/policies com least privilege
+- [x] IAM/policies com least privilege (roles por Lambda)
 - [x] Tags obrigatórias em recursos: `project=afro90s`, `env`, `managed-by=afro90sInfra`
 
 ### CI/CD
 
-- [ ] Pipeline executa validação em todo PR
-- [ ] `cdk diff` automático em PRs que alteram IaC
-- [ ] `cdk deploy` em `dev` após merge; `production` com aprovação manual
+- [x] Pipeline executa validação em todo PR
+- [x] `cdk diff` automático em PRs que alteram IaC
+- [x] `cdk deploy` em `dev` após merge; `production` com aprovação manual
 
 ### Outputs para aplicações
 
 - [x] Documentar outputs exportados ([outputs.md](outputs.md))
-- [ ] Variáveis de ambiente injetadas via CI ou SSM
+- [x] Variáveis de ambiente injetadas via CI / SSM
 
 ## Stack
 
-| Componente | Decisão | ADR |
+| Componente | Tecnologia | ADR |
 |------------|---------|-----|
 | Cloud | **AWS** | [002](../../foundation/adr/002-aws-cloud-provider.md) |
 | IaC | **AWS CDK (TypeScript)** | [003](../../foundation/adr/003-cdk-iac.md) |
 | API / Compute | **API Gateway HTTP + Lambda Node.js 20** | [004](../../foundation/adr/004-serverless-architecture.md) |
 | Banco | **DynamoDB on-demand** | [004](../../foundation/adr/004-serverless-architecture.md) |
 | Auth admin | **Cognito User Pool** | [005](../../foundation/adr/005-admin-auth-v1.md) |
-| E-mail | **SES** | [004](../../foundation/adr/004-serverless-architecture.md) |
+| E-mail | **SES** (task 18 — **pendente**) | [004](../../foundation/adr/004-serverless-architecture.md) |
 | Frontend host | **S3 + CloudFront** | [004](../../foundation/adr/004-serverless-architecture.md) |
 | CI | **GitHub Actions** | — |
-| Secrets | **AWS Secrets Manager / SSM Parameter Store** | — |
+| Secrets | **SSM Parameter Store** | — |
 
 ## Specs detalhadas
 

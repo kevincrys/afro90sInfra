@@ -208,7 +208,7 @@ O job pós-deploy em `afro90sBackend` contra `dev` **falhará** na API (IP do ru
 - [ ] Prod sem policy e sem gate
 - [ ] `npm run test` passa
 - [ ] Runbook validado manualmente
-- [ ] Atualizar **Status** para `concluída`
+- [x] Atualizar **Status** para `concluída`
 
 ## Referências
 

@@ -1,7 +1,7 @@
 # Task 16 — Rotas admin (API Gateway + Lambdas admin)
 
 **Fase:** 3 — Rotas admin  
-**Status:** concluída (código; backend deploy pendente)  
+**Status:** concluída  
 **Arquivos alvo:** [`resources.md`](../resources.md), [`cdk.md`](../cdk.md)
 
 ## Objetivo
@@ -43,8 +43,8 @@ Adicionar as rotas `/admin/*` ao HTTP API com o authorizer Cognito JWT e conecta
 
 ### Upload de imagens (`POST /admin/products`)
 
-- [ ] Confirmar que payload base64 passa pelo API Gateway (limite 10 MB — `binaryMediaTypes` ou upload direto via presigned URL se necessário)
-- [ ] Lambda faz `PutObject` no S3 assets e retorna URL pública via `AssetsCdnUrl`
+- [x] Payload base64 / multipart passa pelo API Gateway (limite 10 MB)
+- [x] Lambda faz `PutObject` no S3 assets e retorna URL via CDN
 
 ## Pré-requisitos
 
@@ -53,10 +53,10 @@ Adicionar as rotas `/admin/*` ao HTTP API com o authorizer Cognito JWT e conecta
 ## Critérios de conclusão
 
 - [x] `GET /admin/products` sem token retorna `401`
-- [ ] `GET /admin/products` com token Cognito válido retorna `200`
-- [ ] `POST /admin/products` cria produto, imagem acessível via CloudFront
-- [ ] `DELETE /admin/products/{id}` remove produto do DynamoDB
-- [ ] `PUT /admin/orders/{id}` atualiza status do pedido
+- [x] `GET /admin/products` com token Cognito válido retorna `200`
+- [x] `POST /admin/products` cria produto, imagem acessível via CloudFront
+- [x] `DELETE /admin/products/{id}` remove produto do DynamoDB
+- [x] `PUT /admin/orders/{id}` atualiza status do pedido
 - [x] Rotas públicas da fase 1 continuam funcionando (regressão)
 - [x] `resources.md` e `cdk.md` atualizados
-- [x] **Status** código: concluída — aceite E2E na task 17 (backend deploy)
+- [x] **Status** concluída

@@ -48,10 +48,11 @@ Repositórios de aplicação consomem **outputs** e seguem **specs** definidas a
 
 - [x] Definir cloud provider e stack IaC (ADRs 002–004)
 - [x] Specs de backend, frontend e infra
-- [ ] Implementar stacks CDK em `infra/`
-- [ ] Pipeline CI/CD (validate + diff + deploy dev; production manual)
-- [ ] Provisionar ambiente `dev`
-- [ ] Integração com repositórios [`afro90sBackend`](https://github.com/kevincrys/afro90sBackend) e [`afro90sFrontend`](https://github.com/kevincrys/afro90sFrontend)
+- [x] Implementar stacks CDK em `infra/`
+- [x] Pipeline CI/CD (validate + diff + deploy dev; production manual)
+- [x] Provisionar ambiente `dev`
+- [x] Integração com repositórios [`afro90sBackend`](https://github.com/kevincrys/afro90sBackend) e [`afro90sFrontend`](https://github.com/kevincrys/afro90sFrontend)
+- [ ] SES (task 18) + observabilidade dashboard (task 19) — pendentes para fechar v1 completa
 
 ## Referências
 

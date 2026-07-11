@@ -70,7 +70,8 @@ Cada task depende apenas da anterior (`task N` requer `task N-1` concluída), sa
 
 ## Fase 3 — Rotas admin
 
-> **Entregável:** painel admin completo — CRUD de produtos com upload de imagens e gestão de pedidos.
+> **Entregável:** painel admin completo — CRUD de produtos com upload de imagens e gestão de pedidos.  
+> **Estado:** concluída (aceite task 17 + BDD).
 
 | # | Arquivo | O que entrega |
 |---|---------|---------------|
@@ -84,16 +85,16 @@ Cada task depende apenas da anterior (`task N` requer `task N-1` concluída), sa
 
 ## Fase 4 — Email
 
-> **Entregável:** `POST /orders` passa a enviar e-mail de notificação ao admin via SES.
-> SES habilitado — `POST /orders` existia desde a fase 1, apenas sem envio.
+> **Entregável:** `POST /orders` passa a enviar e-mail de notificação ao admin via SES.  
+> **Estado:** **pendente** (task 18); regressão 1–3 OK; observabilidade (19) e aceite final (20) parciais.
 
 | # | Arquivo | O que entrega |
 |---|---------|---------------|
-| 18 | [18-ses.md](18-ses.md) | SES template + SSM e-mail params + IAM SES |
-| 19 | [19-observabilidade.md](19-observabilidade.md) | Log groups 14d + dashboard CloudWatch free tier |
-| 20 | [20-aceite-fase4.md](20-aceite-fase4.md) | Smoke test completo + checklist aceite v1 final |
+| 18 | [18-ses.md](18-ses.md) | SES template + SSM e-mail params + IAM SES — **pendente** |
+| 19 | [19-observabilidade.md](19-observabilidade.md) | Log groups 14d + dashboard CloudWatch — **pendente** |
+| 20 | [20-aceite-fase4.md](20-aceite-fase4.md) | Smoke completo + checklist v1 — **parcial** |
 
-**✓ Resultado:** infraestrutura v1 completa. E-mail enviado no pedido. Dashboard CloudWatch ativo.
+**✓ Resultado (alvo):** infraestrutura v1 completa. E-mail enviado no pedido. Dashboard CloudWatch ativo.
 
 ---
 
@@ -103,9 +104,9 @@ Cada task depende apenas da anterior (`task N` requer `task N-1` concluída), sa
 
 | # | Arquivo | O que entrega |
 |---|---------|---------------|
-| 21 | [21-dominio-customizado-prod.md](21-dominio-customizado-prod.md) | ACM wildcard, CloudFront alias, API custom domain, CORS, Cognito callbacks |
+| 21 | [21-dominio-customizado-prod.md](21-dominio-customizado-prod.md) | ACM wildcard, CloudFront alias + www→apex, API custom domain, CORS, Cognito — **concluída** |
 
-**✓ Resultado:** frontend e API em domínios customizados; CORS origin `https://afroo90s.com.br`.
+**✓ Resultado:** frontend e API em domínios customizados; CORS origin `https://afroo90s.com.br`; `www` redireciona ao apex.
 
 ---
 

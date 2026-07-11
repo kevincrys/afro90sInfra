@@ -136,7 +136,7 @@ describe('FrontendStack', () => {
     });
   });
 
-  test('prod with custom domain: ACM cert, Route53 alias, custom SSM URLs', () => {
+  test('prod with custom domain: ACM cert, Route53 alias, www redirect, custom SSM URLs', () => {
     const app = new cdk.App();
     const stack = new FrontendStack(app, stackName(prodDomainConfig, 'frontend'), {
       config: prodDomainConfig,
@@ -149,13 +149,35 @@ describe('FrontendStack', () => {
 
     template.hasResourceProperties('AWS::CloudFront::Distribution', {
       DistributionConfig: Match.objectLike({
-        Aliases: ['afroo90s.com.br'],
+        Aliases: ['afroo90s.com.br', 'www.afroo90s.com.br'],
+        DefaultCacheBehavior: Match.objectLike({
+          FunctionAssociations: Match.arrayWith([
+            Match.objectLike({ EventType: 'viewer-request' }),
+          ]),
+        }),
       }),
     });
 
     template.hasResourceProperties('AWS::Route53::RecordSet', {
       Name: 'afroo90s.com.br.',
       Type: 'A',
+    });
+
+    template.hasResourceProperties('AWS::Route53::RecordSet', {
+      Name: 'www.afroo90s.com.br.',
+      Type: 'A',
+    });
+
+    template.resourceCountIs('AWS::CloudFront::Function', 2);
+
+    template.hasResourceProperties('AWS::CloudFront::Function', {
+      Name: 'afro90s-prod-cf-www-redirect',
+      FunctionCode: Match.stringLikeRegexp('www\\.'),
+    });
+
+    template.hasResourceProperties('AWS::CloudFront::Function', {
+      Name: 'afro90s-prod-cf-strip-assets-prefix',
+      FunctionCode: Match.stringLikeRegexp('wwwRedirect'),
     });
 
     template.hasResourceProperties('AWS::SSM::Parameter', {
