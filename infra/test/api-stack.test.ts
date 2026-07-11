@@ -329,5 +329,8 @@ describe('ApiStack — four flow Lambdas (task 10)', () => {
     expect(sesJson).toContain(
       'arn:aws:ses:us-east-1:083171867610:identity/afroo90s.com.br',
     );
+    expect(sesJson).toContain(
+      'arn:aws:ses:us-east-1:083171867610:identity/ops@example.com',
+    );
   });
 });

@@ -49,11 +49,14 @@ export class LambdaOrdersPublicRole extends Construct {
 
     if (isSesEnabled(config)) {
       const fromEmail = config.ses!.fromEmail;
+      const adminEmail = config.ses!.adminNotificationEmail;
       const fromDomain = fromEmail.includes('@') ? fromEmail.split('@')[1]! : fromEmail;
+      // Sandbox (and some SES checks) authorize Source and Destination identities.
       const identityArns = Array.from(
         new Set([
           `arn:aws:ses:${config.region}:${config.account}:identity/${fromEmail}`,
           `arn:aws:ses:${config.region}:${config.account}:identity/${fromDomain}`,
+          `arn:aws:ses:${config.region}:${config.account}:identity/${adminEmail}`,
         ]),
       );
 
