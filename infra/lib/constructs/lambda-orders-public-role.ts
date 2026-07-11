@@ -48,11 +48,20 @@ export class LambdaOrdersPublicRole extends Construct {
     );
 
     if (isSesEnabled(config)) {
+      const fromEmail = config.ses!.fromEmail;
+      const fromDomain = fromEmail.includes('@') ? fromEmail.split('@')[1]! : fromEmail;
+      const identityArns = Array.from(
+        new Set([
+          `arn:aws:ses:${config.region}:${config.account}:identity/${fromEmail}`,
+          `arn:aws:ses:${config.region}:${config.account}:identity/${fromDomain}`,
+        ]),
+      );
+
       this.role.addToPolicy(
         new iam.PolicyStatement({
           actions: ['ses:SendTemplatedEmail'],
           resources: [
-            `arn:aws:ses:${config.region}:${config.account}:identity/${config.ses!.fromEmail}`,
+            ...identityArns,
             `arn:aws:ses:${config.region}:${config.account}:template/afro90s-${config.env}-ses-new-order`,
           ],
         }),
