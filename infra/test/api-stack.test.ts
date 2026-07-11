@@ -3,6 +3,7 @@ import { Match, Template } from 'aws-cdk-lib/assertions';
 import { devConfig } from '../lib/config';
 import { devAccessConfig } from './fixtures/dev-access-config';
 import { prodDomainConfig } from './fixtures/prod-domain-config';
+import { sesEnabledConfig } from './fixtures/ses-enabled-config';
 import { ApiStack } from '../lib/stacks/api-stack';
 import { DatabaseStack } from '../lib/stacks/database-stack';
 import { FrontendStack } from '../lib/stacks/frontend-stack';
@@ -252,5 +253,77 @@ describe('ApiStack — four flow Lambdas (task 10)', () => {
 
     const prodApis = template.findResources('AWS::ApiGatewayV2::Api');
     expect(Object.values(prodApis)[0].Properties.Policy).toBeUndefined();
+  });
+
+  test('with ses config: template, SSM, IAM, orders-public env', () => {
+    const app = new cdk.App();
+
+    const databaseStack = new DatabaseStack(app, stackName(sesEnabledConfig, 'database'), {
+      config: sesEnabledConfig,
+      env: envFor(sesEnabledConfig),
+      stackName: stackName(sesEnabledConfig, 'database'),
+    });
+
+    const storageStack = new StorageStack(app, stackName(sesEnabledConfig, 'storage'), {
+      config: sesEnabledConfig,
+      env: envFor(sesEnabledConfig),
+      stackName: stackName(sesEnabledConfig, 'storage'),
+    });
+
+    const apiStack = new ApiStack(app, stackName(sesEnabledConfig, 'api'), {
+      config: sesEnabledConfig,
+      env: envFor(sesEnabledConfig),
+      stackName: stackName(sesEnabledConfig, 'api'),
+      productsTable: databaseStack.productsTable,
+      ordersTable: databaseStack.ordersTable,
+      assetsBucket: storageStack.assetsBucket,
+      siteCertificate: undefined,
+    });
+
+    const template = Template.fromStack(apiStack);
+
+    template.hasResourceProperties('AWS::SES::Template', {
+      Template: Match.objectLike({
+        TemplateName: 'afro90s-dev-ses-new-order',
+      }),
+    });
+
+    template.hasResourceProperties('AWS::SSM::Parameter', {
+      Name: '/afro90s/dev/ses-from-email',
+      Value: 'noreply@afroo90s.com.br',
+    });
+
+    template.hasResourceProperties('AWS::SSM::Parameter', {
+      Name: '/afro90s/dev/admin-notification-email',
+      Value: 'ops@example.com',
+    });
+
+    template.hasResourceProperties('AWS::Lambda::Function', {
+      FunctionName: 'afro90s-dev-lambda-orders-public',
+      Environment: {
+        Variables: Match.objectLike({
+          SES_ENABLED: 'true',
+          SES_FROM_EMAIL: 'noreply@afroo90s.com.br',
+          ADMIN_EMAIL: 'ops@example.com',
+          SES_TEMPLATE_NAME: 'afro90s-dev-ses-new-order',
+        }),
+      },
+    });
+
+    const policies = template.findResources('AWS::IAM::Policy');
+    const sesActions = Object.values(policies).flatMap((policy) => {
+      const statements = policy.Properties.PolicyDocument.Statement as Array<{
+        Action?: string | string[];
+        Resource?: string | string[];
+      }>;
+      return statements.filter((s) => {
+        const actions = Array.isArray(s.Action) ? s.Action : [s.Action];
+        return actions.some((a) => a === 'ses:SendTemplatedEmail');
+      });
+    });
+    expect(sesActions.length).toBeGreaterThan(0);
+    expect(JSON.stringify(sesActions)).toContain(
+      'arn:aws:ses:us-east-1:083171867610:identity/noreply@afroo90s.com.br',
+    );
   });
 });

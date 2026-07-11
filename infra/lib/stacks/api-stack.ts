@@ -10,6 +10,7 @@ import * as logs from 'aws-cdk-lib/aws-logs';
 import * as route53 from 'aws-cdk-lib/aws-route53';
 import * as route53Targets from 'aws-cdk-lib/aws-route53-targets';
 import * as s3 from 'aws-cdk-lib/aws-s3';
+import * as ses from 'aws-cdk-lib/aws-ses';
 import * as ssm from 'aws-cdk-lib/aws-ssm';
 import { Construct } from 'constructs';
 import { LambdaAdminRole } from '../constructs/lambda-admin-role';
@@ -21,7 +22,7 @@ import {
   resolveHostedZone,
   webOriginUrl,
 } from '../constructs/hosted-zone';
-import { AppConfig, isDevAccessEnabled } from '../config';
+import { AppConfig, isDevAccessEnabled, isSesEnabled } from '../config';
 import { resourceName } from '../constructs/naming';
 import { Afro90sStackProps, cfnExportName } from './stack-props';
 
@@ -108,6 +109,53 @@ export class ApiStack extends cdk.Stack {
     });
 
     const sesDisabled = { SES_ENABLED: 'false' };
+    const sesTemplateName = `afro90s-${config.env}-ses-new-order`;
+    const ordersPublicSesEnv = isSesEnabled(config)
+      ? {
+          SES_ENABLED: 'true',
+          SES_FROM_EMAIL: config.ses!.fromEmail,
+          ADMIN_EMAIL: config.ses!.adminNotificationEmail,
+          SES_TEMPLATE_NAME: sesTemplateName,
+        }
+      : sesDisabled;
+
+    if (isSesEnabled(config)) {
+      new ses.CfnTemplate(this, 'NewOrderEmailTemplate', {
+        template: {
+          templateName: sesTemplateName,
+          subjectPart: 'Novo pedido #{{orderId}}',
+          htmlPart: `
+      <h2>Novo pedido recebido</h2>
+      <p><strong>ID:</strong> {{orderId}}</p>
+      <p><strong>Cliente:</strong> {{customerName}}</p>
+      <p><strong>Itens:</strong> {{itemsSummary}}</p>
+      <p><strong>Total:</strong> {{fullPrice}}</p>
+    `.trim(),
+          textPart:
+            'Novo pedido {{orderId}} de {{customerName}}. Itens: {{itemsSummary}}. Total: {{fullPrice}}',
+        },
+      });
+
+      new ssm.StringParameter(this, 'SesFromEmailParam', {
+        parameterName: `/afro90s/${config.env}/ses-from-email`,
+        stringValue: config.ses!.fromEmail,
+      });
+
+      new ssm.StringParameter(this, 'AdminNotificationEmailParam', {
+        parameterName: `/afro90s/${config.env}/admin-notification-email`,
+        stringValue: config.ses!.adminNotificationEmail,
+      });
+
+      new cdk.CfnOutput(this, 'SesFromEmail', {
+        value: config.ses!.fromEmail,
+        exportName: cfnExportName(config, 'SesFromEmail'),
+      });
+
+      new cdk.CfnOutput(this, 'AdminNotificationEmail', {
+        value: config.ses!.adminNotificationEmail,
+        exportName: cfnExportName(config, 'AdminNotificationEmail'),
+      });
+    }
 
     this.productsPublicFunction = this.createFlowLambda({
       id: 'ProductsPublicFunction',
@@ -134,7 +182,7 @@ export class ApiStack extends cdk.Stack {
         ORDERS_TABLE: ordersTable.tableName,
         ASSETS_CDN_URL: assetsCdnUrl,
         ...lambdaCorsEnv,
-        ...sesDisabled,
+        ...ordersPublicSesEnv,
       },
     });
 

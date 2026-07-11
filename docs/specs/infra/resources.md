@@ -204,9 +204,14 @@ Billing: **on-demand** (`PAY_PER_REQUEST`) — alinhado ao [ADR-004](../../found
 - JWT authorizer na `ApiStack` (`cognitoAuthorizer`) — aplicado em todas as rotas `/admin/*`
 - **Dev (task 22):** manter **um único** usuário no grupo `admins`; self sign-up já desativado
 
-- Identidade verificada (domínio ou e-mail)
-- Template `new-order-notification` com variáveis: `orderId`, `customerName`, `fullPrice`, `itemsSummary`
-- Destinatário: e-mail do admin (SSM Parameter)
+## SES (task 18)
+
+- Template `afro90s-{env}-ses-new-order` (`CfnTemplate`) com `orderId`, `customerName`, `itemsSummary` (qty, nome, opção, preço un. e linha), `fullPrice`
+- Destinatário: admin (notificação de novo pedido) — **não** o cliente
+- SSM: `/afro90s/{env}/ses-from-email`, `/afro90s/{env}/admin-notification-email`
+- Valores: From = `noreply@afroo90s.com.br` (código); destino admin = GitHub secret `ADMIN_NOTIFICATION_EMAIL` → env no deploy — **nunca** o e-mail admin no repositório
+- Sem secret admin no deploy → `SES_ENABLED=false`
+- IAM: `ses:SendTemplatedEmail` na role `orders-public` (identidade + template)
 
 ## IAM
 

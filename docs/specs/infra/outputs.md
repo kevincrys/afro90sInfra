@@ -140,11 +140,13 @@ A role OIDC `afro90s-github-backend-{env}` precisa de `ssm:GetParameter` em `/af
 | `ORDERS_TABLE` | `OrdersTableName` |
 | `ASSETS_BUCKET` | `AssetsBucketName` |
 | `ASSETS_CDN_URL` | `AssetsCdnUrl` |
-| `SES_FROM_EMAIL` | `SesFromEmail` |
-| `ADMIN_EMAIL` | `AdminNotificationEmail` |
+| `SES_FROM_EMAIL` | `noreply@afroo90s.com.br` (constante no CDK) |
+| `ADMIN_EMAIL` | `AdminNotificationEmail` (só se secret presente no deploy) |
+| `SES_ENABLED` | `true` se admin notification configurado; senão `false` |
+| `SES_TEMPLATE_NAME` | `afro90s-{env}-ses-new-order` |
 | `AWS_REGION` | região do deploy (reservada — não setar na Lambda) |
 
-> Lambdas recebem essas variáveis via CDK `environment` no deploy — não commitar valores em `.env`.
+> Destino admin vem de GitHub secret no deploy CDK — **nunca** commitado. Remetente `noreply@` é público e versionado.
 
 ## Parâmetros SSM Parameter Store (fase 1)
 
@@ -169,6 +171,8 @@ Criados via CDK `StringParameter` em `us-east-1`. Paths sob `/afro90s/{env}/`.
 | `/afro90s/{env}/cognito-user-pool-id` | AuthStack | task 13 |
 | `/afro90s/{env}/cognito-client-id` | AuthStack | task 13 |
 | `/afro90s/{env}/cognito-region` | AuthStack | task 13 |
+| `/afro90s/{env}/ses-from-email` | ApiStack | task 18 — valor via secret no deploy |
+| `/afro90s/{env}/admin-notification-email` | ApiStack | task 18 — valor via secret no deploy |
 
 Leitura pela Lambda pública: `ssm:GetParameter` em `/afro90s/{env}/*` (task 08).
 

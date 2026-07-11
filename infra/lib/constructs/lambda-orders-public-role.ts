@@ -1,7 +1,7 @@
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import { Construct } from 'constructs';
-import { AppConfig } from '../config';
+import { AppConfig, isSesEnabled } from '../config';
 import { resourceName } from './naming';
 
 export interface LambdaOrdersPublicRoleProps {
@@ -46,6 +46,18 @@ export class LambdaOrdersPublicRole extends Construct {
         ],
       }),
     );
+
+    if (isSesEnabled(config)) {
+      this.role.addToPolicy(
+        new iam.PolicyStatement({
+          actions: ['ses:SendTemplatedEmail'],
+          resources: [
+            `arn:aws:ses:${config.region}:${config.account}:identity/${config.ses!.fromEmail}`,
+            `arn:aws:ses:${config.region}:${config.account}:template/afro90s-${config.env}-ses-new-order`,
+          ],
+        }),
+      );
+    }
 
     this.role.addManagedPolicy(
       iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),

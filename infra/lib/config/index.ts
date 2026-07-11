@@ -2,8 +2,9 @@ import { devConfig } from './dev';
 import { prodConfig } from './prod';
 import { AppConfig } from './types';
 
-export type { AppConfig, DevAccessConfig } from './types';
+export type { AppConfig, DevAccessConfig, SesConfig } from './types';
 export { isDevAccessEnabled } from './types';
+export { isSesEnabled, loadSesConfig, SES_FROM_EMAIL } from './load-ses-config';
 export { devConfig, prodConfig };
 
 export function getConfig(env: string): AppConfig {

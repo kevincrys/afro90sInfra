@@ -46,8 +46,8 @@ Criados nas respectivas stacks:
 | `/afro90s/{env}/cognito-user-pool-id` | 2 | task 13 ✅ |
 | `/afro90s/{env}/cognito-client-id` | 2 | task 13 ✅ |
 | `/afro90s/{env}/cognito-region` | 2 | task 13 ✅ |
-| `/afro90s/{env}/ses-from-email` | 4 | task 18 |
-| `/afro90s/{env}/admin-notification-email` | 4 | task 18 |
+| `/afro90s/{env}/ses-from-email` | 4 | task 18 ✅ (valor via secret no deploy) |
+| `/afro90s/{env}/admin-notification-email` | 4 | task 18 ✅ (valor via secret no deploy) |
 
 ### `.env.example`
 

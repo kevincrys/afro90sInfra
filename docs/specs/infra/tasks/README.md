@@ -86,15 +86,15 @@ Cada task depende apenas da anterior (`task N` requer `task N-1` concluída), sa
 ## Fase 4 — Email
 
 > **Entregável:** `POST /orders` passa a enviar e-mail de notificação ao admin via SES.  
-> **Estado:** **pendente** (task 18); regressão 1–3 OK; observabilidade (19) e aceite final (20) parciais.
+> **Estado:** task 18 **concluída** (código); ativar com secrets + verificação SES; observabilidade (19) pendente; aceite (20) parcial.
 
 | # | Arquivo | O que entrega |
 |---|---------|---------------|
-| 18 | [18-ses.md](18-ses.md) | SES template + SSM e-mail params + IAM SES — **pendente** |
+| 18 | [18-ses.md](18-ses.md) | SES template + SSM + IAM + secrets — **concluída** |
 | 19 | [19-observabilidade.md](19-observabilidade.md) | Log groups 14d + dashboard CloudWatch — **pendente** |
 | 20 | [20-aceite-fase4.md](20-aceite-fase4.md) | Smoke completo + checklist v1 — **parcial** |
 
-**✓ Resultado (alvo):** infraestrutura v1 completa. E-mail enviado no pedido. Dashboard CloudWatch ativo.
+**✓ Resultado (parcial):** SES pronto no CDK; e-mail ativo após secrets + verify + backend task 16.
 
 ---
 

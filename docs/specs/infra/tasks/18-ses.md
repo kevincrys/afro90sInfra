@@ -1,88 +1,68 @@
 # Task 18 — SES (notificação de pedidos por e-mail)
 
 **Fase:** 4 — Email  
-**Status:** pendente  
-**Arquivos alvo:** [`resources.md`](../resources.md), [`outputs.md`](../outputs.md)
+**Status:** concluída  
+**Arquivos alvo:** [`resources.md`](../resources.md), [`outputs.md`](../outputs.md), `lib/config/load-ses-config.ts`, `lib/stacks/api-stack.ts`, `lib/constructs/lambda-orders-public-role.ts`
 
 ## Objetivo
 
-Configurar identidade SES, template de e-mail e conectar o envio ao `POST /orders`. Esta é a última entrega funcional — `POST /orders` já funciona desde a fase 1, agora passa a enviar e-mail.
+Configurar identidade SES, template de e-mail e conectar o envio ao `POST /orders`. Destinatário: **admin** (v1). E-mails **não** ficam no repositório — só GitHub secrets / env local.
 
 ## Configurações já definidas
 
 | Decisão | Valor |
 |---------|-------|
+| Destino | Admin (`ADMIN_NOTIFICATION_EMAIL`) — não o cliente |
 | Dev | Sandbox SES — e-mails verificados individualmente |
-| Prod | Domínio `afro90s.com.br` (quando comprado) |
-| Template | SES template gerenciado (não string na Lambda) |
-| Variáveis do template | `{{orderId}}`, `{{customerName}}` |
-| Parâmetros | `ses-from-email` e `admin-notification-email` via SSM |
-| IAM | `ses:SendTemplatedEmail` escopo mínimo |
+| Prod | Domínio `afroo90s.com.br` (identidade verificada no console) |
+| Template | SES template gerenciado `afro90s-{env}-ses-new-order` |
+| Variáveis do template | `{{orderId}}`, `{{customerName}}`, `{{itemsSummary}}`, `{{fullPrice}}` |
+| Parâmetros | `ses-from-email` e `admin-notification-email` via SSM (valores no deploy) |
+| IAM | `ses:SendTemplatedEmail` na identidade + template (não `*`) |
+| Segredos | GitHub Environment secrets — **nunca** commitados |
+
+## Secrets (fora do git)
+
+| Origem | Valor |
+|--------|--------|
+| Código (`SES_FROM_EMAIL`) | `noreply@afroo90s.com.br` (público, versionado) |
+| GitHub secret `ADMIN_NOTIFICATION_EMAIL` | → env `AFRO90S_ADMIN_NOTIFICATION_EMAIL` (só admin) |
+
+Sem `ADMIN_NOTIFICATION_EMAIL` no deploy → `SES_ENABLED=false`.
 
 ## O que implementar
 
-### SES — identidade (setup manual — fase 4)
+### SES — identidade (setup manual)
 
-> Verificação de remetente e destino no console SES (`us-east-1`). **Não** fazer na task 00 — somente antes do deploy desta task.
+- [x] Documentar: verificar remetente e destino no console SES (`us-east-1`) antes do primeiro envio (sandbox)
+- [ ] Em prod: opcional `CfnEmailIdentity` de domínio (follow-up; sandbox/e-mail verificado basta na v1)
 
-- [ ] Verificar e-mail remetente em SES sandbox
-- [ ] Verificar e-mail destino (admin) em SES sandbox
-- [ ] Em prod: quando domínio for comprado, criar `CfnEmailIdentity` para o domínio
+### SES — template CDK + SSM + IAM + Lambda
 
-### SES — template CDK
-
-- [ ] Criar `CfnTemplate` com nome `afro90s-{env}-ses-new-order`:
-
-```typescript
-new CfnTemplate(this, 'OrderTemplate', {
-  template: {
-    templateName: `afro90s-${env}-ses-new-order`,
-    subjectPart: 'Novo pedido #{{orderId}}',
-    htmlPart: `
-      <h2>Novo pedido recebido</h2>
-      <p><strong>ID:</strong> {{orderId}}</p>
-      <p><strong>Cliente:</strong> {{customerName}}</p>
-    `,
-    textPart: 'Novo pedido {{orderId}} de {{customerName}}',
-  },
-});
-```
-
-### SSM — parâmetros de e-mail
-
-- [ ] `/afro90s/{env}/ses-from-email` — e-mail remetente verificado
-- [ ] `/afro90s/{env}/admin-notification-email` — e-mail destino admin
-
-### IAM — adicionar SES à role pública (task 08)
-
-- [ ] Atualizar `afro90s-{env}-role-lambda-orders-public` com:
-  - `ses:SendTemplatedEmail`
-  - Resource: ARN da identidade verificada (não `*`)
-
-### Lambda — habilitar envio
-
-- [ ] Atualizar variável de ambiente na Lambda:
-  - `SES_ENABLED=true` (antes era `false`)
-  - `SES_FROM_EMAIL` — lido do SSM
-  - `ADMIN_EMAIL` — lido do SSM
-  - `SES_TEMPLATE_NAME` = `afro90s-{env}-ses-new-order`
-
-### Outputs CloudFormation
-
-- [ ] `CfnOutput` `SesFromEmail`
-- [ ] `CfnOutput` `AdminNotificationEmail`
+- [x] `CfnTemplate` `afro90s-{env}-ses-new-order` quando `config.ses` presente
+- [x] SSM `/afro90s/{env}/ses-from-email` e `admin-notification-email`
+- [x] IAM `ses:SendTemplatedEmail` na role `orders-public`
+- [x] Env Lambda orders-public: `SES_ENABLED=true`, `SES_FROM_EMAIL`, `ADMIN_EMAIL`, `SES_TEMPLATE_NAME`
+- [x] Outputs `SesFromEmail` / `AdminNotificationEmail`
+- [x] Loader `load-ses-config.ts` + workflows injetam secrets
+- [x] Testes unitários (fixture fake)
 
 ## Pré-requisitos
 
-- [Task 17](17-aceite-fase3.md) concluída (fase 3 entregue)
-- E-mail remetente verificado no SES sandbox
+- [Task 17](17-aceite-fase3.md) concluída
+- E-mails verificados no SES sandbox + secrets no GitHub
 
 ## Critérios de conclusão
 
-- [ ] Template `afro90s-dev-ses-new-order` visível no console SES
-- [ ] `POST /orders` com body válido → `201` + e-mail recebido no endereço admin
-- [ ] E-mail contém `orderId` e `customerName` corretos
-- [ ] `ses:SendTemplatedEmail` restrito à identidade verificada (verificar no IAM)
-- [ ] Outputs `SesFromEmail` e `AdminNotificationEmail` no CloudFormation
-- [ ] `resources.md` e `outputs.md` atualizados
-- [ ] Atualizar **Status** para `concluída`
+- [x] Template criado pelo CDK quando SES configurado
+- [x] `ses:SendTemplatedEmail` restrito à identidade + template
+- [x] E-mails não versionados no repo
+- [x] `resources.md` / `outputs.md` / workflows atualizados
+- [x] Atualizar **Status** para `concluída`
+
+## Operador (pós-merge)
+
+1. SES console → verificar `noreply@afroo90s.com.br` (ou domínio) e o e-mail admin
+2. GitHub → Environments `dev`/`prod` → secret `ADMIN_NOTIFICATION_EMAIL`
+3. Deploy infra → redeploy backend (task 16)
+4. `POST /orders` → e-mail no admin

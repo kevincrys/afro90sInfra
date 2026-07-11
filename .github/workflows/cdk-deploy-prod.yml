@@ -85,6 +85,8 @@ jobs:
 
       - name: Deploy (prod)
         working-directory: infra
+        env:
+          AFRO90S_ADMIN_NOTIFICATION_EMAIL: ${{ secrets.ADMIN_NOTIFICATION_EMAIL }}
         run: npm run deploy:prod -- --require-approval never
 
       - name: Export outputs

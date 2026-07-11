@@ -6,6 +6,12 @@ export interface DevAccessConfig {
   };
 }
 
+/** SES notification emails — loaded from env/secrets at deploy; never commit real values. */
+export interface SesConfig {
+  fromEmail: string;
+  adminNotificationEmail: string;
+}
+
 export interface AppConfig {
   env: 'dev' | 'prod';
   region: string;
@@ -16,6 +22,8 @@ export interface AppConfig {
   adminEmail: string;
   /** Dev-only: IP allowlist on API + Basic Auth on CloudFront SPA (task 22). */
   devAccess?: DevAccessConfig;
+  /** Task 18 — From = noreply@ (código); admin via secret `ADMIN_NOTIFICATION_EMAIL`. */
+  ses?: SesConfig;
 }
 
 export function isDevAccessEnabled(config: AppConfig): boolean {
