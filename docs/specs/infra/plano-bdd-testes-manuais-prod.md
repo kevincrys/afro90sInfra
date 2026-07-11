@@ -78,7 +78,7 @@ Preencher **uma vez** antes da execução. Nos cenários abaixo, substituir `{..
 | `{UUID_INEXISTENTE}` | `00000000-0000-4000-8000-000000000000` | UUID v4 válido, garantidamente inexistente |
 | `{UUID_ALEATORIO}` | `aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa` | Para testes sem auth |
 | `{CURSOR_PEDIDOS}` | `eyJuYW1lIjo...` | `GET {API}/admin/orders?limit=20` → `nextCursor` |
-| `{STRING_5001}` | `a` repetido 5001× | `python -c "print('a'*5001)"` ou equivalente |
+| `{STRING_201}` | `a` repetido 201× | `python -c "print('a'*201)"` ou equivalente |
 | `{VITE_WHATSAPP_NUMBER}` | ex.: `5511999998888` | `.env` prod do frontend (sem `+`) |
 | `{CDN_URL}` | ex.: `https://cdn.afroo90s.com.br` | `photos[0]` de um produto real |
 
@@ -655,11 +655,11 @@ Cenário: Busca com caracteres especiais, Unicode e payloads (robustez)
 | `' OR 1=1--` | `{API}/admin/orders?q=%27%20OR%201%3D1--&limit=20` |
 | `550e8400' UNION SELECT--` | `{API}/admin/orders?q=550e8400%27%20UNION%20SELECT--&limit=20` |
 
-Cenário: Busca com string extremamente longa
-  Dado {STRING_5001} (5001 caracteres "a")
-  Quando envio GET {API}/admin/orders?q={STRING_5001}&limit=20
-  Então API responde 200 ou 400 em menos de 30s
-    E frontend não trava ao colar o mesmo valor na barra de busca
+Cenário: Busca com string longa demais
+  Dado {STRING_201} (201 caracteres "a")
+  Quando envio GET {API}/admin/orders?q={STRING_201}&limit=20
+  Então 400 INVALID_QUERY em menos de 30s
+    E frontend limita a barra de busca a 200 caracteres (colar 5001 não trava; valor truncado)
 
 Cenário: Pedido inexistente retorna 404
   Dado autenticado com {ADMIN_TOKEN}
@@ -870,7 +870,7 @@ Marcar cada cenário após executar. IDs alinhados ao registro abaixo.
 | PED-06 | Modo idOrName (hex sem dígitos, ex.: `dead`) | P0 | ☐ |
 | PED-07 | Paginação com busca ativa (`q` + cursor; gap `q` trocado) | P0 | ☐ |
 | PED-08 | Busca com caracteres especiais, Unicode e payloads (robustez) | P0 | ☐ |
-| PED-09 | Busca com string extremamente longa (5001 chars) | P0 | ☐ |
+| PED-09 | Busca com string longa demais (201 chars → 400) | P0 | ☐ |
 | PED-10 | Pedido inexistente → 404 | P0 | ☐ |
 | PED-11 | Atualização de status válida + transição inválida | P0 | ☐ |
 | PED-12 | Fluxo completo de status até terminal (+ CANCELADO) | P0 | ☐ |
@@ -950,7 +950,7 @@ Marcar cada cenário após executar. IDs alinhados ao registro abaixo.
 | PED-06 | Modo idOrName | | | | | |
 | PED-07 | Paginação + `q` / gap cursor | | | | | |
 | PED-08 | Busca robustez (pedidos) | | | | | |
-| PED-09 | String 5001 chars | | | | | |
+| PED-09 | String 201 chars → 400 | | | | | |
 | PED-10 | Pedido 404 | | | | | |
 | PED-11 | Status válida/inválida | | | | | |
 | PED-12 | Fluxo status completo | | | | | |
